@@ -140,6 +140,8 @@ async fn handle_response<T: DeserializeOwned>(
         inner: Some(Reqwest(e)),
         status_code: None,
     })?;
+    // Remove malformed OPS response
+    let json = json.replace("\"response\":[],", "");
     if status_code.is_success() {
         let deserialized = deserialize::<T>(&json, action)?;
         if deserialized.status == "success" {
