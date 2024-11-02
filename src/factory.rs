@@ -38,15 +38,18 @@ impl GazelleClientFactory {
 
     fn get_headers(&self) -> HeaderMap {
         let mut headers = HeaderMap::new();
-        headers.insert(header::USER_AGENT, HeaderValue::try_from(&self.user_agent).expect("user agent should not fail"));
+        headers.insert(
+            header::USER_AGENT,
+            HeaderValue::try_from(&self.user_agent).expect("user agent should not fail"),
+        );
         headers.insert(header::ACCEPT, HeaderValue::from_static("application/json"));
         headers.insert(header::AUTHORIZATION, self.get_authorization());
         headers
     }
 
     fn get_authorization(&self) -> HeaderValue {
-        let mut value = HeaderValue::try_from(self.key.clone())
-            .expect("Authorization header should not fail");
+        let mut value =
+            HeaderValue::try_from(self.key.clone()).expect("Authorization header should not fail");
         value.set_sensitive(true);
         value
     }

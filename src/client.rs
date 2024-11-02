@@ -6,8 +6,9 @@ use std::time::{Duration, SystemTime};
 use tower::limit::RateLimit;
 use tower::ServiceExt;
 
-use crate::{GazelleClientFactory, UploadForm, UploadResponse};
-use crate::{ApiResponse, GroupResponse, TorrentResponse};
+use crate::Action::{GetTorrent, GetTorrentFile, GetTorrentGroup, UploadTorrent};
+use crate::InnerError::{Reqwest, SerdeJson};
+use crate::*;
 
 /// A client for the Gazelle API
 ///
@@ -24,10 +25,11 @@ impl GazelleClient {
     ///
     /// # See Also
     /// - <https://github.com/OPSnet/Gazelle/blob/master/docs/07-API.md#torrent>
-    pub async fn get_torrent(&mut self, id: i64) -> Result<TorrentResponse, AppError> {
+    pub async fn get_torrent(&mut self, id: i64) -> Result<TorrentResponse, Error> {
         let url = format!("{}/ajax.php?action=torrent&id={}", self.api_url, id);
-        let response = self.get(&url, "get torrent").await?;
-        self.deserialize(response, "get torrent response").await
+        let action = GetTorrent;
+        let response = self.get(&url, action).await?;
+        handle_response(response, action).await
     }
 
     /// Get a torrent group by id
@@ -37,20 +39,21 @@ impl GazelleClient {
     ///
     /// # See Also
     /// - <https://github.com/OPSnet/Gazelle/blob/master/docs/07-API.md#torrent-group>
-    pub async fn get_torrent_group(&mut self, id: i64) -> Result<GroupResponse, AppError> {
+    pub async fn get_torrent_group(&mut self, id: i64) -> Result<GroupResponse, Error> {
         let url = format!("{}/ajax.php?action=torrentgroup&id={}", self.api_url, id);
-        let response = self.get(&url, "get torrent group").await?;
-        self.deserialize(response, "get torrent group response")
-            .await
+        let action = GetTorrentGroup;
+        let response = self.get(&url, action).await?;
+        handle_response(response, action).await
     }
 
     /// Get the content of the .torrent file as a buffer
     ///
     /// # See Also
     /// - <https://github.com/OPSnet/Gazelle/blob/master/docs/07-API.md#download>
-    pub async fn get_torrent_file_as_buffer(&mut self, id: i64) -> Result<Vec<u8>, AppError> {
+    pub async fn get_torrent_file_as_buffer(&mut self, id: i64) -> Result<Vec<u8>, Error> {
         let url = format!("{}/ajax.php?action=download&id={}", self.api_url, id);
-        let response = self.get(&url, "get torrent file").await?;
+        let action = GetTorrentFile;
+        let response = self.get(&url, action).await?;
         let status_code = response.status();
         if status_code.is_success() {
             let bytes = response
@@ -60,7 +63,12 @@ impl GazelleClient {
             let buffer = bytes.to_vec();
             Ok(buffer)
         } else {
-            AppError::response(status_code, "get torrent file")
+            Err(Error {
+                action,
+                message: None,
+                status_code: Some(status_code.as_u16()),
+                inner: None,
+            })
         }
     }
 
@@ -68,17 +76,22 @@ impl GazelleClient {
     ///
     /// # See Also
     ///  - <https://github.com/OPSnet/Gazelle/blob/master/docs/07-API.md#upload>
-    pub async fn upload_torrent(&mut self, upload: UploadForm) -> Result<UploadResponse, AppError> {
+    pub async fn upload_torrent(&mut self, upload: UploadForm) -> Result<UploadResponse, Error> {
         let url = format!("{}/ajax.php?action=upload", self.api_url);
         let form = upload.to_form()?;
         let client = self.wait_for_client().await;
         let result = client.post(&url).multipart(form).send().await;
         trace!("{} POST request: {}", "Sent".bold(), &url);
-        let response = result.or_else(|e| AppError::request(e, "post upload"))?;
-        self.deserialize(response, "upload torrent response").await
+        let response = result.map_err(|e| Error {
+            action: UploadTorrent,
+            message: None,
+            status_code: None,
+            inner: Some(Reqwest(e)),
+        })?;
+        handle_response(response, UploadTorrent).await
     }
 
-    async fn get(&mut self, url: &String, action: &str) -> Result<Response, AppError> {
+    async fn get(&mut self, url: &String, action: Action) -> Result<Response, Error> {
         trace!("{} request GET {}", "Sending".bold(), &url);
         let client = self.wait_for_client().await;
         let start = SystemTime::now();
@@ -88,38 +101,12 @@ impl GazelleClient {
             .expect("elapsed should not fail")
             .as_secs_f64();
         trace!("{} response after {elapsed:.3}", "Received".bold());
-        result.or_else(|e| AppError::request(e, action))
-    }
-
-    async fn deserialize<T: DeserializeOwned>(
-        &mut self,
-        response: Response,
-        action: &str,
-    ) -> Result<T, AppError> {
-        let status_code = response.status();
-        let json = response.text().await.unwrap_or_default();
-        let deserialized = serde_json::from_str::<ApiResponse<T>>(json.as_str())
-            .or_else(|e| AppError::json(e, format!("deserialize {action}").as_str()));
-        if status_code.is_success() {
-            let deserialized = deserialized?;
-            if deserialized.status == "success" {
-                Ok(deserialized.response.expect("response should be set"))
-            } else {
-                AppError::explained(action, format!("{deserialized}"))
-            }
-        } else {
-            let message = if let Ok(response) = deserialized {
-                response.error.unwrap_or(json)
-            } else {
-                json
-            };
-            Err(AppError {
-                action: action.to_owned(),
-                message,
-                status_code: Some(status_code.as_u16()),
-                ..AppError::default()
-            })
-        }
+        result.map_err(|e| Error {
+            action,
+            message: None,
+            status_code: None,
+            inner: Some(Reqwest(e)),
+        })
     }
 
     async fn wait_for_client(&mut self) -> &Client {
@@ -140,4 +127,38 @@ impl GazelleClient {
         }
         client
     }
+}
+
+async fn handle_response<T: DeserializeOwned>(
+    response: Response,
+    action: Action,
+) -> Result<T, Error> {
+    let status_code = response.status();
+    let json = response.text().await.map_err(|e| Error {
+        action,
+        message: None,
+        inner: Some(Reqwest(e)),
+        status_code: None,
+    })?;
+    if status_code.is_success() {
+        let deserialized = deserialize::<T>(&json, action)?;
+        if deserialized.status == "success" {
+            return Ok(deserialized.response.expect("response should be set"));
+        }
+    }
+    Err(Error {
+        action,
+        message: deserialize::<T>(&json, action).ok().and_then(|x| x.error),
+        status_code: Some(status_code.as_u16()),
+        inner: None,
+    })
+}
+
+fn deserialize<T: DeserializeOwned>(json: &str, action: Action) -> Result<ApiResponse<T>, Error> {
+    serde_json::from_str::<ApiResponse<T>>(json).map_err(|e| Error {
+        action,
+        message: None,
+        inner: Some(SerdeJson(e)),
+        status_code: None,
+    })
 }

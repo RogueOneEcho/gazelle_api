@@ -44,6 +44,7 @@ pub struct Torrent {
 }
 
 impl Torrent {
+    #[must_use]
     pub fn get_flacs(&self) -> Vec<PathBuf> {
         Regex::new(r"([^|]+\.flac)\{\{\{\d+\}\}\}(?:\|\|\|)?")
             .expect("Regex should compile")

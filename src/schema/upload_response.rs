@@ -14,10 +14,12 @@ pub struct UploadResponse {
 }
 
 impl UploadResponse {
+    #[must_use]
     pub fn get_torrent_id(&self) -> i64 {
         self.torrentid
             .unwrap_or_else(|| self.torrentId.unwrap_or_default())
     }
+    #[must_use]
     pub fn get_group_id(&self) -> i64 {
         self.groupid
             .unwrap_or_else(|| self.groupId.unwrap_or_default())

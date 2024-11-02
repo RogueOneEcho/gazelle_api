@@ -1,9 +1,9 @@
 pub use client::*;
+pub use error::*;
 pub use factory::*;
 pub use schema::*;
-pub use error::*;
 
 mod client;
+mod error;
 mod factory;
 mod schema;
-mod error;
