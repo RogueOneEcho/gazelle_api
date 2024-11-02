@@ -11,6 +11,7 @@ pub struct Error {
 
 #[derive(Clone, Copy, Debug, Deserialize, Serialize)]
 pub enum Action {
+    CreateClient,
     GetTorrent,
     GetTorrentGroup,
     GetTorrentFile,
@@ -21,6 +22,7 @@ pub enum Action {
 pub enum InnerError {
     #[allow(clippy::absolute_paths)]
     IO(std::io::Error),
+    Json(serde_json::Error),
     Reqwest(reqwest::Error),
-    SerdeJson(serde_json::Error),
+    Yaml(serde_yaml::Error),
 }

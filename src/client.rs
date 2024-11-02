@@ -7,7 +7,7 @@ use tower::limit::RateLimit;
 use tower::ServiceExt;
 
 use crate::Action::{GetTorrent, GetTorrentFile, GetTorrentGroup, UploadTorrent};
-use crate::InnerError::{Reqwest, SerdeJson};
+use crate::InnerError::{Json, Reqwest};
 use crate::*;
 
 /// A client for the Gazelle API
@@ -158,7 +158,7 @@ fn deserialize<T: DeserializeOwned>(json: &str, action: Action) -> Result<ApiRes
     serde_json::from_str::<ApiResponse<T>>(json).map_err(|e| Error {
         action,
         message: None,
-        inner: Some(SerdeJson(e)),
+        inner: Some(Json(e)),
         status_code: None,
     })
 }

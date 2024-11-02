@@ -11,9 +11,9 @@ const REQUEST_LIMIT_DURATION: Duration = Duration::from_secs(10);
 
 /// Create a [`GazelleClient`]
 pub struct GazelleClientFactory {
-    key: String,
-    url: String,
-    user_agent: String,
+    pub key: String,
+    pub url: String,
+    pub user_agent: String,
 }
 
 impl GazelleClientFactory {
