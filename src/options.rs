@@ -36,7 +36,7 @@ impl GazelleClientOptions {
         let factory = GazelleClientFactory {
             key: self.key.clone(),
             url: self.url.clone(),
-            user_agent: "gazelle_api.rs".to_owned()
+            user_agent: "gazelle_api.rs".to_owned(),
         };
         factory.create()
     }

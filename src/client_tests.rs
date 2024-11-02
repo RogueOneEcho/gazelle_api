@@ -1,7 +1,7 @@
 use crate::options::get_options;
+use crate::Action::{GetTorrent, GetTorrentGroup};
 use crate::Error;
 use rogue_logging::Logger;
-use crate::Action::{GetTorrent, GetTorrentGroup};
 
 #[tokio::test]
 async fn get_torrent() -> Result<(), Error> {
@@ -40,7 +40,7 @@ async fn get_torrent_invalid() -> Result<(), Error> {
                 assert!(matches!(e.action, GetTorrent));
                 println!("{:?}", e.inner);
                 assert!(e.inner.is_none());
-                if options.name == "red".to_owned() {
+                if options.name == *"red" {
                     assert_eq!(e.status_code, Some(400));
                     assert_eq!(e.message, Some("bad id parameter".to_owned()));
                 } else {
@@ -89,7 +89,7 @@ async fn get_torrent_group_invalid() -> Result<(), Error> {
             Err(e) => {
                 assert!(matches!(e.action, GetTorrentGroup));
                 println!("{:?}", e.inner);
-                if options.name == "red".to_owned() {
+                if options.name == *"red" {
                     assert_eq!(e.status_code, Some(400));
                     assert_eq!(e.message, Some("bad id parameter".to_owned()));
                 } else {
