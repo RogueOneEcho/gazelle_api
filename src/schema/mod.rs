@@ -7,6 +7,7 @@ pub use torrent::*;
 pub use torrent_response::*;
 pub use upload_form::*;
 pub use upload_response::*;
+pub use user::*;
 
 mod api_response;
 mod artist;
@@ -20,3 +21,4 @@ mod torrent;
 mod torrent_response;
 mod upload_form;
 mod upload_response;
+mod user;

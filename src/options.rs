@@ -12,6 +12,7 @@ pub struct GazelleClientOptions {
     pub url: String,
     pub torrent: u32,
     pub group: u32,
+    pub user: u32,
 }
 
 impl GazelleClientOptions {

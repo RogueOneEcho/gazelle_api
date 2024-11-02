@@ -91,6 +91,17 @@ impl GazelleClient {
         handle_response(response, action).await
     }
 
+    /// Get a user by id
+    ///
+    /// # See Also
+    /// - <https://github.com/OPSnet/Gazelle/blob/master/docs/07-API.md#user-profile>
+    pub async fn get_user(&mut self, id: u32) -> Result<User, Error> {
+        let url = format!("{}/ajax.php?action=user&id={}", self.api_url, id);
+        let action = "get user";
+        let response = self.get(&url, action).await?;
+        handle_response(response, action).await
+    }
+
     async fn get(&mut self, url: &String, action: &str) -> Result<Response, Error> {
         trace!("{} request GET {}", "Sending".bold(), &url);
         let client = self.wait_for_client().await;
