@@ -1,7 +1,6 @@
 use crate::options::get_options;
-use crate::Action::{GetTorrent, GetTorrentGroup};
-use crate::Error;
-use rogue_logging::Logger;
+use log::info;
+use rogue_logging::{Error, Logger};
 
 #[tokio::test]
 async fn get_torrent() -> Result<(), Error> {
@@ -27,7 +26,7 @@ async fn get_torrent_invalid() -> Result<(), Error> {
     Logger::force_init("gazelle_api".to_owned());
     let id = u32::MAX;
     for options in get_options()? {
-        println!("Indexer: {}", options.name);
+        info!("Indexer: {}", options.name);
         let mut client = options.get_client();
 
         // Act
@@ -37,15 +36,13 @@ async fn get_torrent_invalid() -> Result<(), Error> {
         match response {
             Ok(_) => panic!("should be an error"),
             Err(e) => {
-                assert!(matches!(e.action, GetTorrent));
-                println!("{:?}", e.inner);
-                assert!(e.inner.is_none());
+                assert_eq!(e.action, "get torrent");
                 if options.name == *"red" {
                     assert_eq!(e.status_code, Some(400));
-                    assert_eq!(e.message, Some("bad id parameter".to_owned()));
+                    assert_eq!(e.message, "bad id parameter".to_owned());
                 } else {
                     assert_eq!(e.status_code, Some(200));
-                    assert_eq!(e.message, Some("bad parameters".to_owned()));
+                    assert_eq!(e.message, "bad parameters".to_owned());
                 }
             }
         }
@@ -58,7 +55,7 @@ async fn get_torrent_group() -> Result<(), Error> {
     // Arrange
     Logger::force_init("gazelle_api".to_owned());
     for options in get_options()? {
-        println!("Indexer: {}", options.name);
+        info!("Indexer: {}", options.name);
         let mut client = options.get_client();
 
         // Act
@@ -77,7 +74,7 @@ async fn get_torrent_group_invalid() -> Result<(), Error> {
     Logger::force_init("gazelle_api".to_owned());
     let id = u32::MAX;
     for options in get_options()? {
-        println!("Indexer: {}", options.name);
+        info!("Indexer: {}", options.name);
         let mut client = options.get_client();
 
         // Act
@@ -87,14 +84,13 @@ async fn get_torrent_group_invalid() -> Result<(), Error> {
         match response {
             Ok(_) => panic!("should be an error"),
             Err(e) => {
-                assert!(matches!(e.action, GetTorrentGroup));
-                println!("{:?}", e.inner);
+                assert_eq!(e.action, "get torrent group");
                 if options.name == *"red" {
                     assert_eq!(e.status_code, Some(400));
-                    assert_eq!(e.message, Some("bad id parameter".to_owned()));
+                    assert_eq!(e.message, "bad id parameter".to_owned());
                 } else {
                     assert_eq!(e.status_code, Some(200));
-                    assert_eq!(e.message, Some("bad parameters".to_owned()));
+                    assert_eq!(e.message, "bad parameters".to_owned());
                 }
             }
         }

@@ -1,6 +1,5 @@
-use crate::Action::CreateClient;
-use crate::InnerError::{Yaml, IO};
-use crate::{Error, GazelleClient, GazelleClientFactory};
+use crate::{GazelleClient, GazelleClientFactory};
+use rogue_logging::Error;
 use serde::{Deserialize, Serialize};
 use std::fs::File;
 use std::io::BufReader;
@@ -18,17 +17,17 @@ pub struct GazelleClientOptions {
 impl GazelleClientOptions {
     fn from_file(path: &Path) -> Result<Vec<Self>, Error> {
         let file = File::open(path).map_err(|e| Error {
-            action: CreateClient,
-            message: None,
-            status_code: None,
-            inner: Some(IO(e)),
+            action: "create client".to_owned(),
+            message: e.to_string(),
+            domain: Some("file system".to_owned()),
+            ..Error::default()
         })?;
         let reader = BufReader::new(file);
         serde_yaml::from_reader(reader).map_err(|e| Error {
-            action: CreateClient,
-            message: None,
-            status_code: None,
-            inner: Some(Yaml(e)),
+            action: "create client".to_owned(),
+            message: e.to_string(),
+            domain: Some("deserialization".to_owned()),
+            ..Error::default()
         })
     }
 

@@ -3,10 +3,8 @@ use std::fs::File;
 use std::io::Read;
 use std::path::PathBuf;
 
-use crate::Action::UploadTorrent;
-use crate::Error;
-use crate::InnerError::IO;
 use reqwest::multipart::{Form, Part};
+use rogue_logging::Error;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -27,19 +25,17 @@ pub struct UploadForm {
 impl UploadForm {
     #[allow(clippy::wrong_self_convention)]
     pub fn to_form(self) -> Result<Form, Error> {
-        let action = UploadTorrent;
+        let action = "upload torrent";
         let mut file = File::open(&self.path).map_err(|e| Error {
-            action,
-            message: None,
-            status_code: None,
-            inner: Some(IO(e)),
+            action: action.to_owned(),
+            message: e.to_string(),
+            ..Error::default()
         })?;
         let mut buffer = Vec::new();
         let _size = file.read_to_end(&mut buffer).map_err(|e| Error {
-            action,
-            message: None,
-            status_code: None,
-            inner: Some(IO(e)),
+            action: action.to_owned(),
+            message: e.to_string(),
+            ..Error::default()
         })?;
         let filename = self
             .path

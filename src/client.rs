@@ -1,13 +1,12 @@
 use colored::Colorize;
 use log::*;
 use reqwest::{Client, Response};
+use rogue_logging::Error;
 use serde::de::DeserializeOwned;
 use std::time::{Duration, SystemTime};
 use tower::limit::RateLimit;
 use tower::ServiceExt;
 
-use crate::Action::{GetTorrent, GetTorrentFile, GetTorrentGroup, UploadTorrent};
-use crate::InnerError::{Json, Reqwest};
 use crate::*;
 
 /// A client for the Gazelle API
@@ -27,7 +26,7 @@ impl GazelleClient {
     /// - <https://github.com/OPSnet/Gazelle/blob/master/docs/07-API.md#torrent>
     pub async fn get_torrent(&mut self, id: u32) -> Result<TorrentResponse, Error> {
         let url = format!("{}/ajax.php?action=torrent&id={}", self.api_url, id);
-        let action = GetTorrent;
+        let action = "get torrent";
         let response = self.get(&url, action).await?;
         handle_response(response, action).await
     }
@@ -41,7 +40,7 @@ impl GazelleClient {
     /// - <https://github.com/OPSnet/Gazelle/blob/master/docs/07-API.md#torrent-group>
     pub async fn get_torrent_group(&mut self, id: u32) -> Result<GroupResponse, Error> {
         let url = format!("{}/ajax.php?action=torrentgroup&id={}", self.api_url, id);
-        let action = GetTorrentGroup;
+        let action = "get torrent group";
         let response = self.get(&url, action).await?;
         handle_response(response, action).await
     }
@@ -52,7 +51,7 @@ impl GazelleClient {
     /// - <https://github.com/OPSnet/Gazelle/blob/master/docs/07-API.md#download>
     pub async fn get_torrent_file_as_buffer(&mut self, id: u32) -> Result<Vec<u8>, Error> {
         let url = format!("{}/ajax.php?action=download&id={}", self.api_url, id);
-        let action = GetTorrentFile;
+        let action = "get torrent file";
         let response = self.get(&url, action).await?;
         let status_code = response.status();
         if status_code.is_success() {
@@ -64,10 +63,10 @@ impl GazelleClient {
             Ok(buffer)
         } else {
             Err(Error {
-                action,
-                message: None,
+                action: action.to_owned(),
+                message: "operation failed".to_owned(),
                 status_code: Some(status_code.as_u16()),
-                inner: None,
+                ..Error::default()
             })
         }
     }
@@ -82,16 +81,17 @@ impl GazelleClient {
         let client = self.wait_for_client().await;
         let result = client.post(&url).multipart(form).send().await;
         trace!("{} POST request: {}", "Sent".bold(), &url);
+        let action = "upload torrent";
         let response = result.map_err(|e| Error {
-            action: UploadTorrent,
-            message: None,
+            action: action.to_owned(),
+            message: e.to_string(),
             status_code: None,
-            inner: Some(Reqwest(e)),
+            ..Error::default()
         })?;
-        handle_response(response, UploadTorrent).await
+        handle_response(response, action).await
     }
 
-    async fn get(&mut self, url: &String, action: Action) -> Result<Response, Error> {
+    async fn get(&mut self, url: &String, action: &str) -> Result<Response, Error> {
         trace!("{} request GET {}", "Sending".bold(), &url);
         let client = self.wait_for_client().await;
         let start = SystemTime::now();
@@ -102,10 +102,10 @@ impl GazelleClient {
             .as_secs_f64();
         trace!("{} response after {elapsed:.3}", "Received".bold());
         result.map_err(|e| Error {
-            action,
-            message: None,
+            action: action.to_owned(),
+            message: e.to_string(),
             status_code: None,
-            inner: Some(Reqwest(e)),
+            ..Error::default()
         })
     }
 
@@ -131,14 +131,14 @@ impl GazelleClient {
 
 async fn handle_response<T: DeserializeOwned>(
     response: Response,
-    action: Action,
+    action: &str,
 ) -> Result<T, Error> {
     let status_code = response.status();
     let json = response.text().await.map_err(|e| Error {
-        action,
-        message: None,
-        inner: Some(Reqwest(e)),
+        action: action.to_owned(),
+        message: e.to_string(),
         status_code: None,
+        ..Error::default()
     })?;
     // Remove malformed OPS response
     let json = json.replace("\"response\":[],", "");
@@ -148,19 +148,25 @@ async fn handle_response<T: DeserializeOwned>(
             return Ok(deserialized.response.expect("response should be set"));
         }
     }
+    let message = match deserialize::<T>(&json, action) {
+        Ok(ApiResponse {
+            error: Some(error), ..
+        }) => error,
+        _ => "Unexpected response.".to_owned(),
+    };
     Err(Error {
-        action,
-        message: deserialize::<T>(&json, action).ok().and_then(|x| x.error),
+        action: action.to_owned(),
+        message,
         status_code: Some(status_code.as_u16()),
-        inner: None,
+        ..Error::default()
     })
 }
 
-fn deserialize<T: DeserializeOwned>(json: &str, action: Action) -> Result<ApiResponse<T>, Error> {
+fn deserialize<T: DeserializeOwned>(json: &str, action: &str) -> Result<ApiResponse<T>, Error> {
     serde_json::from_str::<ApiResponse<T>>(json).map_err(|e| Error {
-        action,
-        message: None,
-        inner: Some(Json(e)),
+        action: action.to_owned(),
+        message: e.to_string(),
         status_code: None,
+        ..Error::default()
     })
 }
