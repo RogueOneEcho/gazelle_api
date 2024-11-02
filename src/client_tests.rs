@@ -20,7 +20,7 @@ async fn get_torrent() -> Result<(), Error> {
 #[allow(clippy::panic)]
 async fn get_torrent_invalid() -> Result<(), Error> {
     // Arrange
-    let id = i64::MAX;
+    let id = u32::MAX;
     let mut client = get_test_client()?;
 
     // Act

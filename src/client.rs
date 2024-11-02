@@ -25,7 +25,7 @@ impl GazelleClient {
     ///
     /// # See Also
     /// - <https://github.com/OPSnet/Gazelle/blob/master/docs/07-API.md#torrent>
-    pub async fn get_torrent(&mut self, id: i64) -> Result<TorrentResponse, Error> {
+    pub async fn get_torrent(&mut self, id: u32) -> Result<TorrentResponse, Error> {
         let url = format!("{}/ajax.php?action=torrent&id={}", self.api_url, id);
         let action = GetTorrent;
         let response = self.get(&url, action).await?;
@@ -39,7 +39,7 @@ impl GazelleClient {
     ///
     /// # See Also
     /// - <https://github.com/OPSnet/Gazelle/blob/master/docs/07-API.md#torrent-group>
-    pub async fn get_torrent_group(&mut self, id: i64) -> Result<GroupResponse, Error> {
+    pub async fn get_torrent_group(&mut self, id: u32) -> Result<GroupResponse, Error> {
         let url = format!("{}/ajax.php?action=torrentgroup&id={}", self.api_url, id);
         let action = GetTorrentGroup;
         let response = self.get(&url, action).await?;
@@ -50,7 +50,7 @@ impl GazelleClient {
     ///
     /// # See Also
     /// - <https://github.com/OPSnet/Gazelle/blob/master/docs/07-API.md#download>
-    pub async fn get_torrent_file_as_buffer(&mut self, id: i64) -> Result<Vec<u8>, Error> {
+    pub async fn get_torrent_file_as_buffer(&mut self, id: u32) -> Result<Vec<u8>, Error> {
         let url = format!("{}/ajax.php?action=download&id={}", self.api_url, id);
         let action = GetTorrentFile;
         let response = self.get(&url, action).await?;

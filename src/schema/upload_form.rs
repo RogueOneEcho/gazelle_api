@@ -21,7 +21,7 @@ pub struct UploadForm {
     pub bitrate: String,
     pub media: String,
     pub release_desc: String,
-    pub group_id: i64,
+    pub group_id: u32,
 }
 
 impl UploadForm {

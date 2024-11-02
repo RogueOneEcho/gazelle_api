@@ -6,24 +6,24 @@ use std::path::PathBuf;
 #[serde(rename_all = "camelCase")]
 #[allow(clippy::struct_excessive_bools)]
 pub struct Torrent {
-    pub id: i64,
+    pub id: u32,
     pub media: String,
     pub format: String,
     pub encoding: String,
     pub remastered: bool,
-    pub remaster_year: Option<i64>,
+    pub remaster_year: Option<u16>,
     pub remaster_title: String,
     pub remaster_record_label: String,
     pub remaster_catalogue_number: String,
     pub scene: bool,
     pub has_log: bool,
     pub has_cue: bool,
-    pub log_score: i64,
-    pub file_count: i64,
-    pub size: i64,
-    pub seeders: i64,
-    pub leechers: i64,
-    pub snatched: i64,
+    pub log_score: u8,
+    pub file_count: u32,
+    pub size: u64,
+    pub seeders: u32,
+    pub leechers: u32,
+    pub snatched: u32,
     #[serde(rename = "has_snatched")]
     pub has_snatched: Option<bool>,
     pub trumpable: Option<bool>,
@@ -39,7 +39,7 @@ pub struct Torrent {
     pub description: String,
     pub file_list: String,
     pub file_path: String,
-    pub user_id: i64,
+    pub user_id: u32,
     pub username: String,
 }
 
