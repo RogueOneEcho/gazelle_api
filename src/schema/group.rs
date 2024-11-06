@@ -2,7 +2,7 @@ use serde::Deserialize;
 
 use crate::MusicInfo;
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Default, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Group {
     pub wiki_body: String,
