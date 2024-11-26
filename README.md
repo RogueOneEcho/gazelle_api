@@ -1,4 +1,4 @@
-# <p style="text-align: center">rogue_logging</p>
+# <p style="text-align: center">gazelle_api</p>
 
 An API client for Gazelle indexers.
 
