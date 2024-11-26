@@ -3,5 +3,3 @@
 **/*.rs.bk
 *.pdb
 config.yml
-
-config.*.yml
