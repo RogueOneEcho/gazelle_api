@@ -18,7 +18,7 @@ pub struct Torrent {
     pub scene: bool,
     pub has_log: bool,
     pub has_cue: bool,
-    pub log_score: u8,
+    pub log_score: i16,
     pub file_count: u32,
     pub size: u64,
     pub seeders: u32,
