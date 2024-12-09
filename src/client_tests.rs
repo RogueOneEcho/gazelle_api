@@ -98,7 +98,6 @@ async fn get_torrent_group_invalid() -> Result<(), Error> {
     Ok(())
 }
 
-
 #[tokio::test]
 async fn get_user() -> Result<(), Error> {
     // Arrange
