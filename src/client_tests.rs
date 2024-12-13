@@ -2,21 +2,35 @@ use crate::options::GazelleClientOptions;
 use log::info;
 use rogue_config::{OptionsProvider, YamlOptionsProvider};
 use rogue_logging::{Error, Logger};
+use serde::{Deserialize, Serialize};
+
+#[derive(Deserialize, Serialize)]
+struct ExampleValues {
+    pub torrent: u32,
+    pub group: u32,
+    pub user: u32,
+}
+
+fn get_options() -> Result<Vec<(GazelleClientOptions, ExampleValues)>, Error> {
+    let clients: Vec<GazelleClientOptions> = YamlOptionsProvider::get()?;
+    let examples: Vec<ExampleValues> = YamlOptionsProvider::get()?;
+    let vec = clients.into_iter().zip(examples).collect();
+    Ok(vec)
+}
 
 #[tokio::test]
 async fn get_torrent() -> Result<(), Error> {
     // Arrange
     Logger::force_init("gazelle_api".to_owned());
-    let options: Vec<GazelleClientOptions> = YamlOptionsProvider::get()?;
-    for options in options {
+    for (options, example) in get_options()? {
         println!("Indexer: {}", options.name);
         let mut client = options.get_client();
 
         // Act
-        let response = client.get_torrent(options.torrent).await?;
+        let response = client.get_torrent(example.torrent).await?;
 
         // Assert
-        assert_eq!(response.torrent.id, options.torrent);
+        assert_eq!(response.torrent.id, example.torrent);
     }
     Ok(())
 }
@@ -57,16 +71,15 @@ async fn get_torrent_invalid() -> Result<(), Error> {
 async fn get_torrent_group() -> Result<(), Error> {
     // Arrange
     Logger::force_init("gazelle_api".to_owned());
-    let options: Vec<GazelleClientOptions> = YamlOptionsProvider::get()?;
-    for options in options {
+    for (options, example) in get_options()? {
         info!("Indexer: {}", options.name);
         let mut client = options.get_client();
 
         // Act
-        let response = client.get_torrent_group(options.group).await?;
+        let response = client.get_torrent_group(example.group).await?;
 
         // Assert
-        assert_eq!(response.group.id, options.group);
+        assert_eq!(response.group.id, example.group);
     }
     Ok(())
 }
@@ -77,8 +90,7 @@ async fn get_torrent_group_invalid() -> Result<(), Error> {
     // Arrange
     Logger::force_init("gazelle_api".to_owned());
     let id = u32::MAX;
-    let options: Vec<GazelleClientOptions> = YamlOptionsProvider::get()?;
-    for options in options {
+    for (options, _example) in get_options()? {
         info!("Indexer: {}", options.name);
         let mut client = options.get_client();
 
@@ -107,13 +119,12 @@ async fn get_torrent_group_invalid() -> Result<(), Error> {
 async fn get_user() -> Result<(), Error> {
     // Arrange
     Logger::force_init("gazelle_api".to_owned());
-    let options: Vec<GazelleClientOptions> = YamlOptionsProvider::get()?;
-    for options in options {
+    for (options, example) in get_options()? {
         println!("Indexer: {}", options.name);
         let mut client = options.get_client();
 
         // Act
-        let user = client.get_user(options.user).await?;
+        let user = client.get_user(example.user).await?;
 
         // Assert
         assert!(!user.username.is_empty());

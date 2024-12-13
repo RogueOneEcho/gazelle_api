@@ -6,9 +6,6 @@ pub struct GazelleClientOptions {
     pub name: String,
     pub key: String,
     pub url: String,
-    pub torrent: u32,
-    pub group: u32,
-    pub user: u32,
 }
 
 impl GazelleClientOptions {
