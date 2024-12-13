@@ -1,12 +1,14 @@
-use crate::options::get_options;
+use crate::options::GazelleClientOptions;
 use log::info;
+use rogue_config::{OptionsProvider, YamlOptionsProvider};
 use rogue_logging::{Error, Logger};
 
 #[tokio::test]
 async fn get_torrent() -> Result<(), Error> {
     // Arrange
     Logger::force_init("gazelle_api".to_owned());
-    for options in get_options()? {
+    let options: Vec<GazelleClientOptions> = YamlOptionsProvider::get()?;
+    for options in options {
         println!("Indexer: {}", options.name);
         let mut client = options.get_client();
 
@@ -25,7 +27,8 @@ async fn get_torrent_invalid() -> Result<(), Error> {
     // Arrange
     Logger::force_init("gazelle_api".to_owned());
     let id = u32::MAX;
-    for options in get_options()? {
+    let options: Vec<GazelleClientOptions> = YamlOptionsProvider::get()?;
+    for options in options {
         info!("Indexer: {}", options.name);
         let mut client = options.get_client();
 
@@ -54,7 +57,8 @@ async fn get_torrent_invalid() -> Result<(), Error> {
 async fn get_torrent_group() -> Result<(), Error> {
     // Arrange
     Logger::force_init("gazelle_api".to_owned());
-    for options in get_options()? {
+    let options: Vec<GazelleClientOptions> = YamlOptionsProvider::get()?;
+    for options in options {
         info!("Indexer: {}", options.name);
         let mut client = options.get_client();
 
@@ -73,7 +77,8 @@ async fn get_torrent_group_invalid() -> Result<(), Error> {
     // Arrange
     Logger::force_init("gazelle_api".to_owned());
     let id = u32::MAX;
-    for options in get_options()? {
+    let options: Vec<GazelleClientOptions> = YamlOptionsProvider::get()?;
+    for options in options {
         info!("Indexer: {}", options.name);
         let mut client = options.get_client();
 
@@ -102,7 +107,8 @@ async fn get_torrent_group_invalid() -> Result<(), Error> {
 async fn get_user() -> Result<(), Error> {
     // Arrange
     Logger::force_init("gazelle_api".to_owned());
-    for options in get_options()? {
+    let options: Vec<GazelleClientOptions> = YamlOptionsProvider::get()?;
+    for options in options {
         println!("Indexer: {}", options.name);
         let mut client = options.get_client();
 
