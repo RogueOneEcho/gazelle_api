@@ -18,6 +18,17 @@ pub struct GazelleClient {
 }
 
 impl GazelleClient {
+    /// Create a [`GazelleClient`] from [`GazelleClientOptions`]
+    #[must_use]
+    pub fn from_options(options: GazelleClientOptions) -> GazelleClient {
+        let factory = GazelleClientFactory {
+            key: options.key,
+            url: options.url,
+            user_agent: "gazelle_api.rs".to_owned(),
+        };
+        factory.create()
+    }
+
     /// Get a torrent by id
     ///
     /// A torrent is a specific encoding of a release (album, EP, single, etc.).

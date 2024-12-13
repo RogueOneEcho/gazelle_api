@@ -1,4 +1,5 @@
 use crate::options::GazelleClientOptions;
+use crate::GazelleClient;
 use log::info;
 use rogue_config::{OptionsProvider, YamlOptionsProvider};
 use rogue_logging::{Error, Logger};
@@ -24,7 +25,7 @@ async fn get_torrent() -> Result<(), Error> {
     Logger::force_init("gazelle_api".to_owned());
     for (options, example) in get_options()? {
         println!("Indexer: {}", options.name);
-        let mut client = options.get_client();
+        let mut client = GazelleClient::from_options(options);
 
         // Act
         let response = client.get_torrent(example.torrent).await?;
@@ -44,7 +45,7 @@ async fn get_torrent_invalid() -> Result<(), Error> {
     let options: Vec<GazelleClientOptions> = YamlOptionsProvider::get()?;
     for options in options {
         info!("Indexer: {}", options.name);
-        let mut client = options.get_client();
+        let mut client = GazelleClient::from_options(options.clone());
 
         // Act
         let response = client.get_torrent(id).await;
@@ -73,7 +74,7 @@ async fn get_torrent_group() -> Result<(), Error> {
     Logger::force_init("gazelle_api".to_owned());
     for (options, example) in get_options()? {
         info!("Indexer: {}", options.name);
-        let mut client = options.get_client();
+        let mut client = GazelleClient::from_options(options);
 
         // Act
         let response = client.get_torrent_group(example.group).await?;
@@ -92,7 +93,7 @@ async fn get_torrent_group_invalid() -> Result<(), Error> {
     let id = u32::MAX;
     for (options, _example) in get_options()? {
         info!("Indexer: {}", options.name);
-        let mut client = options.get_client();
+        let mut client = GazelleClient::from_options(options.clone());
 
         // Act
         let response = client.get_torrent_group(id).await;
@@ -121,7 +122,7 @@ async fn get_user() -> Result<(), Error> {
     Logger::force_init("gazelle_api".to_owned());
     for (options, example) in get_options()? {
         println!("Indexer: {}", options.name);
-        let mut client = options.get_client();
+        let mut client = GazelleClient::from_options(options);
 
         // Act
         let user = client.get_user(example.user).await?;
