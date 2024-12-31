@@ -349,7 +349,7 @@ dependencies = [
  "regex",
  "reqwest",
  "rogue_config",
- "rogue_logging 0.2.1",
+ "rogue_logging",
  "serde",
  "serde_json",
  "serde_yaml",
@@ -1040,23 +1040,9 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b071598f8267008918b3811ce31f26da1f9e390bbae61184eb2c94df97969dc9"
 dependencies = [
  "envy",
- "rogue_logging 0.3.0",
+ "rogue_logging",
  "serde",
  "serde_json",
- "serde_yaml",
-]
-
-[[package]]
-name = "rogue_logging"
-version = "0.2.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "397cc08f5cf9c20adb0f7cb04896bcf3fa5042a4b92c0a0e2cf506a49600fee4"
-dependencies = [
- "chrono",
- "clap",
- "colored",
- "log",
- "serde",
  "serde_yaml",
 ]
 

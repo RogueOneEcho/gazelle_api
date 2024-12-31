@@ -1,8 +1,10 @@
+use std::sync::Arc;
 use crate::options::GazelleClientOptions;
 use crate::GazelleClient;
 use log::info;
 use rogue_config::{OptionsProvider, YamlOptionsProvider};
-use rogue_logging::{Error, Logger};
+use rogue_logging::{Error, Logger, LoggerBuilder};
+use rogue_logging::Verbosity::Trace;
 use serde::{Deserialize, Serialize};
 
 #[derive(Deserialize, Serialize)]
@@ -19,10 +21,19 @@ fn get_options() -> Result<Vec<(GazelleClientOptions, ExampleValues)>, Error> {
     Ok(vec)
 }
 
+fn init_logger() -> Arc<Logger> {
+    LoggerBuilder::new()
+        .with_exclude_filter("reqwest".to_owned())
+        .with_exclude_filter("cookie".to_owned())
+        .with_verbosity(Trace)
+        .create()
+}
+
+
 #[tokio::test]
 async fn get_torrent() -> Result<(), Error> {
     // Arrange
-    Logger::force_init("gazelle_api".to_owned());
+    init_logger();
     for (options, example) in get_options()? {
         println!("Indexer: {}", options.name);
         let mut client = GazelleClient::from_options(options);
@@ -40,7 +51,7 @@ async fn get_torrent() -> Result<(), Error> {
 #[allow(clippy::panic)]
 async fn get_torrent_invalid() -> Result<(), Error> {
     // Arrange
-    Logger::force_init("gazelle_api".to_owned());
+    init_logger();
     let id = u32::MAX;
     let options: Vec<GazelleClientOptions> = YamlOptionsProvider::get()?;
     for options in options {
@@ -71,7 +82,7 @@ async fn get_torrent_invalid() -> Result<(), Error> {
 #[tokio::test]
 async fn get_torrent_group() -> Result<(), Error> {
     // Arrange
-    Logger::force_init("gazelle_api".to_owned());
+    init_logger();
     for (options, example) in get_options()? {
         info!("Indexer: {}", options.name);
         let mut client = GazelleClient::from_options(options);
@@ -89,7 +100,7 @@ async fn get_torrent_group() -> Result<(), Error> {
 #[allow(clippy::panic)]
 async fn get_torrent_group_invalid() -> Result<(), Error> {
     // Arrange
-    Logger::force_init("gazelle_api".to_owned());
+    init_logger();
     let id = u32::MAX;
     for (options, _example) in get_options()? {
         info!("Indexer: {}", options.name);
@@ -119,7 +130,7 @@ async fn get_torrent_group_invalid() -> Result<(), Error> {
 #[tokio::test]
 async fn get_user() -> Result<(), Error> {
     // Arrange
-    Logger::force_init("gazelle_api".to_owned());
+    init_logger();
     for (options, example) in get_options()? {
         println!("Indexer: {}", options.name);
         let mut client = GazelleClient::from_options(options);
