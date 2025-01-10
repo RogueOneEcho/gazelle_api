@@ -2,9 +2,11 @@ clients:
   red:
     url: https://redacted.sh
     key: YOUR_API_KEY
+    user_agent: rust_gazelle_api_tests
   ops:
     url: https://orpheus.network
     key: YOUR_API_KEY
+    user_agent: rust_gazelle_api_tests
 examples:
   red:
     torrent: 3690620

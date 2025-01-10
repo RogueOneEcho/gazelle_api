@@ -18,7 +18,7 @@ async fn get_torrent() -> Result<(), Error> {
     init_logger();
     for (name, config) in load_config()? {
         println!("Indexer: {name}");
-        let mut client = GazelleClient::from_options(config.client);
+        let mut client = GazelleClient::from(config.client);
 
         // Act
         let response = client.get_torrent(config.examples.torrent).await?;
@@ -37,7 +37,7 @@ async fn get_torrent_invalid() -> Result<(), Error> {
     let id = u32::MAX;
     for (name, config) in load_config()? {
         println!("Indexer: {name}");
-        let mut client = GazelleClient::from_options(config.client.clone());
+        let mut client = GazelleClient::from(config.client.clone());
 
         // Act
         let response = client.get_torrent(id).await;
@@ -66,7 +66,7 @@ async fn get_torrent_group() -> Result<(), Error> {
     init_logger();
     for (name, config) in load_config()? {
         println!("Indexer: {name}");
-        let mut client = GazelleClient::from_options(config.client.clone());
+        let mut client = GazelleClient::from(config.client.clone());
 
         // Act
         let response = client.get_torrent_group(config.examples.group).await?;
@@ -85,7 +85,7 @@ async fn get_torrent_group_invalid() -> Result<(), Error> {
     let id = u32::MAX;
     for (name, config) in load_config()? {
         println!("Indexer: {name}");
-        let mut client = GazelleClient::from_options(config.client.clone());
+        let mut client = GazelleClient::from(config.client.clone());
 
         // Act
         let response = client.get_torrent_group(id).await;
@@ -114,7 +114,7 @@ async fn get_user() -> Result<(), Error> {
     init_logger();
     for (name, config) in load_config()? {
         println!("Indexer: {name}");
-        let mut client = GazelleClient::from_options(config.client.clone());
+        let mut client = GazelleClient::from(config.client.clone());
 
         // Act
         let user = client.get_user(config.examples.user).await?;
