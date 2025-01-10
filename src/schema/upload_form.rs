@@ -57,7 +57,7 @@ pub struct UploadForm {
     ///
     /// *OPS may have others*
     pub bitrate: String,
-    /// Media 
+    /// Media
     ///
     /// 0: `CD`
     /// 1: `DVD`

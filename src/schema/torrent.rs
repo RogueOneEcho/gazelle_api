@@ -10,8 +10,8 @@ use std::path::PathBuf;
 pub struct Torrent {
     /// ID number
     pub id: u32,
-    /// Media 
-    /// 
+    /// Media
+    ///
     /// 0: `CD`
     /// 1: `DVD`
     /// 2: `Vinyl`
@@ -23,17 +23,17 @@ pub struct Torrent {
     /// 8: `Blu-Ray` (Possibly `Blu-ray` on OPS)
     pub media: String,
     /// Format
-    /// 
+    ///
     /// 0: `MP3`
     /// 1: `FLAC`
     /// 2: `AAC`
     /// 3: `AC3`
     /// 4: `DTS`
-    /// 
+    ///
     /// *OPS may have others*
     pub format: String,
     /// Encoding
-    /// 
+    ///
     /// 0: `192`
     /// 1: `APS (VBR)`
     /// 2: `V2 (VBR)`
@@ -49,12 +49,12 @@ pub struct Torrent {
     /// *OPS may have others*
     pub encoding: String,
     /// Has this release been confirmed?
-    /// 
+    ///
     /// `remastered` is a deprecated term from the early days of Gazelle.
     /// If `false` then it will be displayed as an "Unconfirmed Release" and likely won't have a year
     pub remastered: bool,
     /// Edition year
-    /// 
+    ///
     /// May be `0`
     pub remaster_year: Option<u16>,
     /// Edition title
@@ -65,7 +65,7 @@ pub struct Torrent {
     pub remaster_catalogue_number: String,
     /// Is this a scene release?
     pub scene: bool,
-    /// Is there a log? 
+    /// Is there a log?
     pub has_log: bool,
     /// Is there a cue?
     pub has_cue: bool,

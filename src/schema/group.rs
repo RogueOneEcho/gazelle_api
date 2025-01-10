@@ -20,12 +20,12 @@ pub struct Group {
     pub name: String,
     /// Release Year
     pub year: u16,
-    /// Record label 
+    /// Record label
     pub record_label: String,
     /// Release catalogue number
     pub catalogue_number: String,
     /// Index of release type
-    /// 
+    ///
     /// 1: `Album`
     /// 3: `Soundtrack`
     /// 5: `EP`
@@ -44,7 +44,7 @@ pub struct Group {
     /// <https://github.com/OPSnet/Gazelle/blob/3e2f8f8ef99f654047d86ea75da166e270b85ba9/public/static/functions/upload.js#L582-L595>
     pub release_type: u8,
     /// ID number of the category
-    /// 
+    ///
     /// *CAUTION: This index is inexplicably different to the [`UploadForm`] `category_id`*
     ///
     /// 0: `Music`
