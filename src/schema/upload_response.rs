@@ -1,9 +1,12 @@
 use serde::Deserialize;
 
+/// Response for the `upload` action
 #[allow(non_snake_case)]
 #[derive(Debug, Deserialize)]
 pub struct UploadResponse {
+    /// If `true` you will need to download the torrent file.
     pub private: bool,
+    /// If `true` you will need to download the torrent file.
     pub source: bool,
     #[serde(rename = "requestid")]
     pub request_id: Option<u32>,

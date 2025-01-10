@@ -8,16 +8,70 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct UploadForm {
+    /// Path to the torrent file to upload
     pub path: PathBuf,
+    /// ID number of the category
+    ///
+    /// *CAUTION: This index is inexplicably different to the [`Group`] `category_id`*
+    ///
+    /// `Music`: 0,
+    /// `Applications`: 1,
+    /// `E-Books`: 2,
+    /// `Audiobooks`: 3,
+    /// `E-Learning Videos`: 4,
+    /// `Comedy`: 5,
+    /// `Comics`: 6
+    /// <https://github.com/OPSnet/Gazelle/blob/3e2f8f8ef99f654047d86ea75da166e270b85ba9/public/static/functions/upload.js#L702-L710>
     pub category_id: u8,
+    /// Edition year
     pub remaster_year: u16,
+    /// Edition title
     pub remaster_title: String,
+    /// Edition record label
     pub remaster_record_label: String,
+    /// Edition catalogue number
     pub remaster_catalogue_number: String,
+    /// Format
+    ///
+    /// 0: `MP3`
+    /// 1: `FLAC`
+    /// 2: `AAC`
+    /// 3: `AC3`
+    /// 4: `DTS`
+    ///
+    /// *OPS may have others*
     pub format: String,
+    /// Encoding
+    ///
+    /// 0: `192`
+    /// 1: `APS (VBR)`
+    /// 2: `V2 (VBR)`
+    /// 3: `V1 (VBR)`
+    /// 4: `256`
+    /// 5: `APX (VBR)`
+    /// 6: `V0 (VBR)`
+    /// 7: `320`
+    /// 8: `Lossless`
+    /// 9: `24bit Lossless`
+    /// 10: `Other`
+    ///
+    /// *OPS may have others*
     pub bitrate: String,
+    /// Media 
+    ///
+    /// 0: `CD`
+    /// 1: `DVD`
+    /// 2: `Vinyl`
+    /// 3: `Soundboard`
+    /// 4: `SACD`
+    /// 5: `DAT`
+    /// 6: `Cassette`
+    /// 7: `WEB`
+    /// 8: `Blu-Ray` (Possibly `Blu-ray` on OPS)
     pub media: String,
+    /// Description formatted as BB code
     pub release_desc: String,
+    /// ID of the torrentgroup
     pub group_id: u32,
 }
 
