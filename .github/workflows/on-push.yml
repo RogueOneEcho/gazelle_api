@@ -94,7 +94,7 @@ jobs:
         ${{ secrets.CONFIG }}
         EOF
 
-    - run: cargo test --release --no-fail-fast
+    - run: cargo test --release --no-fail-fast -- --test-threads=2
 
     - name: Run cargo check
       run: |

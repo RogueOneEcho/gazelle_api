@@ -1,5 +1,5 @@
-use std::time::{Duration, SystemTime};
 use crate::RateLimiter;
+use std::time::{Duration, SystemTime};
 
 const LIMIT_COUNT: usize = 5;
 const LIMIT_DURATION: Duration = Duration::from_secs(10);
@@ -50,7 +50,11 @@ fn test_get_wait_duration_full() {
 
     // Assert
     assert!(wait.is_some());
-    assert!(approximately_equals(wait.unwrap(), LIMIT_DURATION, Duration::from_millis(100)));
+    assert!(approximately_equals(
+        wait.unwrap(),
+        LIMIT_DURATION,
+        Duration::from_millis(100)
+    ));
 }
 
 #[test]
@@ -71,7 +75,11 @@ fn test_execute_available() {
 
     // Assert
     assert!(wait.is_none());
-    assert!(approximately_equals(elapsed, Duration::from_secs(0), Duration::from_millis(50)));
+    assert!(approximately_equals(
+        elapsed,
+        Duration::from_secs(0),
+        Duration::from_millis(50)
+    ));
 }
 
 #[test]
@@ -92,8 +100,16 @@ fn test_execute_full() {
 
     // Assert
     assert!(wait.is_some());
-    assert!(approximately_equals(wait.unwrap(), LIMIT_DURATION_SHORT, Duration::from_millis(50)));
-    assert!(approximately_equals(elapsed, LIMIT_DURATION_SHORT, Duration::from_millis(50)));
+    assert!(approximately_equals(
+        wait.unwrap(),
+        LIMIT_DURATION_SHORT,
+        Duration::from_millis(50)
+    ));
+    assert!(approximately_equals(
+        elapsed,
+        LIMIT_DURATION_SHORT,
+        Duration::from_millis(50)
+    ));
 }
 
 fn approximately_equals(d1: Duration, d2: Duration, tolerance: Duration) -> bool {

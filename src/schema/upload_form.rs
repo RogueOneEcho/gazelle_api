@@ -4,7 +4,6 @@ use std::io::Read;
 use std::path::PathBuf;
 
 use reqwest::multipart::{Form, Part};
-use rogue_logging::Error;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -23,20 +22,11 @@ pub struct UploadForm {
 }
 
 impl UploadForm {
-    #[allow(clippy::wrong_self_convention)]
-    pub fn to_form(self) -> Result<Form, Error> {
-        let action = "upload torrent";
-        let mut file = File::open(&self.path).map_err(|e| Error {
-            action: action.to_owned(),
-            message: e.to_string(),
-            ..Error::default()
-        })?;
+    #[allow(clippy::wrong_self_convention, clippy::absolute_paths)]
+    pub fn to_form(self) -> Result<Form, std::io::Error> {
+        let mut file = File::open(&self.path)?;
         let mut buffer = Vec::new();
-        let _size = file.read_to_end(&mut buffer).map_err(|e| Error {
-            action: action.to_owned(),
-            message: e.to_string(),
-            ..Error::default()
-        })?;
+        let _size = file.read_to_end(&mut buffer)?;
         let filename = self
             .path
             .file_name()
