@@ -5,8 +5,8 @@ use reqwest::{header, Client, ClientBuilder};
 
 use crate::{GazelleClient, GazelleClientOptions, RateLimiter};
 
-const DEFAULT_LIMIT: usize = 2;
-const DEFAULT_LIMIT_DURATION: Duration = Duration::from_secs(1);
+const DEFAULT_LIMIT: usize = 8;
+const DEFAULT_LIMIT_DURATION: Duration = Duration::from_secs(10);
 
 /// Create a [`GazelleClient`]
 pub struct GazelleClientFactory {
