@@ -23,15 +23,12 @@ reqwest = { version = "0.12.12", features = ["rustls-tls", "json", "multipart", 
 rogue_config = "0.1.1"
 rogue_logging = "0.3.0"
 serde = { version = "1.0.217", features = ["derive"] }
-serde_json = "1.0.134"
+serde_json = "1.0.135"
 serde_yaml = "0.9.34"
 tokio = { version = "1.43.0", features = ["full"] }
-tower = { version = "0.5.2", features = ["util", "limit"] }
 
 [lints.clippy]
 pedantic = { level = "warn", priority = -1 }
-#restriction = { level = "warn", priority = -2 }
-
 absolute_paths = "warn"
 arithmetic_side_effects = "allow"
 as_conversions = "warn"

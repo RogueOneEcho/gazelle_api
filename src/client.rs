@@ -3,9 +3,7 @@ use log::*;
 use reqwest::{Client, Response};
 use rogue_logging::Error;
 use serde::de::DeserializeOwned;
-use std::time::{Duration, SystemTime};
-use tower::limit::RateLimit;
-use tower::ServiceExt;
+use std::time::SystemTime;
 
 use crate::*;
 
@@ -14,7 +12,8 @@ use crate::*;
 /// Created by an [`GazelleClientFactory`]
 pub struct GazelleClient {
     pub base_url: String,
-    pub client: RateLimit<Client>,
+    pub client: Client,
+    pub limiter: RateLimiter,
 }
 
 impl From<GazelleClientOptions> for GazelleClient {
@@ -87,9 +86,9 @@ impl GazelleClient {
     pub async fn upload_torrent(&mut self, upload: UploadForm) -> Result<UploadResponse, Error> {
         let url = format!("{}/ajax.php?action=upload", self.base_url);
         let form = upload.to_form()?;
-        let client = self.wait_for_client().await;
-        let result = client.post(&url).multipart(form).send().await;
-        trace!("{} POST request: {}", "Sent".bold(), &url);
+        self.limiter.execute();
+        trace!("{} POST request: {}", "Sending".bold(), &url);
+        let result = self.client.post(&url).multipart(form).send().await;
         let action = "upload torrent";
         let response = result.map_err(|e| Error {
             action: action.to_owned(),
@@ -112,10 +111,10 @@ impl GazelleClient {
     }
 
     async fn get(&mut self, url: &String, action: &str) -> Result<Response, Error> {
+        self.limiter.execute();
         trace!("{} request GET {}", "Sending".bold(), &url);
-        let client = self.wait_for_client().await;
         let start = SystemTime::now();
-        let result = client.get(url).send().await;
+        let result = self.client.get(url).send().await;
         let elapsed = start
             .elapsed()
             .expect("elapsed should not fail")
@@ -127,25 +126,6 @@ impl GazelleClient {
             status_code: None,
             ..Error::default()
         })
-    }
-
-    async fn wait_for_client(&mut self) -> &Client {
-        let start = SystemTime::now();
-        let client = self
-            .client
-            .ready()
-            .await
-            .expect("client should be available")
-            .get_ref();
-        let duration = start.elapsed().expect("duration should not fail");
-        if duration > Duration::from_millis(200) {
-            trace!(
-                "{} {:.3} for rate limiter",
-                "Waited".bold(),
-                duration.as_secs_f64()
-            );
-        }
-        client
     }
 }
 
