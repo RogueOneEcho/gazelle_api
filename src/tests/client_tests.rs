@@ -1,25 +1,8 @@
-use std::sync::Arc;
-use crate::options::GazelleClientOptions;
+use crate::tests::load_config;
 use crate::GazelleClient;
-use log::info;
-use rogue_config::{OptionsProvider, YamlOptionsProvider};
-use rogue_logging::{Error, Logger, LoggerBuilder};
 use rogue_logging::Verbosity::Trace;
-use serde::{Deserialize, Serialize};
-
-#[derive(Deserialize, Serialize)]
-struct ExampleValues {
-    pub torrent: u32,
-    pub group: u32,
-    pub user: u32,
-}
-
-fn get_options() -> Result<Vec<(GazelleClientOptions, ExampleValues)>, Error> {
-    let clients: Vec<GazelleClientOptions> = YamlOptionsProvider::get()?;
-    let examples: Vec<ExampleValues> = YamlOptionsProvider::get()?;
-    let vec = clients.into_iter().zip(examples).collect();
-    Ok(vec)
-}
+use rogue_logging::{Error, Logger, LoggerBuilder};
+use std::sync::Arc;
 
 fn init_logger() -> Arc<Logger> {
     LoggerBuilder::new()
@@ -29,20 +12,19 @@ fn init_logger() -> Arc<Logger> {
         .create()
 }
 
-
 #[tokio::test]
 async fn get_torrent() -> Result<(), Error> {
     // Arrange
     init_logger();
-    for (options, example) in get_options()? {
-        println!("Indexer: {}", options.name);
-        let mut client = GazelleClient::from_options(options);
+    for (name, config) in load_config()? {
+        println!("Indexer: {name}");
+        let mut client = GazelleClient::from_options(config.client);
 
         // Act
-        let response = client.get_torrent(example.torrent).await?;
+        let response = client.get_torrent(config.examples.torrent).await?;
 
         // Assert
-        assert_eq!(response.torrent.id, example.torrent);
+        assert_eq!(response.torrent.id, config.examples.torrent);
     }
     Ok(())
 }
@@ -53,10 +35,9 @@ async fn get_torrent_invalid() -> Result<(), Error> {
     // Arrange
     init_logger();
     let id = u32::MAX;
-    let options: Vec<GazelleClientOptions> = YamlOptionsProvider::get()?;
-    for options in options {
-        info!("Indexer: {}", options.name);
-        let mut client = GazelleClient::from_options(options.clone());
+    for (name, config) in load_config()? {
+        println!("Indexer: {name}");
+        let mut client = GazelleClient::from_options(config.client.clone());
 
         // Act
         let response = client.get_torrent(id).await;
@@ -66,7 +47,7 @@ async fn get_torrent_invalid() -> Result<(), Error> {
             Ok(_) => panic!("should be an error"),
             Err(e) => {
                 assert_eq!(e.action, "get torrent");
-                if options.name == *"red" {
+                if name == *"red" {
                     assert_eq!(e.status_code, Some(400));
                     assert_eq!(e.message, "bad id parameter".to_owned());
                 } else {
@@ -83,15 +64,15 @@ async fn get_torrent_invalid() -> Result<(), Error> {
 async fn get_torrent_group() -> Result<(), Error> {
     // Arrange
     init_logger();
-    for (options, example) in get_options()? {
-        info!("Indexer: {}", options.name);
-        let mut client = GazelleClient::from_options(options);
+    for (name, config) in load_config()? {
+        println!("Indexer: {name}");
+        let mut client = GazelleClient::from_options(config.client.clone());
 
         // Act
-        let response = client.get_torrent_group(example.group).await?;
+        let response = client.get_torrent_group(config.examples.group).await?;
 
         // Assert
-        assert_eq!(response.group.id, example.group);
+        assert_eq!(response.group.id, config.examples.group);
     }
     Ok(())
 }
@@ -102,9 +83,9 @@ async fn get_torrent_group_invalid() -> Result<(), Error> {
     // Arrange
     init_logger();
     let id = u32::MAX;
-    for (options, _example) in get_options()? {
-        info!("Indexer: {}", options.name);
-        let mut client = GazelleClient::from_options(options.clone());
+    for (name, config) in load_config()? {
+        println!("Indexer: {name}");
+        let mut client = GazelleClient::from_options(config.client.clone());
 
         // Act
         let response = client.get_torrent_group(id).await;
@@ -114,7 +95,7 @@ async fn get_torrent_group_invalid() -> Result<(), Error> {
             Ok(_) => panic!("should be an error"),
             Err(e) => {
                 assert_eq!(e.action, "get torrent group");
-                if options.name == *"red" {
+                if name == *"red" {
                     assert_eq!(e.status_code, Some(400));
                     assert_eq!(e.message, "bad id parameter".to_owned());
                 } else {
@@ -131,12 +112,12 @@ async fn get_torrent_group_invalid() -> Result<(), Error> {
 async fn get_user() -> Result<(), Error> {
     // Arrange
     init_logger();
-    for (options, example) in get_options()? {
-        println!("Indexer: {}", options.name);
-        let mut client = GazelleClient::from_options(options);
+    for (name, config) in load_config()? {
+        println!("Indexer: {name}");
+        let mut client = GazelleClient::from_options(config.client.clone());
 
         // Act
-        let user = client.get_user(example.user).await?;
+        let user = client.get_user(config.examples.user).await?;
 
         // Assert
         assert!(!user.username.is_empty());

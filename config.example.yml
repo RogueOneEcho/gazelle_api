@@ -1,12 +1,16 @@
-- name: red
-  url: https://redacted.sh
-  key: YOUR_API_KEY
-  torrent: 3690620
-  group: 629
-  user: 12345
-- name: ops
-  url: https://orpheus.network
-  key: YOUR_API_KEY
-  torrent: 2507974
-  group: 1161539
-  user: 12345
+clients:
+  red:
+    url: https://redacted.sh
+    key: YOUR_API_KEY
+  ops:
+    url: https://orpheus.network
+    key: YOUR_API_KEY
+examples:
+  red:
+    torrent: 3690620
+    group: 629
+    user: 12345
+  ops:
+    torrent: 2507974
+    group: 1161539
+    user: 12345
