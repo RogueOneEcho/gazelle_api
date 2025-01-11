@@ -1,5 +1,6 @@
 use reqwest::StatusCode;
 use serde::{Deserialize, Serialize};
+use std::fmt::{Display, Formatter};
 use GazelleError::*;
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -89,4 +90,45 @@ impl GazelleError {
             _ => None,
         }
     }
+}
+
+impl Display for GazelleError {
+    #[allow(clippy::absolute_paths)]
+    fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
+        let message = match self {
+            Request(message) => format!("Failed to send API request: {message}"),
+            Response(message) => {
+                format!("Failed to read API response: {message}")
+            }
+            Deserialization(message) => {
+                format!("Failed to deserialize API response: {message}")
+            }
+            Upload(message) => {
+                format!("Failed to upload torrent file: {message}")
+            }
+            BadRequest => "Invalid parameters".to_owned(),
+            Unauthorized => "Invalid API key".to_owned(),
+            NotFound => "Resource does not exist".to_owned(),
+            TooManyRequests => "Exceeded rate limit".to_owned(),
+            Unexpected(code, message) => {
+                format!(
+                    "Unexpected API response ({}): {message}",
+                    status_code_and_reason(*code)
+                )
+            }
+            Empty(code) => format!(
+                "Unexpected API response without error message ({})",
+                status_code_and_reason(*code)
+            ),
+        };
+        message.fmt(formatter)
+    }
+}
+
+fn status_code_and_reason(code: u16) -> String {
+    StatusCode::from_u16(code)
+        .ok()
+        .and_then(|code| code.canonical_reason())
+        .map(|reason| format!("{code} {reason}"))
+        .unwrap_or(code.to_string())
 }
