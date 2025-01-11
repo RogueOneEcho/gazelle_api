@@ -4,7 +4,6 @@ use reqwest::{Client, Response, StatusCode};
 use serde::de::DeserializeOwned;
 use std::time::SystemTime;
 
-use crate::GazelleError::Deserialization;
 use crate::*;
 
 /// A client for the Gazelle API
@@ -61,34 +60,32 @@ pub(crate) async fn handle_result<T: DeserializeOwned>(
 async fn get_response(
     result: Result<Response, reqwest::Error>,
 ) -> Result<(StatusCode, String), GazelleError> {
-    let response = result.map_err(GazelleError::Request)?;
+    let response = result.map_err(GazelleError::request)?;
     let status_code = response.status();
-    let json = response.text().await.map_err(GazelleError::Request)?;
+    let json = response.text().await.map_err(GazelleError::response)?;
     Ok((status_code, json))
 }
 
 fn deserialize<T: DeserializeOwned>(json: String) -> Result<ApiResponse<T>, GazelleError> {
     // Remove malformed OPS response
     let json = json.replace("\"response\":[],", "");
-    serde_json::from_str(&json).map_err(|e| Deserialization(e, json))
+    serde_json::from_str(&json).map_err(GazelleError::deserialization)
 }
 
 fn get_result<T: DeserializeOwned>(
     status_code: StatusCode,
     response: ApiResponse<T>,
 ) -> Result<T, GazelleError> {
-    if let Some(error) = GazelleError::from_status_code(status_code) {
+    if let Some(error) = GazelleError::match_client_error(status_code) {
         return Err(error);
     }
     if let Some(error) = response.error {
-        if let Some(error) = GazelleError::from_str(error.as_str()) {
+        if let Some(error) = GazelleError::match_response_error(error.as_str()) {
             return Err(error);
         }
         if !status_code.is_success() {
-            return Err(GazelleError::Other(status_code, error));
+            return Err(GazelleError::unexpected(status_code, error));
         }
     }
-    response
-        .response
-        .ok_or(GazelleError::Other(status_code, "No response.".to_owned()))
+    response.response.ok_or(GazelleError::empty(status_code))
 }

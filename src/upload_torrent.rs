@@ -13,7 +13,7 @@ impl GazelleClient {
         &mut self,
         upload: UploadForm,
     ) -> Result<UploadResponse, GazelleError> {
-        let form = upload.to_form().map_err(GazelleError::IO)?;
+        let form = upload.to_form().map_err(GazelleError::upload)?;
         self.limiter.execute();
         let path = "/ajax.php?action=upload";
         trace!("{} request POST {path}", "Sending".bold());
