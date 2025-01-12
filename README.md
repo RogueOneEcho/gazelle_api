@@ -12,7 +12,7 @@ Used by:
 
 ## Releases and Changes
 
-Releases and a full changelog are available via [GitHub Releases](https://github.com/RogueOneEcho/logging/releases).
+Releases and a full changelog are available via [GitHub Releases](https://github.com/RogueOneEcho/gazelle_api/releases).
 
 Release versions follow the [Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.html) specification.
 
