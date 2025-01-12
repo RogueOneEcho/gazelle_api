@@ -1,6 +1,14 @@
 # <p style="text-align: center">gazelle_api</p>
 
-An API client for Gazelle indexers.
+A basic API client for Gazelle indexers.
+
+- Minimal dependencies
+- Supports `OPS` and `RED`
+- Clear, standardized enum based errors
+
+Used by:
+- [caesura 𝄓](https://github.com/RogueOneEcho/caesura)
+- [coda 𝄌](https://github.com/RogueOneEcho/coda)
 
 ## Releases and Changes
 
