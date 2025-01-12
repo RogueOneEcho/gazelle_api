@@ -17,21 +17,17 @@ impl GazelleClient {
 mod tests {
     use crate::tests::{init_logger, load_config};
     use crate::{GazelleClient, GazelleError};
-    use rogue_logging::Error;
 
     #[tokio::test]
-    async fn get_user() -> Result<(), Error> {
+    async fn get_user() -> Result<(), GazelleError> {
         // Arrange
         init_logger();
-        for (name, config) in load_config()? {
+        for (name, config) in load_config() {
             println!("Indexer: {name}");
             let mut client = GazelleClient::from(config.client);
 
             // Act
-            let response = client
-                .get_user(config.examples.user)
-                .await
-                .expect("should not error");
+            let response = client.get_user(config.examples.user).await?;
 
             // Assert
             assert!(!response.username.is_empty());
@@ -41,11 +37,10 @@ mod tests {
 
     #[tokio::test]
     #[allow(clippy::panic)]
-    async fn get_user_invalid() -> Result<(), Error> {
+    async fn get_user_invalid() -> Result<(), GazelleError> {
         // Arrange
-        init_logger();
         let id = u32::MAX;
-        for (name, config) in load_config()? {
+        for (name, config) in load_config() {
             println!("Indexer: {name}");
             let mut client = GazelleClient::from(config.client.clone());
 

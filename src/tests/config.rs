@@ -1,6 +1,5 @@
 use crate::GazelleClientOptions;
 use rogue_config::{OptionsProvider, YamlOptionsProvider};
-use rogue_logging::Error;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
@@ -23,9 +22,13 @@ pub struct ConfigSet {
     pub examples: ExampleValues,
 }
 
-pub fn load_config() -> Result<HashMap<String, ConfigSet>, Error> {
-    let config: ConfigFile = YamlOptionsProvider::get()?;
-    let vec = config
+#[allow(clippy::panic)]
+pub fn load_config() -> HashMap<String, ConfigSet> {
+    let config: ConfigFile = YamlOptionsProvider::get().unwrap_or_else(|e| {
+        println!("{e}");
+        panic!("Failed to load config");
+    });
+    config
         .clients
         .into_iter()
         .map(|(name, client)| {
@@ -36,6 +39,5 @@ pub fn load_config() -> Result<HashMap<String, ConfigSet>, Error> {
                 .expect("examples should have key");
             (name, ConfigSet { client, examples })
         })
-        .collect();
-    Ok(vec)
+        .collect()
 }

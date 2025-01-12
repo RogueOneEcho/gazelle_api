@@ -16,21 +16,17 @@ impl GazelleClient {
 mod tests {
     use crate::tests::{init_logger, load_config};
     use crate::{GazelleClient, GazelleError};
-    use rogue_logging::Error;
 
     #[tokio::test]
-    async fn get_torrent() -> Result<(), Error> {
+    async fn get_torrent() -> Result<(), GazelleError> {
         // Arrange
         init_logger();
-        for (name, config) in load_config()? {
+        for (name, config) in load_config() {
             println!("Indexer: {name}");
             let mut client = GazelleClient::from(config.client);
 
             // Act
-            let response = client
-                .get_torrent(config.examples.torrent)
-                .await
-                .expect("should not error");
+            let response = client.get_torrent(config.examples.torrent).await?;
 
             // Assert
             assert_eq!(response.torrent.id, config.examples.torrent);
@@ -40,11 +36,11 @@ mod tests {
 
     #[tokio::test]
     #[allow(clippy::panic)]
-    async fn get_torrent_invalid() -> Result<(), Error> {
+    async fn get_torrent_invalid() -> Result<(), GazelleError> {
         // Arrange
         init_logger();
         let id = u32::MAX;
-        for (name, config) in load_config()? {
+        for (name, config) in load_config() {
             println!("Indexer: {name}");
             let mut client = GazelleClient::from(config.client.clone());
 
