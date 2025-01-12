@@ -9,7 +9,7 @@ impl GazelleClient {
     ///
     /// # See Also
     /// - <https://github.com/OPSnet/Gazelle/blob/master/docs/07-API.md#download>
-    pub async fn get_torrent_file_as_buffer(&mut self, id: u32) -> Result<Vec<u8>, GazelleError> {
+    pub async fn download_torrent(&mut self, id: u32) -> Result<Vec<u8>, GazelleError> {
         let query = format!("action=download&id={id}");
         let result = self.get_internal(query).await;
         let response = result.map_err(GazelleError::request)?;
@@ -52,7 +52,7 @@ mod tests {
     use crate::{GazelleClient, GazelleError};
 
     #[tokio::test]
-    async fn get_torrent_file() -> Result<(), GazelleError> {
+    async fn download_torrent() -> Result<(), GazelleError> {
         // Arrange
         init_logger();
         for (name, config) in load_config() {
@@ -61,7 +61,7 @@ mod tests {
 
             // Act
             let response = client
-                .get_torrent_file_as_buffer(config.examples.torrent)
+                .download_torrent(config.examples.torrent)
                 .await?;
 
             // Assert
@@ -72,7 +72,7 @@ mod tests {
 
     #[tokio::test]
     #[allow(clippy::panic)]
-    async fn get_torrent_file_invalid() -> Result<(), GazelleError> {
+    async fn download_torrent_invalid() -> Result<(), GazelleError> {
         // Arrange
         init_logger();
         let id = u32::MAX;
@@ -82,7 +82,7 @@ mod tests {
 
             // Act
             let error = client
-                .get_torrent_file_as_buffer(id)
+                .download_torrent(id)
                 .await
                 .expect_err("should be an error");
             println!("{error:?}");
