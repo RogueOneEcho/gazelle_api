@@ -28,3 +28,49 @@ impl GazelleClient {
         handle_result(result).await
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use std::path::PathBuf;
+    use crate::tests::{init_logger, load_config};
+    use crate::{GazelleClient, GazelleError, UploadForm};
+
+    #[tokio::test]
+    async fn upload_torrent_invalid() -> Result<(), GazelleError> {
+        // Arrange
+        init_logger();
+        for (name, config) in load_config() {
+            println!("Indexer: {name}");
+            let mut client = GazelleClient::from(config.client.clone());
+            let form = UploadForm {
+                path: PathBuf::from("/srv/shared/tests/example-1.torrent"),
+                category_id: 0,
+                remaster_year: 0,
+                remaster_title: "ALBUM TITLE".to_owned(),
+                remaster_record_label: "RECORD LABEL".to_owned(),
+                remaster_catalogue_number: "CATALOGUE NUMBER".to_owned(),
+                format: "FLAC".to_owned(),
+                bitrate: "Lossless".to_owned(),
+                media: "Cassette".to_owned(),
+                release_desc: "DESCRIPTION".to_owned(),
+                group_id: config.examples.group,
+            };
+
+            // Act
+            let error = client
+                .upload_torrent(form)
+                .await
+                .expect_err("should be an error");
+            println!("{error:?}");
+
+            // Assert
+            if name == "ops" {
+                assert!(matches!(error, GazelleError::Unexpected(200, _)));
+            } else {
+                assert!(matches!(error, GazelleError::BadRequest));
+            }
+        }
+        Ok(())
+    }
+}
+
