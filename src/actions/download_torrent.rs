@@ -14,9 +14,6 @@ impl GazelleClient {
         let result = self.get_internal(query).await;
         let response = result.map_err(GazelleError::request)?;
         let status_code = response.status();
-        if let Some(error) = GazelleError::match_client_error(status_code) {
-            return Err(error);
-        }
         let content_type = get_content_type(&response).unwrap_or_default();
         if !content_type.contains("application/x-bittorrent") {
             let json = response.text().await.map_err(GazelleError::response)?;
@@ -31,7 +28,8 @@ impl GazelleClient {
             let buffer = bytes.to_vec();
             Ok(buffer)
         } else {
-            Err(GazelleError::empty(status_code))
+            Err(GazelleError::match_status_error(status_code, None)
+                .unwrap_or(GazelleError::other(status_code, None)))
         }
     }
 }
@@ -86,7 +84,7 @@ mod tests {
             println!("{error:?}");
 
             // Assert
-            assert!(matches!(error, GazelleError::NotFound));
+            assert!(matches!(error, GazelleError::NotFound { message: _ }));
         }
         Ok(())
     }

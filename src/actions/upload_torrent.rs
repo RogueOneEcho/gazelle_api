@@ -66,9 +66,15 @@ mod tests {
 
             // Assert
             if name == "ops" {
-                assert!(matches!(error, GazelleError::Unexpected(200, _)));
+                assert!(matches!(
+                    error,
+                    GazelleError::Other {
+                        status: 200,
+                        message: _
+                    }
+                ));
             } else {
-                assert!(matches!(error, GazelleError::BadRequest));
+                assert!(matches!(error, GazelleError::BadRequest { message: _ }));
             }
         }
         Ok(())

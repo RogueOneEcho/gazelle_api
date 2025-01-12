@@ -50,7 +50,7 @@ mod tests {
             println!("{error:?}");
 
             // Assert
-            assert!(matches!(error, GazelleError::BadRequest));
+            assert!(matches!(error, GazelleError::BadRequest { message: _ }));
         }
         Ok(())
     }

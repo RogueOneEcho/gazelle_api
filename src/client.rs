@@ -86,13 +86,10 @@ pub(crate) fn get_result<T: DeserializeOwned>(
     } else {
         trace!("Received {status_code} response without error");
     }
-    if let Some(error) = GazelleError::match_client_error(status_code) {
+    if let Some(error) = GazelleError::match_status_error(status_code, response.error.clone()) {
         return Err(error);
-    }
-    if let Some(message) = response.error {
-        return Err(GazelleError::unexpected(status_code, message));
     }
     response
         .response
-        .ok_or_else(|| GazelleError::empty(status_code))
+        .ok_or_else(|| GazelleError::other(status_code, response.error))
 }
