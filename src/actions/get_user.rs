@@ -39,6 +39,7 @@ mod tests {
     #[allow(clippy::panic)]
     async fn get_user_invalid() -> Result<(), GazelleError> {
         // Arrange
+        init_logger();
         let id = u32::MAX;
         for (name, config) in load_config() {
             println!("Indexer: {name}");
@@ -49,11 +50,7 @@ mod tests {
             println!("{error:?}");
 
             // Assert
-            if name == "ops" {
-                assert!(matches!(error, GazelleError::BadRequest));
-            } else {
-                assert!(matches!(error, GazelleError::NotFound));
-            }
+            assert!(matches!(error, GazelleError::BadRequest));
         }
         Ok(())
     }

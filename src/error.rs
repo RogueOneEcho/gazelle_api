@@ -81,11 +81,13 @@ impl GazelleError {
     /// Get a `GazelleError` if the response `error` string indicates a known client error
     pub(crate) fn match_response_error(value: &str) -> Option<Self> {
         match value {
-            "bad id parameter" | "bad parameters" => Some(BadRequest),
+            "bad id parameter" | "bad parameters" | "no such user" => Some(BadRequest),
             "This page is limited to API key usage only." | "This page requires an api token" => {
                 Some(Unauthorized)
             }
-            "endpoint not found" | "failure" | "could not find torrent" => Some(NotFound),
+            "endpoint not found" | "failure" | "could not find torrent" => {
+                Some(NotFound)
+            }
             "Rate limit exceeded" => Some(TooManyRequests),
             _ => None,
         }

@@ -78,20 +78,21 @@ pub(crate) fn get_result<T: DeserializeOwned>(
     status_code: StatusCode,
     response: ApiResponse<T>,
 ) -> Result<T, GazelleError> {
+    if let Some(message) = &response.error {
+        trace!("Received {status_code} response with error: {message}");
+        if let Some(error) = GazelleError::match_response_error(message) {
+            return Err(error);
+        }
+    } else {
+        trace!("Received {status_code} response without error");
+    }
     if let Some(error) = GazelleError::match_client_error(status_code) {
-        trace!("Response status code indicates {error:?}: {status_code}");
         return Err(error);
     }
     if let Some(message) = response.error {
-        if let Some(error) = GazelleError::match_response_error(message.as_str()) {
-            trace!("Response error message indicates {error:?}: {message}");
-            return Err(error);
-        }
-        warn!("Response error message was unexpected: {message}");
         return Err(GazelleError::unexpected(status_code, message));
     }
     response.response.ok_or_else(|| {
-        warn!("Response did not contain an error or response object: {status_code}");
         GazelleError::empty(status_code)
     })
 }
