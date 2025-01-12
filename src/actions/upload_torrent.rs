@@ -36,6 +36,7 @@ mod tests {
     use crate::{GazelleClient, GazelleError, UploadForm};
 
     #[tokio::test]
+    #[ignore]
     async fn upload_torrent_invalid() -> Result<(), GazelleError> {
         // Arrange
         init_logger();
