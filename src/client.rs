@@ -92,7 +92,7 @@ pub(crate) fn get_result<T: DeserializeOwned>(
     if let Some(message) = response.error {
         return Err(GazelleError::unexpected(status_code, message));
     }
-    response.response.ok_or_else(|| {
-        GazelleError::empty(status_code)
-    })
+    response
+        .response
+        .ok_or_else(|| GazelleError::empty(status_code))
 }

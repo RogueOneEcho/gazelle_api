@@ -31,9 +31,9 @@ impl GazelleClient {
 
 #[cfg(test)]
 mod tests {
-    use std::path::PathBuf;
     use crate::tests::{init_logger, load_config};
     use crate::{GazelleClient, GazelleError, UploadForm};
+    use std::path::PathBuf;
 
     #[tokio::test]
     #[ignore]
@@ -74,4 +74,3 @@ mod tests {
         Ok(())
     }
 }
-

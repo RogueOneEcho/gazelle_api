@@ -60,9 +60,7 @@ mod tests {
             let mut client = GazelleClient::from(config.client);
 
             // Act
-            let response = client
-                .download_torrent(config.examples.torrent)
-                .await?;
+            let response = client.download_torrent(config.examples.torrent).await?;
 
             // Assert
             assert!(!response.is_empty());

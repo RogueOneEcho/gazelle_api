@@ -85,9 +85,7 @@ impl GazelleError {
             "This page is limited to API key usage only." | "This page requires an api token" => {
                 Some(Unauthorized)
             }
-            "endpoint not found" | "failure" | "could not find torrent" => {
-                Some(NotFound)
-            }
+            "endpoint not found" | "failure" | "could not find torrent" => Some(NotFound),
             "Rate limit exceeded" => Some(TooManyRequests),
             _ => None,
         }
