@@ -1,4 +1,8 @@
+use crate::client::{deserialize, get_result};
 use crate::{GazelleClient, GazelleError};
+use reqwest::header::CONTENT_TYPE;
+use reqwest::Response;
+use serde_json::Value;
 
 impl GazelleClient {
     /// Get the content of the .torrent file as a buffer
@@ -13,6 +17,12 @@ impl GazelleClient {
         if let Some(error) = GazelleError::match_client_error(status_code) {
             return Err(error);
         }
+        let content_type = get_content_type(&response).unwrap_or_default();
+        if !content_type.contains("application/x-bittorrent") {
+            let json = response.text().await.map_err(GazelleError::response)?;
+            let response = deserialize::<Value>(json)?;
+            return get_result(status_code, response).map(|_| Vec::new());
+        }
         if status_code.is_success() {
             let bytes = response
                 .bytes()
@@ -23,5 +33,63 @@ impl GazelleClient {
         } else {
             Err(GazelleError::empty(status_code))
         }
+    }
+}
+
+fn get_content_type(response: &Response) -> Option<String> {
+    let content_type = response
+        .headers()
+        .get(CONTENT_TYPE)?
+        .to_str()
+        .ok()?
+        .to_owned();
+    Some(content_type)
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::tests::{init_logger, load_config};
+    use crate::{GazelleClient, GazelleError};
+
+    #[tokio::test]
+    async fn get_torrent_file() -> Result<(), GazelleError> {
+        // Arrange
+        init_logger();
+        for (name, config) in load_config() {
+            println!("Indexer: {name}");
+            let mut client = GazelleClient::from(config.client);
+
+            // Act
+            let response = client
+                .get_torrent_file_as_buffer(config.examples.torrent)
+                .await?;
+
+            // Assert
+            assert!(!response.is_empty());
+        }
+        Ok(())
+    }
+
+    #[tokio::test]
+    #[allow(clippy::panic)]
+    async fn get_torrent_file_invalid() -> Result<(), GazelleError> {
+        // Arrange
+        init_logger();
+        let id = u32::MAX;
+        for (name, config) in load_config() {
+            println!("Indexer: {name}");
+            let mut client = GazelleClient::from(config.client.clone());
+
+            // Act
+            let error = client
+                .get_torrent_file_as_buffer(id)
+                .await
+                .expect_err("should be an error");
+            println!("{error:?}");
+
+            // Assert
+            assert!(matches!(error, GazelleError::NotFound));
+        }
+        Ok(())
     }
 }

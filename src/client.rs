@@ -57,7 +57,7 @@ pub(crate) async fn handle_result<T: DeserializeOwned>(
     get_result(status_code, response)
 }
 
-async fn get_response(
+pub(crate) async fn get_response(
     result: Result<Response, reqwest::Error>,
 ) -> Result<(StatusCode, String), GazelleError> {
     let response = result.map_err(GazelleError::request)?;
@@ -66,26 +66,32 @@ async fn get_response(
     Ok((status_code, json))
 }
 
-fn deserialize<T: DeserializeOwned>(json: String) -> Result<ApiResponse<T>, GazelleError> {
+pub(crate) fn deserialize<T: DeserializeOwned>(
+    json: String,
+) -> Result<ApiResponse<T>, GazelleError> {
     // Remove malformed OPS response
     let json = json.replace("\"response\":[],", "");
     serde_json::from_str(&json).map_err(GazelleError::deserialization)
 }
 
-fn get_result<T: DeserializeOwned>(
+pub(crate) fn get_result<T: DeserializeOwned>(
     status_code: StatusCode,
     response: ApiResponse<T>,
 ) -> Result<T, GazelleError> {
     if let Some(error) = GazelleError::match_client_error(status_code) {
+        trace!("Response status code indicates {error:?}: {status_code}");
         return Err(error);
     }
-    if let Some(error) = response.error {
-        if let Some(error) = GazelleError::match_response_error(error.as_str()) {
+    if let Some(message) = response.error {
+        if let Some(error) = GazelleError::match_response_error(message.as_str()) {
+            trace!("Response error message indicates {error:?}: {message}");
             return Err(error);
         }
-        if !status_code.is_success() {
-            return Err(GazelleError::unexpected(status_code, error));
-        }
+        warn!("Response error message was unexpected: {message}");
+        return Err(GazelleError::unexpected(status_code, message));
     }
-    response.response.ok_or(GazelleError::empty(status_code))
+    response.response.ok_or_else(|| {
+        warn!("Response did not contain an error or response object: {status_code}");
+        GazelleError::empty(status_code)
+    })
 }
