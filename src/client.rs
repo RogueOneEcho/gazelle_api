@@ -79,12 +79,12 @@ pub(crate) fn get_result<T: DeserializeOwned>(
     response: ApiResponse<T>,
 ) -> Result<T, GazelleError> {
     if let Some(message) = &response.error {
-        trace!("Received {status_code} response with error: {message}");
+        trace!("{} {status_code} response with error: {message}", "Received".bold());
         if let Some(error) = GazelleError::match_response_error(message) {
             return Err(error);
         }
     } else {
-        trace!("Received {status_code} response without error");
+        trace!("{} {status_code} response without error", "Received".bold());
     }
     if let Some(error) = GazelleError::match_status_error(status_code, response.error.clone()) {
         return Err(error);
