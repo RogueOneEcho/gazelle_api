@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 
 /// Release credits
 /// Artists, composer etc
-#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Credits {
     /// Arrangers

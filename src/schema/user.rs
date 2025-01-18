@@ -1,7 +1,7 @@
 use serde::Deserialize;
 
 /// Response for the `user` action
-#[derive(Debug, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct User {
     /// Username
@@ -25,7 +25,7 @@ pub struct User {
     pub community: Community,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Stats {
     /// Join date
@@ -42,7 +42,7 @@ pub struct Stats {
     pub required_ratio: f32,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 pub struct Ranks {
     /// Percentile of data uploaded
     pub uploaded: f32,
@@ -62,7 +62,7 @@ pub struct Ranks {
     pub overall: f32,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Personal {
     /// Class
@@ -81,7 +81,7 @@ pub struct Personal {
     pub passkey: String,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Community {
     /// Number of posts made

@@ -6,7 +6,7 @@ use std::path::PathBuf;
 use reqwest::multipart::{Form, Part};
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct UploadForm {
     /// Path to the torrent file to upload
     pub path: PathBuf,

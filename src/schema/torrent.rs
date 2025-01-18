@@ -4,7 +4,7 @@ use std::path::PathBuf;
 
 /// An edition of a release
 /// <https://github.com/OPSnet/Gazelle/blob/master/docs/07-API.md#torrent>
-#[derive(Debug, Default, Deserialize)]
+#[derive(Clone, Debug, Default, Deserialize)]
 #[serde(rename_all = "camelCase")]
 #[allow(clippy::struct_excessive_bools)]
 pub struct Torrent {

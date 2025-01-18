@@ -3,7 +3,7 @@ use serde::Deserialize;
 use crate::{Group, Torrent};
 
 /// Response for the `torrentgroup` action
-#[derive(Debug, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct GroupResponse {
     /// Release information

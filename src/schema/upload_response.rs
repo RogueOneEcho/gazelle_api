@@ -2,7 +2,7 @@ use serde::Deserialize;
 
 /// Response for the `upload` action
 #[allow(non_snake_case)]
-#[derive(Debug, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 pub struct UploadResponse {
     /// If `true` you will need to download the torrent file.
     pub private: bool,

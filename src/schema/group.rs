@@ -5,7 +5,7 @@ use crate::Credits;
 /// A release
 /// Typically representing an album, EP, or single which may contain multiple editions.
 /// <https://github.com/OPSnet/Gazelle/blob/master/docs/07-API.md#torrent-group>
-#[derive(Debug, Default, Deserialize)]
+#[derive(Clone, Debug, Default, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Group {
     /// Album info formatted as HTML
