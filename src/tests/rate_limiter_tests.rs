@@ -114,9 +114,9 @@ fn test_execute_full() {
 
 fn approximately_equals(d1: Duration, d2: Duration, tolerance: Duration) -> bool {
     if d1 > d2 {
-        d1 - d2 <= tolerance
+        d1.checked_sub(d2).unwrap() <= tolerance
     } else {
-        d2 - d1 <= tolerance
+        d2.checked_sub(d1).unwrap() <= tolerance
     }
 }
 

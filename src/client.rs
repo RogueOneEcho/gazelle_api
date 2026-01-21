@@ -17,7 +17,6 @@ pub struct GazelleClient {
 
 impl From<GazelleClientOptions> for GazelleClient {
     /// Create a [`GazelleClient`] from [`GazelleClientOptions`]
-    #[must_use]
     fn from(options: GazelleClientOptions) -> GazelleClient {
         let factory = GazelleClientFactory { options };
         factory.create()

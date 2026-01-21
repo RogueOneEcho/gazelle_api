@@ -54,7 +54,12 @@ impl RateLimiter {
         if elapsed > self.rate.per {
             return None;
         }
-        Some(self.rate.per - elapsed)
+        Some(
+            self.rate
+                .per
+                .checked_sub(elapsed)
+                .expect("duration should not overflow"),
+        )
     }
 
     /// Remove requests older than the rate duration.

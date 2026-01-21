@@ -36,7 +36,7 @@ mod tests {
     use std::path::PathBuf;
 
     #[tokio::test]
-    #[ignore]
+    #[ignore = "require upload"]
     async fn upload_torrent_invalid() -> Result<(), GazelleError> {
         // Arrange
         init_logger();
