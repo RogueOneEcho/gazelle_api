@@ -1,7 +1,7 @@
 use std::time::Duration;
 
 use reqwest::header::{HeaderMap, HeaderValue};
-use reqwest::{header, Client, ClientBuilder};
+use reqwest::{Client, ClientBuilder, header};
 
 use crate::{GazelleClient, GazelleClientOptions, RateLimiter};
 

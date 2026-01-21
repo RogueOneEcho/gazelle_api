@@ -1,7 +1,7 @@
 use crate::client::{deserialize, get_result};
 use crate::{GazelleClient, GazelleError};
-use reqwest::header::CONTENT_TYPE;
 use reqwest::Response;
+use reqwest::header::CONTENT_TYPE;
 use serde_json::Value;
 
 impl GazelleClient {

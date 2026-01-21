@@ -1,7 +1,7 @@
 [package]
 name = "gazelle_api"
 version = "0.0.0"
-edition = "2021"
+edition = "2024"
 publish = true
 authors = ["RogueOneEcho"]
 description = "Gazelle API Client"

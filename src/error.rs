@@ -1,8 +1,8 @@
+use GazelleError::*;
 use colored::Colorize;
 use reqwest::StatusCode;
 use serde::{Deserialize, Serialize};
 use std::fmt::{Display, Formatter};
-use GazelleError::*;
 
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 #[allow(clippy::absolute_paths)]
