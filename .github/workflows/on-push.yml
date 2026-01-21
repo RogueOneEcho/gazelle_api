@@ -9,7 +9,7 @@ env:
 jobs:
 
   release:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     outputs:
       version: ${{ steps.release.outputs.version }}
     steps:
@@ -26,18 +26,18 @@ jobs:
 
     - run: echo "# ${{ steps.release.outputs.version}}" >> $GITHUB_STEP_SUMMARY
 
-    - run: cat /tmp/RELEASE-NOTES.md >> $GITHUB_STEP_SUMMARY
+    - run: cat /tmp/release-notes.md >> $GITHUB_STEP_SUMMARY
 
     - uses: actions/upload-artifact@v4
       with:
-        name: RELEASE-NOTES.md
-        path: /tmp/RELEASE-NOTES.md
+        name: release-notes.md
+        path: /tmp/release-notes.md
 
     - run: /home/linuxbrew/.linuxbrew/bin/brew install cargo-edit
-      if: ${{ steps.release.outputs.version != ''}}
+      if: steps.release.outputs.version != ''
 
     - run: /home/linuxbrew/.linuxbrew/bin/cargo-set-version set-version ${{ steps.release.outputs.version }}
-      if: ${{ steps.release.outputs.version != ''}}
+      if: steps.release.outputs.version != ''
 
     - run: git --no-pager diff --color
 
@@ -48,7 +48,7 @@ jobs:
 
 
   cargo-build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs:
     - release
     steps:
@@ -121,9 +121,8 @@ jobs:
 
 
   cargo-publish:
-    runs-on: ubuntu-latest
-    if: ${{ needs.release.outputs.version != '' }}
-#    if: ${{ needs.release.outputs.version != '' && ! contains(needs.release.outputs.version, '-') }}
+    runs-on: ubuntu-24.04
+    if: needs.release.outputs.version != '' && contains(needs.release.outputs.version, '-') == false
     needs:
     - release
     - cargo-build
@@ -142,9 +141,29 @@ jobs:
         CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
 
 
+  git-tag:
+    runs-on: ubuntu-24.04
+    if: needs.release.outputs.version != '' && contains(needs.release.outputs.version, '-')
+    needs:
+    - release
+    - cargo-build
+    steps:
+
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        fetch-tags: true
+
+    - name: git tag
+      run: git tag "v${{ needs.release.outputs.version }}"
+
+    - name: git push
+      run: git push origin "v${{ needs.release.outputs.version }}"
+
+
   github-release:
-    runs-on: ubuntu-latest
-    if: ${{ needs.release.outputs.version != ''}}
+    runs-on: ubuntu-24.04
+    if: needs.release.outputs.version != '' && contains(needs.release.outputs.version, '-') == false
     needs:
       - release
       - cargo-build
@@ -154,27 +173,14 @@ jobs:
 
     - uses: actions/download-artifact@v4
       with:
-        name: RELEASE-NOTES.md
+        name: release-notes.md
 
     - name: gh release create
-      if: ${{ ! contains(needs.release.outputs.version, '-') }}
       env:
         GH_TOKEN: ${{ github.token }}
       run: >
         gh release create
         "v${{ needs.release.outputs.version }}"
         --title "v${{ needs.release.outputs.version }}"
-        --notes-file RELEASE-NOTES.md
+        --notes-file release-notes.md
         --target ${{ github.ref_name }}
-
-    - name: gh release create --prerelease
-      if: ${{ contains(needs.release.outputs.version, '-') }}
-      env:
-        GH_TOKEN: ${{ github.token }}
-      run: >
-        gh release create
-        "v${{ needs.release.outputs.version }}"
-        --title "v${{ needs.release.outputs.version }}"
-        --notes-file RELEASE-NOTES.md
-        --target ${{ github.ref_name }}
-        --prerelease
