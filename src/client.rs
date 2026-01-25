@@ -34,7 +34,7 @@ impl GazelleClient {
     }
 
     pub(crate) async fn get_internal(&mut self, query: String) -> Result<Response, reqwest::Error> {
-        self.limiter.execute();
+        self.limiter.execute().await;
         let path = format!("/ajax.php?{query}");
         trace!("{} request GET {path}", "Sending".bold());
         let url = format!("{}{path}", self.base_url);

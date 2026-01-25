@@ -2,8 +2,8 @@ use crate::Rate;
 use colored::Colorize;
 use log::trace;
 use std::collections::VecDeque;
-use std::thread::sleep;
 use std::time::{Duration, SystemTime};
+use tokio::time::sleep;
 
 pub struct RateLimiter {
     pub(crate) rate: Rate,
@@ -23,7 +23,7 @@ impl RateLimiter {
     /// Wait if required then execute
     ///
     /// Returns `None` if there was no wait, else the duration.
-    pub fn execute(&mut self) -> Option<Duration> {
+    pub async fn execute(&mut self) -> Option<Duration> {
         let wait_duration = self.get_wait_duration();
         if let Some(wait) = wait_duration {
             trace!(
@@ -31,7 +31,7 @@ impl RateLimiter {
                 "Waiting".bold(),
                 wait.as_secs_f64()
             );
-            sleep(wait);
+            sleep(wait).await;
             self.requests.pop_front();
         }
         self.requests.push_back(SystemTime::now());
