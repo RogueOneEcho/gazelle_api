@@ -1,180 +1,216 @@
-use GazelleError::*;
 use colored::Colorize;
 use reqwest::StatusCode;
 use serde::{Deserialize, Serialize};
-use std::fmt::{Display, Formatter};
+use std::error::Error;
+use std::fmt::{Debug, Display, Formatter, Result as FmtResult};
+use std::io;
 
-#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
-#[allow(clippy::absolute_paths)]
-#[serde(rename_all = "snake_case", tag = "type")]
-pub enum GazelleError {
-    /// An error occured creating the request
-    /// Includes the `reqwest::Error` as a string
-    Request { error: String },
-    /// An error occured extracting the body of the response
-    /// Includes the `reqwest::Error` as a string
-    Response { error: String },
-    /// An error occured deserializing the body as JSON
-    /// Includes the `serde_json::Error` as a string
-    Deserialization { error: String },
-    /// An error occured reading the torrent file
-    /// Includes the `std::io::Error` as a string
-    Upload { error: String },
+/// Error kind without message payload.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum GazelleErrorKind {
+    /// Failed to send HTTP request
+    Request,
+    /// Failed to read HTTP response body
+    Response,
+    /// Failed to deserialize JSON
+    Deserialization,
+    /// Failed to read torrent file for upload
+    Upload,
     /// 400 Bad Request
-    /// Indicates that either the requested resource was not found,
-    /// or there was an issue with the paramters
-    BadRequest { message: String },
+    BadRequest,
     /// 401 Unauthorized
-    /// Indicates the API Key is invalid
-    Unauthorized { message: String },
+    Unauthorized,
     /// 404 Not Found
-    /// Indicates the requested resource was not found
-    NotFound { message: String },
-    /// 429 Too Many Request
-    /// Indicates the rate limit has been hit
-    TooManyRequests { message: String },
-    /// An unexpected status code and error message was received from the API
-    /// Includes the `StatusCode` as a `u16` and
-    /// the error message received from the API as a string
-    Other {
-        status: u16,
-        message: Option<String>,
-    },
+    NotFound,
+    /// 429 Too Many Requests
+    TooManyRequests,
+    /// Other HTTP status code
+    Other(u16),
 }
 
-#[allow(clippy::absolute_paths)]
+/// Unified error type with source chain preservation.
+#[derive(Serialize, Deserialize)]
+pub struct GazelleError {
+    pub kind: GazelleErrorKind,
+    pub message: Option<String>,
+    #[serde(skip)]
+    source: Option<Box<dyn Error + Send + Sync + 'static>>,
+}
+
 impl GazelleError {
-    pub(crate) fn request(error: reqwest::Error) -> Self {
-        Request {
-            error: error.to_string(),
+    /// Create error without source
+    #[must_use]
+    pub fn new(kind: GazelleErrorKind) -> Self {
+        Self {
+            kind,
+            message: None,
+            source: None,
         }
     }
 
-    pub(crate) fn response(error: reqwest::Error) -> Self {
-        Response {
-            error: error.to_string(),
+    /// Create error with message
+    #[must_use]
+    pub fn with_message(kind: GazelleErrorKind, message: impl Into<String>) -> Self {
+        Self {
+            kind,
+            message: Some(message.into()),
+            source: None,
         }
     }
 
-    pub(crate) fn deserialization(error: serde_json::Error) -> Self {
-        Deserialization {
-            error: error.to_string(),
+    /// Create error with source
+    pub fn with_source<E: Error + Send + Sync + 'static>(
+        kind: GazelleErrorKind,
+        source: E,
+    ) -> Self {
+        Self {
+            kind,
+            message: None,
+            source: Some(Box::new(source)),
         }
     }
 
-    pub(crate) fn upload(error: std::io::Error) -> Self {
-        Upload {
-            error: error.to_string(),
+    /// Clone the error without the source chain.
+    /// Use this when you need a copy but don't need error chain propagation.
+    #[must_use]
+    pub fn clone_without_source(&self) -> Self {
+        Self {
+            kind: self.kind,
+            message: self.message.clone(),
+            source: None,
         }
     }
 
-    pub(crate) fn other(status_code: StatusCode, error: Option<String>) -> Self {
-        Other {
-            status: status_code.as_u16(),
-            message: error,
+    /// Create a request error from a reqwest error
+    pub(crate) fn request(source: reqwest::Error) -> Self {
+        Self::with_source(GazelleErrorKind::Request, source)
+    }
+
+    /// Create a response error from a reqwest error
+    pub(crate) fn response(source: reqwest::Error) -> Self {
+        Self::with_source(GazelleErrorKind::Response, source)
+    }
+
+    /// Create a deserialization error from a `serde_json` error
+    pub(crate) fn deserialization(source: serde_json::Error) -> Self {
+        Self::with_source(GazelleErrorKind::Deserialization, source)
+    }
+
+    /// Create an upload error from an io error
+    pub(crate) fn upload(source: io::Error) -> Self {
+        Self::with_source(GazelleErrorKind::Upload, source)
+    }
+
+    /// Create an other error from a status code
+    pub(crate) fn other(status: StatusCode, message: Option<String>) -> Self {
+        Self {
+            kind: GazelleErrorKind::Other(status.as_u16()),
+            message,
+            source: None,
         }
     }
 
-    /// Get a `GazelleError` if the status code indicates a known client error
+    /// Match HTTP status code to error kind
     /// *RED only as OPS inexplicably returns `200 Success` for everything*
-    pub(crate) fn match_status_error(
-        status_code: StatusCode,
-        error: Option<String>,
-    ) -> Option<Self> {
-        match status_code {
-            StatusCode::BAD_REQUEST => Some(BadRequest {
-                message: error.unwrap_or_default(),
-            }),
-            StatusCode::UNAUTHORIZED => Some(Unauthorized {
-                message: error.unwrap_or_default(),
-            }),
-            StatusCode::NOT_FOUND => Some(NotFound {
-                message: error.unwrap_or_default(),
-            }),
-            StatusCode::TOO_MANY_REQUESTS => Some(TooManyRequests {
-                message: error.unwrap_or_default(),
-            }),
-            _ => None,
-        }
+    pub(crate) fn match_status_error(status: StatusCode, message: Option<String>) -> Option<Self> {
+        let kind = match status {
+            StatusCode::BAD_REQUEST => GazelleErrorKind::BadRequest,
+            StatusCode::UNAUTHORIZED => GazelleErrorKind::Unauthorized,
+            StatusCode::NOT_FOUND => GazelleErrorKind::NotFound,
+            StatusCode::TOO_MANY_REQUESTS => GazelleErrorKind::TooManyRequests,
+            _ => return None,
+        };
+        Some(Self {
+            kind,
+            message,
+            source: None,
+        })
     }
 
-    /// Get a `GazelleError` if the response `error` string indicates a known client error
+    /// Match API error string to error kind
     pub(crate) fn match_response_error(error: &str) -> Option<Self> {
-        match error {
-            "bad id parameter" | "bad parameters" | "no such user" => Some(BadRequest {
-                message: error.to_owned(),
-            }),
+        let kind = match error {
+            "bad id parameter" | "bad parameters" | "no such user" => GazelleErrorKind::BadRequest,
             "This page is limited to API key usage only." | "This page requires an api token" => {
-                Some(Unauthorized {
-                    message: error.to_owned(),
-                })
+                GazelleErrorKind::Unauthorized
             }
-            "endpoint not found" | "failure" | "could not find torrent" => Some(NotFound {
-                message: error.to_owned(),
-            }),
-            "Rate limit exceeded" => Some(TooManyRequests {
-                message: error.to_owned(),
-            }),
-            _ => None,
+            "endpoint not found" | "failure" | "could not find torrent" => {
+                GazelleErrorKind::NotFound
+            }
+            "Rate limit exceeded" => GazelleErrorKind::TooManyRequests,
+            _ => return None,
+        };
+        Some(Self::with_message(kind, error))
+    }
+}
+
+impl Error for GazelleError {
+    #[allow(clippy::as_conversions)]
+    fn source(&self) -> Option<&(dyn Error + 'static)> {
+        self.source
+            .as_ref()
+            .map(|s| s.as_ref() as &(dyn Error + 'static))
+    }
+}
+
+impl Display for GazelleErrorKind {
+    fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
+        match self {
+            GazelleErrorKind::Request => write!(f, "{} to send API request", "Failed".bold()),
+            GazelleErrorKind::Response => write!(f, "{} to read API response", "Failed".bold()),
+            GazelleErrorKind::Deserialization => {
+                write!(f, "{} to deserialize API response", "Failed".bold())
+            }
+            GazelleErrorKind::Upload => {
+                write!(f, "{} to upload torrent file", "Failed".bold())
+            }
+            GazelleErrorKind::BadRequest => {
+                write!(f, "{} bad request response", "Received".bold())
+            }
+            GazelleErrorKind::Unauthorized => {
+                write!(f, "{} unauthorized response", "Received".bold())
+            }
+            GazelleErrorKind::NotFound => write!(f, "{} not found response", "Received".bold()),
+            GazelleErrorKind::TooManyRequests => {
+                write!(f, "{} too many requests response", "Received".bold())
+            }
+            GazelleErrorKind::Other(status) => {
+                write!(
+                    f,
+                    "{} {} response",
+                    "Received".bold(),
+                    status_code_and_reason(*status)
+                )
+            }
         }
     }
 }
 
 impl Display for GazelleError {
-    #[allow(clippy::absolute_paths)]
-    fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
-        let message = match self {
-            Request { error } => format!("{} to send API request: {error}", "Failed".bold()),
-            Response { error } => {
-                format!("{} to read API response: {error}", "Failed".bold())
-            }
-            Deserialization { error } => {
-                format!("{} to deserialize API response: {error}", "Failed".bold())
-            }
-            Upload { error } => {
-                format!("{} to upload torrent file: {error}", "Failed".bold())
-            }
-            BadRequest { message } => {
-                format!(
-                    "{} bad request response{}",
-                    "Received".bold(),
-                    append(message)
-                )
-            }
-            Unauthorized { message } => {
-                format!(
-                    "{} unauthorized response{}",
-                    "Received".bold(),
-                    append(message)
-                )
-            }
-            NotFound { message } => {
-                format!(
-                    "{} not found response{}",
-                    "Received".bold(),
-                    append(message)
-                )
-            }
-            TooManyRequests { message } => {
-                format!(
-                    "{} too many requests response{}",
-                    "Received".bold(),
-                    append(message)
-                )
-            }
-            Other {
-                status,
-                message: error,
-            } => {
-                format!(
-                    "{} {} response{}",
-                    "Received".bold(),
-                    status_code_and_reason(*status),
-                    append(&error.clone().unwrap_or_default())
-                )
-            }
-        };
-        message.fmt(formatter)
+    fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
+        write!(f, "{}", self.kind)?;
+        if let Some(msg) = &self.message {
+            write!(f, "\n{msg}")?;
+        }
+        if let Some(source) = &self.source {
+            write!(f, "\n{source}")?;
+        }
+        Ok(())
+    }
+}
+
+impl Debug for GazelleError {
+    fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
+        let mut debug = f.debug_struct("GazelleError");
+        debug.field("kind", &self.kind);
+        if let Some(msg) = &self.message {
+            debug.field("message", msg);
+        }
+        if let Some(src) = &self.source {
+            debug.field("source", src);
+        }
+        debug.finish()
     }
 }
 
@@ -186,58 +222,81 @@ fn status_code_and_reason(code: u16) -> String {
         .unwrap_or(code.to_string())
 }
 
-fn append(message: &str) -> String {
-    if message.is_empty() {
-        String::new()
-    } else {
-        format!(": {message}")
-    }
-}
-
 #[cfg(test)]
 mod tests {
-    use crate::GazelleError;
-    use crate::GazelleError::*;
-    use reqwest::StatusCode;
+    use super::*;
 
     #[test]
-    pub fn yaml_serialization() -> Result<(), serde_yaml::Error> {
+    fn yaml_serialization_all_kinds() {
         // Arrange
-        let example = vec![
-            BadRequest {
-                message: String::new(),
+        let errors = vec![
+            GazelleError::with_message(GazelleErrorKind::Request, "connection refused"),
+            GazelleError::with_message(GazelleErrorKind::Response, "invalid body"),
+            GazelleError::with_message(GazelleErrorKind::Deserialization, "expected string"),
+            GazelleError::with_message(GazelleErrorKind::Upload, "file not found"),
+            GazelleError::with_message(GazelleErrorKind::BadRequest, "bad id parameter"),
+            GazelleError::with_message(GazelleErrorKind::Unauthorized, "invalid api key"),
+            GazelleError::with_message(GazelleErrorKind::NotFound, "torrent not found"),
+            GazelleError::with_message(GazelleErrorKind::TooManyRequests, "rate limit exceeded"),
+            GazelleError {
+                kind: GazelleErrorKind::Other(500),
+                message: Some("internal error".to_owned()),
+                source: None,
             },
-            BadRequest {
-                message: "bad id parameter".to_owned(),
-            },
-            NotFound {
-                message: "no such user".to_owned(),
-            },
-            Other {
-                status: 500,
-                message: Some("Hello, world".to_owned()),
-            },
+            GazelleError::new(GazelleErrorKind::Other(503)),
         ];
-        let expected = "- type: bad_request
-  message: ''
-- type: bad_request
-  message: bad id parameter
-- type: not_found
-  message: no such user
-- type: other
-  status: 500
-  message: Hello, world
-";
 
         // Act
-        let yaml = serde_yaml::to_string(&example)?;
-        println!("{yaml}");
-        let deserialized: Vec<GazelleError> = serde_yaml::from_str(expected)?;
+        let yaml = serde_yaml::to_string(&errors).expect("should serialize");
 
         // Assert
-        assert_eq!(yaml, expected);
-        assert_eq!(deserialized, example);
-        Ok(())
+        insta::assert_snapshot!(yaml);
+
+        // Act (round-trip)
+        let deserialized: Vec<GazelleError> =
+            serde_yaml::from_str(&yaml).expect("should deserialize");
+
+        // Assert
+        assert_eq!(deserialized.len(), errors.len());
+        for (orig, deser) in errors.iter().zip(deserialized.iter()) {
+            assert_eq!(orig.kind, deser.kind);
+            assert_eq!(orig.message, deser.message);
+        }
+    }
+
+    #[test]
+    fn source_is_preserved() {
+        // Arrange
+        let json_err = serde_json::from_str::<()>("invalid").expect_err("should fail");
+
+        // Act
+        let error = GazelleError::deserialization(json_err);
+
+        // Assert
+        assert!(error.source().is_some());
+        assert_eq!(error.kind, GazelleErrorKind::Deserialization);
+    }
+
+    #[test]
+    fn new_has_no_source() {
+        // Act
+        let error = GazelleError::new(GazelleErrorKind::NotFound);
+
+        // Assert
+        assert!(error.source().is_none());
+        assert!(error.message.is_none());
+        assert_eq!(error.kind, GazelleErrorKind::NotFound);
+    }
+
+    #[test]
+    fn with_message_has_no_source() {
+        // Act
+        let error = GazelleError::with_message(GazelleErrorKind::NotFound, "test message");
+
+        // Assert
+        assert!(error.source().is_none());
+        assert_eq!(error.message, Some("test message".to_owned()));
+        assert_eq!(error.kind, GazelleErrorKind::NotFound);
     }
 
     // match_status_error tests
@@ -249,7 +308,9 @@ mod tests {
             GazelleError::match_status_error(StatusCode::BAD_REQUEST, Some("test".to_owned()));
 
         // Assert
-        assert!(matches!(result, Some(BadRequest { message }) if message == "test"));
+        let error = result.expect("should match");
+        assert_eq!(error.kind, GazelleErrorKind::BadRequest);
+        assert_eq!(error.message, Some("test".to_owned()));
     }
 
     #[test]
@@ -258,7 +319,9 @@ mod tests {
         let result = GazelleError::match_status_error(StatusCode::UNAUTHORIZED, None);
 
         // Assert
-        assert!(matches!(result, Some(Unauthorized { message }) if message.is_empty()));
+        let error = result.expect("should match");
+        assert_eq!(error.kind, GazelleErrorKind::Unauthorized);
+        assert!(error.message.is_none());
     }
 
     #[test]
@@ -268,7 +331,9 @@ mod tests {
             GazelleError::match_status_error(StatusCode::NOT_FOUND, Some("not found".to_owned()));
 
         // Assert
-        assert!(matches!(result, Some(NotFound { message }) if message == "not found"));
+        let error = result.expect("should match");
+        assert_eq!(error.kind, GazelleErrorKind::NotFound);
+        assert_eq!(error.message, Some("not found".to_owned()));
     }
 
     #[test]
@@ -277,7 +342,8 @@ mod tests {
         let result = GazelleError::match_status_error(StatusCode::TOO_MANY_REQUESTS, None);
 
         // Assert
-        assert!(matches!(result, Some(TooManyRequests { .. })));
+        let error = result.expect("should match");
+        assert_eq!(error.kind, GazelleErrorKind::TooManyRequests);
     }
 
     #[test]
@@ -306,7 +372,8 @@ mod tests {
         let result = GazelleError::match_response_error("bad id parameter");
 
         // Assert
-        assert!(matches!(result, Some(BadRequest { .. })));
+        let error = result.expect("should match");
+        assert_eq!(error.kind, GazelleErrorKind::BadRequest);
     }
 
     #[test]
@@ -315,7 +382,8 @@ mod tests {
         let result = GazelleError::match_response_error("bad parameters");
 
         // Assert
-        assert!(matches!(result, Some(BadRequest { .. })));
+        let error = result.expect("should match");
+        assert_eq!(error.kind, GazelleErrorKind::BadRequest);
     }
 
     #[test]
@@ -324,7 +392,8 @@ mod tests {
         let result = GazelleError::match_response_error("no such user");
 
         // Assert
-        assert!(matches!(result, Some(BadRequest { .. })));
+        let error = result.expect("should match");
+        assert_eq!(error.kind, GazelleErrorKind::BadRequest);
     }
 
     #[test]
@@ -334,7 +403,8 @@ mod tests {
             GazelleError::match_response_error("This page is limited to API key usage only.");
 
         // Assert
-        assert!(matches!(result, Some(Unauthorized { .. })));
+        let error = result.expect("should match");
+        assert_eq!(error.kind, GazelleErrorKind::Unauthorized);
     }
 
     #[test]
@@ -343,7 +413,8 @@ mod tests {
         let result = GazelleError::match_response_error("This page requires an api token");
 
         // Assert
-        assert!(matches!(result, Some(Unauthorized { .. })));
+        let error = result.expect("should match");
+        assert_eq!(error.kind, GazelleErrorKind::Unauthorized);
     }
 
     #[test]
@@ -352,7 +423,8 @@ mod tests {
         let result = GazelleError::match_response_error("endpoint not found");
 
         // Assert
-        assert!(matches!(result, Some(NotFound { .. })));
+        let error = result.expect("should match");
+        assert_eq!(error.kind, GazelleErrorKind::NotFound);
     }
 
     #[test]
@@ -361,7 +433,8 @@ mod tests {
         let result = GazelleError::match_response_error("failure");
 
         // Assert
-        assert!(matches!(result, Some(NotFound { .. })));
+        let error = result.expect("should match");
+        assert_eq!(error.kind, GazelleErrorKind::NotFound);
     }
 
     #[test]
@@ -370,7 +443,8 @@ mod tests {
         let result = GazelleError::match_response_error("could not find torrent");
 
         // Assert
-        assert!(matches!(result, Some(NotFound { .. })));
+        let error = result.expect("should match");
+        assert_eq!(error.kind, GazelleErrorKind::NotFound);
     }
 
     #[test]
@@ -379,7 +453,8 @@ mod tests {
         let result = GazelleError::match_response_error("Rate limit exceeded");
 
         // Assert
-        assert!(matches!(result, Some(TooManyRequests { .. })));
+        let error = result.expect("should match");
+        assert_eq!(error.kind, GazelleErrorKind::TooManyRequests);
     }
 
     #[test]

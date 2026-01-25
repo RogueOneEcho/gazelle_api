@@ -121,7 +121,7 @@ impl GazelleClientTrait for GazelleClient {
 #[allow(clippy::unwrap_used)]
 mod tests {
     use super::*;
-    use crate::GazelleError::*;
+    use crate::GazelleErrorKind;
 
     // deserialize tests
 
@@ -182,7 +182,7 @@ mod tests {
 
         // Assert
         assert!(result.is_err());
-        assert!(matches!(result.unwrap_err(), Request { .. }));
+        assert_eq!(result.unwrap_err().kind, GazelleErrorKind::Deserialization);
     }
 
     // get_result tests
@@ -218,7 +218,7 @@ mod tests {
 
         // Assert
         assert!(result.is_err());
-        assert!(matches!(result.unwrap_err(), BadRequest { .. }));
+        assert_eq!(result.unwrap_err().kind, GazelleErrorKind::BadRequest);
     }
 
     #[test]
@@ -235,7 +235,7 @@ mod tests {
 
         // Assert
         assert!(result.is_err());
-        assert!(matches!(result.unwrap_err(), BadRequest { .. }));
+        assert_eq!(result.unwrap_err().kind, GazelleErrorKind::BadRequest);
     }
 
     #[test]
@@ -252,7 +252,7 @@ mod tests {
 
         // Assert
         assert!(result.is_err());
-        assert!(matches!(result.unwrap_err(), Other { status: 200, .. }));
+        assert_eq!(result.unwrap_err().kind, GazelleErrorKind::Other(200));
     }
 
     #[test]
@@ -269,7 +269,7 @@ mod tests {
 
         // Assert - Response error matching takes priority
         assert!(result.is_err());
-        assert!(matches!(result.unwrap_err(), TooManyRequests { .. }));
+        assert_eq!(result.unwrap_err().kind, GazelleErrorKind::TooManyRequests);
     }
 
     #[test]
@@ -286,12 +286,8 @@ mod tests {
 
         // Assert - Falls through to other error
         assert!(result.is_err());
-        assert!(matches!(
-            result.unwrap_err(),
-            Other {
-                status: 200,
-                message: Some(msg)
-            } if msg == "some new error type"
-        ));
+        let err = result.unwrap_err();
+        assert_eq!(err.kind, GazelleErrorKind::Other(200));
+        assert_eq!(err.message, Some("some new error type".to_owned()));
     }
 }

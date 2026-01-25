@@ -29,7 +29,7 @@ impl GazelleClient {
 #[cfg(test)]
 mod tests {
     use crate::tests::{init_logger, load_config};
-    use crate::{GazelleClient, GazelleError, UploadForm};
+    use crate::{GazelleClient, GazelleError, GazelleErrorKind, UploadForm};
     use serial_test::serial;
     use std::path::PathBuf;
 
@@ -65,15 +65,9 @@ mod tests {
 
             // Assert
             if name == "ops" {
-                assert!(matches!(
-                    error,
-                    GazelleError::Other {
-                        status: 200,
-                        message: _
-                    }
-                ));
+                assert_eq!(error.kind, GazelleErrorKind::Other(200));
             } else {
-                assert!(matches!(error, GazelleError::BadRequest { message: _ }));
+                assert_eq!(error.kind, GazelleErrorKind::BadRequest);
             }
         }
         Ok(())
