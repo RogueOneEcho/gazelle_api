@@ -57,7 +57,7 @@ impl GazelleError {
     }
 
     pub(crate) fn deserialization(error: serde_json::Error) -> Self {
-        Request {
+        Deserialization {
             error: error.to_string(),
         }
     }
