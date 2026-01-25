@@ -28,3 +28,20 @@ impl UploadResponse {
             .unwrap_or_else(|| self.groupId.unwrap_or_default())
     }
 }
+
+#[cfg(feature = "mock")]
+impl UploadResponse {
+    /// Create a mock `UploadResponse` for testing
+    #[must_use]
+    pub fn mock() -> Self {
+        Self {
+            private: true,
+            source: true,
+            request_id: None,
+            torrentid: Some(456),
+            groupid: Some(123),
+            torrentId: None,
+            groupId: None,
+        }
+    }
+}

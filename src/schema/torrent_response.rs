@@ -11,3 +11,15 @@ pub struct TorrentResponse {
     /// Edition information
     pub torrent: Torrent,
 }
+
+#[cfg(feature = "mock")]
+impl TorrentResponse {
+    /// Create a mock `TorrentResponse` for testing
+    #[must_use]
+    pub fn mock() -> Self {
+        Self {
+            group: Group::mock(),
+            torrent: Torrent::mock(),
+        }
+    }
+}

@@ -1,3 +1,4 @@
+use async_trait::async_trait;
 use colored::Colorize;
 use log::*;
 use reqwest::{Client, Response, StatusCode};
@@ -94,4 +95,27 @@ pub(crate) fn get_result<T: DeserializeOwned>(
     response
         .response
         .ok_or_else(|| GazelleError::other(status_code, response.error))
+}
+
+#[async_trait]
+impl GazelleClientTrait for GazelleClient {
+    async fn get_torrent(&mut self, id: u32) -> Result<TorrentResponse, GazelleError> {
+        GazelleClient::get_torrent(self, id).await
+    }
+
+    async fn get_torrent_group(&mut self, id: u32) -> Result<GroupResponse, GazelleError> {
+        GazelleClient::get_torrent_group(self, id).await
+    }
+
+    async fn get_user(&mut self, id: u32) -> Result<User, GazelleError> {
+        GazelleClient::get_user(self, id).await
+    }
+
+    async fn download_torrent(&mut self, id: u32) -> Result<Vec<u8>, GazelleError> {
+        GazelleClient::download_torrent(self, id).await
+    }
+
+    async fn upload_torrent(&mut self, upload: UploadForm) -> Result<UploadResponse, GazelleError> {
+        GazelleClient::upload_torrent(self, upload).await
+    }
 }

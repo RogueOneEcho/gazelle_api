@@ -11,3 +11,15 @@ pub struct GroupResponse {
     /// Editions
     pub torrents: Vec<Torrent>,
 }
+
+#[cfg(feature = "mock")]
+impl GroupResponse {
+    /// Create a mock `GroupResponse` for testing
+    #[must_use]
+    pub fn mock() -> Self {
+        Self {
+            group: Group::mock(),
+            torrents: vec![Torrent::mock()],
+        }
+    }
+}

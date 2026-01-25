@@ -16,6 +16,7 @@ include = [
 ]
 
 [dependencies]
+async-trait = "0.1"
 colored = "3.1.1"
 log = { version = "0.4.29", features = ["std"] }
 regex = "1.12.2"
@@ -28,6 +29,10 @@ tokio = { version = "1.49.0", features = ["full"] }
 [dev-dependencies]
 rogue_config = "0.2.0"
 rogue_logging = "0.3.0"
+
+[features]
+default = []
+mock = []
 
 [lints.clippy]
 pedantic = { level = "warn", priority = -1 }

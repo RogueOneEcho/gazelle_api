@@ -130,3 +130,45 @@ impl Torrent {
             .collect()
     }
 }
+
+#[cfg(feature = "mock")]
+impl Torrent {
+    /// Create a mock Torrent for testing
+    #[must_use]
+    pub fn mock() -> Self {
+        Self {
+            id: 456,
+            media: "CD".to_owned(),
+            format: "FLAC".to_owned(),
+            encoding: "Lossless".to_owned(),
+            remastered: true,
+            remaster_year: Some(2020),
+            remaster_title: String::new(),
+            remaster_record_label: "Test Label".to_owned(),
+            remaster_catalogue_number: "TEST-001".to_owned(),
+            scene: false,
+            has_log: true,
+            has_cue: true,
+            log_score: 100,
+            file_count: 10,
+            size: 500_000_000,
+            seeders: 50,
+            leechers: 2,
+            snatched: 100,
+            has_snatched: None,
+            trumpable: None,
+            lossy_web_approved: None,
+            lossy_master_approved: None,
+            free_torrent: None,
+            is_neutralleech: None,
+            is_freeload: None,
+            reported: false,
+            time: "2020-01-01 00:00:00".to_owned(),
+            description: "Test description".to_owned(),
+            file_list: "test.flac{{{100000}}}|||".to_owned(),
+            file_path: "Test Album (2020) [FLAC]".to_owned(),
+            user_id: 1,
+            username: "uploader".to_owned(),
+        }
+    }
+}

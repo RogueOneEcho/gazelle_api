@@ -77,3 +77,29 @@ pub struct Group {
     /// Artists, composer etc
     pub music_info: Option<Credits>,
 }
+
+#[cfg(feature = "mock")]
+impl Group {
+    /// Create a mock Group for testing
+    #[must_use]
+    pub fn mock() -> Self {
+        Self {
+            id: 123,
+            name: "Test Album".to_owned(),
+            year: 2020,
+            record_label: "Test Label".to_owned(),
+            catalogue_number: "TEST-001".to_owned(),
+            category_id: 0,
+            category_name: "Music".to_owned(),
+            time: "2020-01-01 00:00:00".to_owned(),
+            vanity_house: false,
+            is_bookmarked: false,
+            music_info: None,
+            tags: vec!["rock".to_owned()],
+            wiki_body: "Test wiki body".to_owned(),
+            bb_body: None,
+            wiki_image: "https://example.com/image.jpg".to_owned(),
+            release_type: 1,
+        }
+    }
+}
