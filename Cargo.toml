@@ -29,6 +29,7 @@ tokio = { version = "1.49.0", features = ["full"] }
 [dev-dependencies]
 rogue_config = "0.2.0"
 rogue_logging = "0.3.0"
+serial_test = "3.2"
 
 [features]
 default = []

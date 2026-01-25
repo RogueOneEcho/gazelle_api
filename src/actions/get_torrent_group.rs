@@ -15,46 +15,46 @@ impl GazelleClient {
 
 #[cfg(test)]
 mod tests {
-    use crate::tests::{init_logger, load_config};
-    use crate::{GazelleClient, GazelleError};
+    use crate::GazelleError;
+    use crate::tests::for_each_indexer;
+    use serial_test::serial;
 
     #[tokio::test]
+    #[serial]
+    #[ignore = "integration test requiring API credentials"]
     async fn get_torrent_group() -> Result<(), GazelleError> {
-        // Arrange
-        init_logger();
-        for (name, config) in load_config() {
-            println!("Indexer: {name}");
-            let mut client = GazelleClient::from(config.client);
-
-            // Act
-            let response = client.get_torrent_group(config.examples.group).await?;
-
-            // Assert
-            assert_eq!(response.group.id, config.examples.group);
-        }
-        Ok(())
+        for_each_indexer(|name, client, examples| async move {
+            let response = client
+                .lock()
+                .await
+                .get_torrent_group(examples.group)
+                .await?;
+            assert_eq!(
+                response.group.id, examples.group,
+                "[{name}] group id mismatch"
+            );
+            Ok(())
+        })
+        .await
     }
 
     #[tokio::test]
-    #[allow(clippy::panic)]
+    #[serial]
+    #[ignore = "integration test requiring API credentials"]
     async fn get_torrent_group_invalid() -> Result<(), GazelleError> {
-        // Arrange
-        init_logger();
-        let id = u32::MAX;
-        for (name, config) in load_config() {
-            println!("Indexer: {name}");
-            let mut client = GazelleClient::from(config.client.clone());
-
-            // Act
+        for_each_indexer(|name, client, _examples| async move {
             let error = client
-                .get_torrent_group(id)
+                .lock()
+                .await
+                .get_torrent_group(u32::MAX)
                 .await
                 .expect_err("should be an error");
-            println!("{error:?}");
-
-            // Assert
-            assert!(matches!(error, GazelleError::BadRequest { message: _ }));
-        }
-        Ok(())
+            assert!(
+                matches!(error, GazelleError::BadRequest { .. }),
+                "[{name}] expected BadRequest, got {error:?}"
+            );
+            Ok(())
+        })
+        .await
     }
 }

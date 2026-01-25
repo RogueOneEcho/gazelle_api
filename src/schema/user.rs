@@ -204,3 +204,106 @@ impl Community {
         }
     }
 }
+
+#[cfg(test)]
+#[allow(clippy::unwrap_used, clippy::float_cmp)]
+mod tests {
+    use super::*;
+
+    const OPS_RESPONSE: &str = include_str!("../tests/fixtures/user_response_ops.json");
+    const RED_RESPONSE: &str = include_str!("../tests/fixtures/user_response_red.json");
+
+    #[test]
+    fn deserialize_ops_user_response() {
+        // Arrange & Act
+        let user: User = serde_json::from_str(OPS_RESPONSE).unwrap();
+
+        // Assert - OPS lacks bb_profile_text
+        assert!(user.bb_profile_text.is_none());
+
+        // Assert - Core fields
+        assert_eq!(user.username, "TestUser");
+        assert!(!user.is_friend);
+        assert!(user.profile_text.is_empty());
+    }
+
+    #[test]
+    fn deserialize_red_user_response() {
+        // Arrange & Act
+        let user: User = serde_json::from_str(RED_RESPONSE).unwrap();
+
+        // Assert - RED has bb_profile_text
+        assert!(user.bb_profile_text.is_some());
+        assert!(user.bb_profile_text.as_ref().unwrap().contains("Developer"));
+
+        // Assert - Core fields
+        assert_eq!(user.username, "TestUser");
+        assert!(!user.is_friend);
+        assert!(user.profile_text.contains("Developer"));
+    }
+
+    #[test]
+    fn deserialize_user_stats() {
+        // Arrange & Act
+        let user: User = serde_json::from_str(OPS_RESPONSE).unwrap();
+
+        // Assert - Stats fields
+        assert_eq!(user.stats.joined_date, "2023-04-13 03:49:47");
+        assert_eq!(user.stats.uploaded, 1_207_152_087_233);
+        assert_eq!(user.stats.downloaded, 373_638_950_466);
+        assert!(user.stats.ratio > 3.0);
+        assert!(user.stats.required_ratio < 1.0);
+    }
+
+    #[test]
+    fn deserialize_user_ranks() {
+        // Arrange & Act
+        let user: User = serde_json::from_str(OPS_RESPONSE).unwrap();
+
+        // Assert - Ranks fields
+        assert_eq!(user.ranks.uploaded, 95.0);
+        assert_eq!(user.ranks.downloaded, 93.0);
+        assert_eq!(user.ranks.uploads, 94.0);
+        assert_eq!(user.ranks.overall, 36.0);
+    }
+
+    #[test]
+    fn deserialize_user_personal() {
+        // Arrange & Act
+        let user: User = serde_json::from_str(OPS_RESPONSE).unwrap();
+
+        // Assert - Personal fields
+        assert_eq!(user.personal.class, "Torrent Master");
+        assert_eq!(user.personal.paranoia, 34);
+        assert_eq!(user.personal.paranoia_text, "Very high");
+        assert!(!user.personal.donor);
+        assert!(!user.personal.warned);
+        assert!(user.personal.enabled);
+    }
+
+    #[test]
+    fn deserialize_user_community() {
+        // Arrange & Act
+        let user: User = serde_json::from_str(OPS_RESPONSE).unwrap();
+
+        // Assert - Community fields
+        assert_eq!(user.community.posts, 9);
+        assert_eq!(user.community.perfect_flacs, 81);
+        assert_eq!(user.community.uploaded, 578);
+        assert_eq!(user.community.groups, 287);
+        assert_eq!(user.community.seeding, 1127);
+        assert_eq!(user.community.snatched, 982);
+    }
+
+    #[test]
+    fn deserialize_red_user_community() {
+        // Arrange & Act
+        let user: User = serde_json::from_str(RED_RESPONSE).unwrap();
+
+        // Assert - RED community has different values
+        assert_eq!(user.community.posts, 63);
+        assert_eq!(user.community.perfect_flacs, 246);
+        assert_eq!(user.community.seeding, 2660);
+        assert_eq!(user.community.snatched, 4789);
+    }
+}

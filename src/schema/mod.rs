@@ -14,9 +14,6 @@ mod credit;
 mod credits;
 mod group;
 mod group_response;
-#[cfg(test)]
-#[allow(clippy::unwrap_used)]
-mod tests;
 mod torrent;
 mod torrent_response;
 mod upload_form;

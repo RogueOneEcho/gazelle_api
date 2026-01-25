@@ -33,9 +33,11 @@ impl GazelleClient {
 mod tests {
     use crate::tests::{init_logger, load_config};
     use crate::{GazelleClient, GazelleError, UploadForm};
+    use serial_test::serial;
     use std::path::PathBuf;
 
     #[tokio::test]
+    #[serial]
     #[ignore = "require upload"]
     async fn upload_torrent_invalid() -> Result<(), GazelleError> {
         // Arrange

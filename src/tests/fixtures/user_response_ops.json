@@ -1,0 +1,60 @@
+{
+  "username": "TestUser",
+  "avatar": "https://example.com/avatar.jpg",
+  "isFriend": false,
+  "profileText": "",
+  "stats": {
+    "joinedDate": "2023-04-13 03:49:47",
+    "lastAccess": "2024-01-21 20:03:50",
+    "uploaded": 1207152087233,
+    "downloaded": 373638950466,
+    "requiredRatio": 0.6,
+    "ratio": 3.23079,
+    "bonusPoints": 840671
+  },
+  "ranks": {
+    "uploaded": 95,
+    "downloaded": 93,
+    "uploads": 94,
+    "requests": 0,
+    "bounty": 0,
+    "artists": 0,
+    "collage-add": 0,
+    "collage-create": 0,
+    "posts": 71,
+    "votes": 0,
+    "bonus": 73,
+    "overall": 36
+  },
+  "personal": {
+    "class": "Torrent Master",
+    "paranoia": 34,
+    "paranoiaText": "Very high",
+    "donor": false,
+    "warned": false,
+    "enabled": true,
+    "passkey": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+  },
+  "community": {
+    "posts": 9,
+    "torrentComments": 0,
+    "collagesContrib": 0,
+    "requestsFilled": 0,
+    "bountyEarned": 0,
+    "requestsVoted": 0,
+    "bountySpent": 0,
+    "releaseVotes": 0,
+    "uploaded": 578,
+    "artistsAdded": 0,
+    "artistComments": 0,
+    "collageComments": 0,
+    "requestComments": 0,
+    "collagesStarted": 0,
+    "perfectFlacs": 81,
+    "groups": 287,
+    "seeding": 1127,
+    "leeching": 0,
+    "snatched": 982,
+    "invited": 0
+  }
+}

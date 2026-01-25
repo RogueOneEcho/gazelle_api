@@ -10,6 +10,10 @@ Used by:
 - [caesura 𝄓](https://github.com/RogueOneEcho/caesura)
 - [coda 𝄌](https://github.com/RogueOneEcho/coda)
 
+## Testing
+
+See [TESTING.md](TESTING.md) for details on the test suite.
+
 ## Releases and Changes
 
 Releases and a full changelog are available via [GitHub Releases](https://github.com/RogueOneEcho/gazelle_api/releases).

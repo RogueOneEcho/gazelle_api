@@ -1,0 +1,79 @@
+{
+  "group": {
+    "wikiBody": "<span class=\"size5\"><strong>Test Artist &ndash; Test Album</strong></span><br />\r\n<br />\r\n<strong>Label/Cat#:</strong> Test Records<br />\r\n<strong>Year:</strong> 2015<br />",
+    "bbBody": "[size=5][b]Test Artist &ndash; Test Album[/b][/size]\r\n\r\n[b]Label/Cat#:[/b] Test Records\r\n[b]Year:[/b] 2015",
+    "wikiImage": "https://example.com/cover.jpg",
+    "id": 8126,
+    "name": "Test Album",
+    "year": 2015,
+    "recordLabel": "Test Records",
+    "catalogueNumber": "",
+    "releaseType": 9,
+    "categoryId": 1,
+    "categoryName": "Music",
+    "time": "2024-01-13 15:58:49",
+    "collages": [
+      {
+        "id": 102,
+        "name": "Test Collage",
+        "numTorrents": 785
+      }
+    ],
+    "personalCollages": null,
+    "vanityHouse": false,
+    "isBookmarked": false,
+    "musicInfo": {
+      "composers": [],
+      "dj": [],
+      "artists": [
+        {
+          "id": 2387,
+          "name": "Test Artist"
+        }
+      ],
+      "with": [],
+      "conductor": [],
+      "remixedBy": [],
+      "producer": []
+    },
+    "tags": ["pop"]
+  },
+  "torrent": {
+    "id": 12483,
+    "infoHash": "2282B5513CBEA24A83D557D1EBFBC3611A0951B7",
+    "media": "WEB",
+    "format": "FLAC",
+    "encoding": "Lossless",
+    "remastered": true,
+    "remasterYear": 2015,
+    "remasterTitle": "",
+    "remasterRecordLabel": "Test Records",
+    "remasterCatalogueNumber": "",
+    "scene": false,
+    "hasLog": false,
+    "hasCue": false,
+    "logScore": 0,
+    "ripLogIds": [],
+    "fileCount": 2,
+    "size": 30487522,
+    "canUseToken": true,
+    "seeders": 15,
+    "leechers": 0,
+    "snatched": 55,
+    "has_snatched": false,
+    "trumpable": false,
+    "trumpable_reasons": [],
+    "lossyWebApproved": false,
+    "lossyMasterApproved": false,
+    "freeTorrent": false,
+    "isNeutralleech": false,
+    "isFreeload": false,
+    "reported": false,
+    "time": "2016-11-26 10:13:06",
+    "description": "",
+    "fileList": "01 - Track.flac{{{29144302}}}|||Front.jpg{{{1343220}}}",
+    "filePath": "Test Artist - Test Album (2015) - FLAC WEB",
+    "userId": 2001,
+    "username": "user_a"
+  }
+}

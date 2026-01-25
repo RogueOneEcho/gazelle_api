@@ -1,0 +1,60 @@
+{
+  "username": "TestUser",
+  "avatar": "https://example.com/avatar.jpg",
+  "isFriend": false,
+  "profileText": "<span class=\"size5\">Developer</span><br />\r\n<br />\r\nProfile content in HTML format.",
+  "bbProfileText": "===Developer===\r\n\r\nProfile content in BB code format.",
+  "profileAlbum": [],
+  "stats": {
+    "joinedDate": "2022-10-16 17:39:05",
+    "lastAccess": "2024-01-21 20:01:42",
+    "uploaded": 1443593771270,
+    "downloaded": 878944102475,
+    "ratio": 1.64,
+    "buffer": 1341969391786,
+    "requiredRatio": 0.6
+  },
+  "ranks": {
+    "uploaded": 92,
+    "downloaded": 95,
+    "uploads": 99,
+    "requests": 0,
+    "bounty": 0,
+    "posts": 89,
+    "artists": 1,
+    "overall": 89
+  },
+  "personal": {
+    "class": "Power TM",
+    "paranoia": 32,
+    "paranoiaText": "Very high",
+    "donor": false,
+    "warned": false,
+    "enabled": true,
+    "passkey": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+    "giftTokens": 99,
+    "meritTokens": 4
+  },
+  "community": {
+    "posts": 63,
+    "groupVotes": 0,
+    "torrentComments": 1,
+    "artistComments": 0,
+    "collageComments": 0,
+    "requestComments": 0,
+    "collagesStarted": 0,
+    "collagesContrib": 0,
+    "requestsFilled": 0,
+    "bountyEarned": null,
+    "requestsVoted": 0,
+    "bountySpent": null,
+    "perfectFlacs": 246,
+    "uploaded": 1298,
+    "groups": 786,
+    "seeding": 2660,
+    "leeching": 0,
+    "snatched": 4789,
+    "invited": 0,
+    "artistsAdded": 1
+  }
+}

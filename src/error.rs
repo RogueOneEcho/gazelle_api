@@ -198,6 +198,7 @@ fn append(message: &str) -> String {
 mod tests {
     use crate::GazelleError;
     use crate::GazelleError::*;
+    use reqwest::StatusCode;
 
     #[test]
     pub fn yaml_serialization() -> Result<(), serde_yaml::Error> {
@@ -237,5 +238,165 @@ mod tests {
         assert_eq!(yaml, expected);
         assert_eq!(deserialized, example);
         Ok(())
+    }
+
+    // match_status_error tests
+
+    #[test]
+    fn match_status_error_bad_request() {
+        // Arrange & Act
+        let result =
+            GazelleError::match_status_error(StatusCode::BAD_REQUEST, Some("test".to_owned()));
+
+        // Assert
+        assert!(matches!(result, Some(BadRequest { message }) if message == "test"));
+    }
+
+    #[test]
+    fn match_status_error_unauthorized() {
+        // Arrange & Act
+        let result = GazelleError::match_status_error(StatusCode::UNAUTHORIZED, None);
+
+        // Assert
+        assert!(matches!(result, Some(Unauthorized { message }) if message.is_empty()));
+    }
+
+    #[test]
+    fn match_status_error_not_found() {
+        // Arrange & Act
+        let result =
+            GazelleError::match_status_error(StatusCode::NOT_FOUND, Some("not found".to_owned()));
+
+        // Assert
+        assert!(matches!(result, Some(NotFound { message }) if message == "not found"));
+    }
+
+    #[test]
+    fn match_status_error_too_many_requests() {
+        // Arrange & Act
+        let result = GazelleError::match_status_error(StatusCode::TOO_MANY_REQUESTS, None);
+
+        // Assert
+        assert!(matches!(result, Some(TooManyRequests { .. })));
+    }
+
+    #[test]
+    fn match_status_error_success_returns_none() {
+        // Arrange & Act
+        let result = GazelleError::match_status_error(StatusCode::OK, None);
+
+        // Assert
+        assert!(result.is_none());
+    }
+
+    #[test]
+    fn match_status_error_server_error_returns_none() {
+        // Arrange & Act
+        let result = GazelleError::match_status_error(StatusCode::INTERNAL_SERVER_ERROR, None);
+
+        // Assert
+        assert!(result.is_none());
+    }
+
+    // match_response_error tests
+
+    #[test]
+    fn match_response_error_bad_id() {
+        // Arrange & Act
+        let result = GazelleError::match_response_error("bad id parameter");
+
+        // Assert
+        assert!(matches!(result, Some(BadRequest { .. })));
+    }
+
+    #[test]
+    fn match_response_error_bad_parameters() {
+        // Arrange & Act
+        let result = GazelleError::match_response_error("bad parameters");
+
+        // Assert
+        assert!(matches!(result, Some(BadRequest { .. })));
+    }
+
+    #[test]
+    fn match_response_error_no_such_user() {
+        // Arrange & Act
+        let result = GazelleError::match_response_error("no such user");
+
+        // Assert
+        assert!(matches!(result, Some(BadRequest { .. })));
+    }
+
+    #[test]
+    fn match_response_error_api_key_only() {
+        // Arrange & Act
+        let result =
+            GazelleError::match_response_error("This page is limited to API key usage only.");
+
+        // Assert
+        assert!(matches!(result, Some(Unauthorized { .. })));
+    }
+
+    #[test]
+    fn match_response_error_api_token_required() {
+        // Arrange & Act
+        let result = GazelleError::match_response_error("This page requires an api token");
+
+        // Assert
+        assert!(matches!(result, Some(Unauthorized { .. })));
+    }
+
+    #[test]
+    fn match_response_error_endpoint_not_found() {
+        // Arrange & Act
+        let result = GazelleError::match_response_error("endpoint not found");
+
+        // Assert
+        assert!(matches!(result, Some(NotFound { .. })));
+    }
+
+    #[test]
+    fn match_response_error_failure() {
+        // Arrange & Act
+        let result = GazelleError::match_response_error("failure");
+
+        // Assert
+        assert!(matches!(result, Some(NotFound { .. })));
+    }
+
+    #[test]
+    fn match_response_error_could_not_find_torrent() {
+        // Arrange & Act
+        let result = GazelleError::match_response_error("could not find torrent");
+
+        // Assert
+        assert!(matches!(result, Some(NotFound { .. })));
+    }
+
+    #[test]
+    fn match_response_error_rate_limit() {
+        // Arrange & Act
+        let result = GazelleError::match_response_error("Rate limit exceeded");
+
+        // Assert
+        assert!(matches!(result, Some(TooManyRequests { .. })));
+    }
+
+    #[test]
+    fn match_response_error_unknown_returns_none() {
+        // Arrange & Act
+        let result = GazelleError::match_response_error("some unknown error message");
+
+        // Assert
+        assert!(result.is_none());
+    }
+
+    #[test]
+    fn match_response_error_empty_returns_none() {
+        // Arrange & Act
+        let result = GazelleError::match_response_error("");
+
+        // Assert
+        assert!(result.is_none());
     }
 }

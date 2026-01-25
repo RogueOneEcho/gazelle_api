@@ -46,46 +46,46 @@ fn get_content_type(response: &Response) -> Option<String> {
 
 #[cfg(test)]
 mod tests {
-    use crate::tests::{init_logger, load_config};
-    use crate::{GazelleClient, GazelleError};
+    use crate::GazelleError;
+    use crate::tests::for_each_indexer;
+    use serial_test::serial;
 
     #[tokio::test]
+    #[serial]
+    #[ignore = "integration test requiring API credentials"]
     async fn download_torrent() -> Result<(), GazelleError> {
-        // Arrange
-        init_logger();
-        for (name, config) in load_config() {
-            println!("Indexer: {name}");
-            let mut client = GazelleClient::from(config.client);
-
-            // Act
-            let response = client.download_torrent(config.examples.torrent).await?;
-
-            // Assert
-            assert!(!response.is_empty());
-        }
-        Ok(())
+        for_each_indexer(|name, client, examples| async move {
+            let response = client
+                .lock()
+                .await
+                .download_torrent(examples.torrent)
+                .await?;
+            assert!(
+                !response.is_empty(),
+                "[{name}] torrent file should not be empty"
+            );
+            Ok(())
+        })
+        .await
     }
 
     #[tokio::test]
-    #[allow(clippy::panic)]
+    #[serial]
+    #[ignore = "integration test requiring API credentials"]
     async fn download_torrent_invalid() -> Result<(), GazelleError> {
-        // Arrange
-        init_logger();
-        let id = u32::MAX;
-        for (name, config) in load_config() {
-            println!("Indexer: {name}");
-            let mut client = GazelleClient::from(config.client.clone());
-
-            // Act
+        for_each_indexer(|name, client, _examples| async move {
             let error = client
-                .download_torrent(id)
+                .lock()
+                .await
+                .download_torrent(u32::MAX)
                 .await
                 .expect_err("should be an error");
-            println!("{error:?}");
-
-            // Assert
-            assert!(matches!(error, GazelleError::NotFound { message: _ }));
-        }
-        Ok(())
+            assert!(
+                matches!(error, GazelleError::NotFound { .. }),
+                "[{name}] expected NotFound, got {error:?}"
+            );
+            Ok(())
+        })
+        .await
     }
 }

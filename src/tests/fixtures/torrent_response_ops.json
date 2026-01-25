@@ -1,0 +1,73 @@
+{
+  "group": {
+    "wikiBody": "<p>Test album description in HTML format.</p>",
+    "wikiBBcode": "[b]Test album description in BB code format.[/b]",
+    "wikiImage": "https://example.com/cover.jpg",
+    "proxyImage": "https://example.com/proxy/cover.jpg",
+    "id": 16352,
+    "name": "Test Album",
+    "year": 2015,
+    "recordLabel": "",
+    "catalogueNumber": "",
+    "releaseType": 9,
+    "releaseTypeName": "Single",
+    "categoryId": 1,
+    "categoryName": "Music",
+    "time": "2024-10-28 21:50:22",
+    "vanityHouse": false,
+    "isBookmarked": false,
+    "tags": ["pop"],
+    "musicInfo": {
+      "artists": [
+        {
+          "id": 1930,
+          "aliasid": 1930,
+          "artist": {"id": 1930},
+          "name": "Test Artist"
+        }
+      ],
+      "with": [],
+      "remixedBy": [],
+      "composers": [],
+      "conductor": [],
+      "dj": [],
+      "producer": [],
+      "arranger": []
+    }
+  },
+  "torrent": {
+    "infoHash": "c8c59284150338a369caedd8172a00bcfa6256fd",
+    "id": 1520678,
+    "media": "WEB",
+    "format": "FLAC",
+    "encoding": "Lossless",
+    "remastered": true,
+    "remasterYear": 2015,
+    "remasterTitle": "",
+    "remasterRecordLabel": "Test Records",
+    "remasterCatalogueNumber": "0191404114155",
+    "scene": false,
+    "hasLog": false,
+    "hasCue": false,
+    "logScore": 0,
+    "logChecksum": false,
+    "logCount": 0,
+    "ripLogIds": [],
+    "fileCount": 2,
+    "size": 30634754,
+    "seeders": 3,
+    "leechers": 0,
+    "snatched": 5,
+    "freeTorrent": "Normal",
+    "freeReason": "Normal",
+    "reported": false,
+    "trumpable": false,
+    "trumpable_reasons": [],
+    "time": "2020-12-26 04:29:28",
+    "description": "",
+    "fileList": "01 - Track.flac{{{29198990}}}|||Cover.jpg{{{1435764}}}",
+    "filePath": "Test Artist - Test Album [2015] WEB FLAC",
+    "userId": 1001,
+    "username": "user_a"
+  }
+}

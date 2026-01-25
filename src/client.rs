@@ -119,3 +119,182 @@ impl GazelleClientTrait for GazelleClient {
         GazelleClient::upload_torrent(self, upload).await
     }
 }
+
+#[cfg(test)]
+#[allow(clippy::unwrap_used)]
+mod tests {
+    use super::*;
+    use crate::GazelleError::*;
+
+    // deserialize tests
+
+    #[test]
+    fn deserialize_success_response() {
+        // Arrange
+        let json = r#"{"status":"success","response":{"value":42}}"#;
+
+        // Act
+        let result: Result<ApiResponse<serde_json::Value>, _> = deserialize(json.to_owned());
+
+        // Assert
+        assert!(result.is_ok());
+        let response = result.unwrap();
+        assert_eq!(response.status, "success");
+        assert!(response.response.is_some());
+        assert!(response.error.is_none());
+    }
+
+    #[test]
+    fn deserialize_failure_response() {
+        // Arrange
+        let json = r#"{"status":"failure","error":"bad id parameter"}"#;
+
+        // Act
+        let result: Result<ApiResponse<serde_json::Value>, _> = deserialize(json.to_owned());
+
+        // Assert
+        assert!(result.is_ok());
+        let response = result.unwrap();
+        assert_eq!(response.status, "failure");
+        assert!(response.response.is_none());
+        assert_eq!(response.error, Some("bad id parameter".to_owned()));
+    }
+
+    #[test]
+    fn deserialize_removes_malformed_ops_response() {
+        // Arrange - OPS returns malformed "response":[] on errors
+        let json = r#"{"status":"failure","response":[],"error":"bad id parameter"}"#;
+
+        // Act
+        let result: Result<ApiResponse<serde_json::Value>, _> = deserialize(json.to_owned());
+
+        // Assert - should parse after removing malformed array
+        assert!(result.is_ok());
+        let response = result.unwrap();
+        assert_eq!(response.status, "failure");
+        assert_eq!(response.error, Some("bad id parameter".to_owned()));
+    }
+
+    #[test]
+    fn deserialize_invalid_json_returns_error() {
+        // Arrange
+        let json = r#"{"invalid json"#;
+
+        // Act
+        let result: Result<ApiResponse<serde_json::Value>, _> = deserialize(json.to_owned());
+
+        // Assert
+        assert!(result.is_err());
+        assert!(matches!(result.unwrap_err(), Request { .. }));
+    }
+
+    // get_result tests
+
+    #[test]
+    fn get_result_success_extracts_response() {
+        // Arrange
+        let response = ApiResponse {
+            status: "success".to_owned(),
+            response: Some(42),
+            error: None,
+        };
+
+        // Act
+        let result = get_result(StatusCode::OK, response);
+
+        // Assert
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), 42);
+    }
+
+    #[test]
+    fn get_result_with_response_error_returns_error() {
+        // Arrange
+        let response: ApiResponse<i32> = ApiResponse {
+            status: "failure".to_owned(),
+            response: None,
+            error: Some("bad id parameter".to_owned()),
+        };
+
+        // Act
+        let result = get_result(StatusCode::OK, response);
+
+        // Assert
+        assert!(result.is_err());
+        assert!(matches!(result.unwrap_err(), BadRequest { .. }));
+    }
+
+    #[test]
+    fn get_result_with_status_error_returns_error() {
+        // Arrange - RED returns proper status codes
+        let response: ApiResponse<i32> = ApiResponse {
+            status: "failure".to_owned(),
+            response: None,
+            error: Some("unknown error".to_owned()),
+        };
+
+        // Act
+        let result = get_result(StatusCode::BAD_REQUEST, response);
+
+        // Assert
+        assert!(result.is_err());
+        assert!(matches!(result.unwrap_err(), BadRequest { .. }));
+    }
+
+    #[test]
+    fn get_result_no_response_returns_other_error() {
+        // Arrange - Success status but no response body
+        let response: ApiResponse<i32> = ApiResponse {
+            status: "success".to_owned(),
+            response: None,
+            error: None,
+        };
+
+        // Act
+        let result = get_result(StatusCode::OK, response);
+
+        // Assert
+        assert!(result.is_err());
+        assert!(matches!(result.unwrap_err(), Other { status: 200, .. }));
+    }
+
+    #[test]
+    fn get_result_response_error_takes_priority_over_status() {
+        // Arrange - Both response error and bad status
+        let response: ApiResponse<i32> = ApiResponse {
+            status: "failure".to_owned(),
+            response: None,
+            error: Some("Rate limit exceeded".to_owned()),
+        };
+
+        // Act - Status is 400 but error message indicates rate limit
+        let result = get_result(StatusCode::BAD_REQUEST, response);
+
+        // Assert - Response error matching takes priority
+        assert!(result.is_err());
+        assert!(matches!(result.unwrap_err(), TooManyRequests { .. }));
+    }
+
+    #[test]
+    fn get_result_unknown_response_error_falls_through() {
+        // Arrange
+        let response: ApiResponse<i32> = ApiResponse {
+            status: "failure".to_owned(),
+            response: None,
+            error: Some("some new error type".to_owned()),
+        };
+
+        // Act
+        let result = get_result(StatusCode::OK, response);
+
+        // Assert - Falls through to other error
+        assert!(result.is_err());
+        assert!(matches!(
+            result.unwrap_err(),
+            Other {
+                status: 200,
+                message: Some(msg)
+            } if msg == "some new error type"
+        ));
+    }
+}
