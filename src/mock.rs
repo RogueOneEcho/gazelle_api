@@ -81,34 +81,31 @@ impl Default for MockGazelleClient {
 
 #[async_trait]
 impl GazelleClientTrait for MockGazelleClient {
-    async fn get_torrent(&mut self, _id: u32) -> Result<TorrentResponse, GazelleError> {
+    async fn get_torrent(&self, _id: u32) -> Result<TorrentResponse, GazelleError> {
         self.get_torrent_returns
             .clone()
             .expect("MockGazelleClient: get_torrent_returns not set")
     }
 
-    async fn get_torrent_group(&mut self, _id: u32) -> Result<GroupResponse, GazelleError> {
+    async fn get_torrent_group(&self, _id: u32) -> Result<GroupResponse, GazelleError> {
         self.get_torrent_group_returns
             .clone()
             .expect("MockGazelleClient: get_torrent_group_returns not set")
     }
 
-    async fn get_user(&mut self, _id: u32) -> Result<User, GazelleError> {
+    async fn get_user(&self, _id: u32) -> Result<User, GazelleError> {
         self.get_user_returns
             .clone()
             .expect("MockGazelleClient: get_user_returns not set")
     }
 
-    async fn download_torrent(&mut self, _id: u32) -> Result<Vec<u8>, GazelleError> {
+    async fn download_torrent(&self, _id: u32) -> Result<Vec<u8>, GazelleError> {
         self.download_torrent_returns
             .clone()
             .expect("MockGazelleClient: download_torrent_returns not set")
     }
 
-    async fn upload_torrent(
-        &mut self,
-        _upload: UploadForm,
-    ) -> Result<UploadResponse, GazelleError> {
+    async fn upload_torrent(&self, _upload: UploadForm) -> Result<UploadResponse, GazelleError> {
         self.upload_torrent_returns
             .clone()
             .expect("MockGazelleClient: upload_torrent_returns not set")
@@ -128,7 +125,7 @@ mod tests {
     async fn mock_get_torrent_returns_configured_value() {
         // Arrange
         let expected = TorrentResponse::mock();
-        let mut mock = MockGazelleClient::new().with_get_torrent(Ok(expected.clone()));
+        let mock = MockGazelleClient::new().with_get_torrent(Ok(expected.clone()));
 
         // Act
         let result = mock.get_torrent(123).await;
@@ -142,7 +139,7 @@ mod tests {
     #[tokio::test]
     async fn mock_get_torrent_returns_error() {
         // Arrange
-        let mut mock = MockGazelleClient::new().with_get_torrent(Err(GazelleError::NotFound {
+        let mock = MockGazelleClient::new().with_get_torrent(Err(GazelleError::NotFound {
             message: "not found".to_owned(),
         }));
 
@@ -157,7 +154,7 @@ mod tests {
     async fn mock_get_user_returns_configured_value() {
         // Arrange
         let expected = User::mock();
-        let mut mock = MockGazelleClient::new().with_get_user(Ok(expected.clone()));
+        let mock = MockGazelleClient::new().with_get_user(Ok(expected.clone()));
 
         // Act
         let result = mock.get_user(1).await;
@@ -172,7 +169,7 @@ mod tests {
     async fn mock_download_torrent_returns_bytes() {
         // Arrange
         let expected_bytes = vec![0xd8, 0x3a, 0x00]; // Some bytes
-        let mut mock = MockGazelleClient::new().with_download_torrent(Ok(expected_bytes.clone()));
+        let mock = MockGazelleClient::new().with_download_torrent(Ok(expected_bytes.clone()));
 
         // Act
         let result = mock.download_torrent(123).await;
@@ -202,7 +199,7 @@ mod tests {
     async fn mock_can_be_called_multiple_times() {
         // Arrange
         let expected = TorrentResponse::mock();
-        let mut mock = MockGazelleClient::new().with_get_torrent(Ok(expected.clone()));
+        let mock = MockGazelleClient::new().with_get_torrent(Ok(expected.clone()));
 
         // Act - Call multiple times
         let result1 = mock.get_torrent(123).await;
@@ -230,7 +227,7 @@ mod tests {
     #[tokio::test]
     async fn mock_default_has_all_ok_responses() {
         // Arrange
-        let mut mock = MockGazelleClient::default();
+        let mock = MockGazelleClient::default();
 
         // Act & Assert - All methods return Ok
         assert!(mock.get_torrent(1).await.is_ok());

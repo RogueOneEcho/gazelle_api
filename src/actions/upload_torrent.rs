@@ -9,10 +9,7 @@ impl GazelleClient {
     ///
     /// # See Also
     ///  - <https://github.com/OPSnet/Gazelle/blob/master/docs/07-API.md#upload>
-    pub async fn upload_torrent(
-        &mut self,
-        upload: UploadForm,
-    ) -> Result<UploadResponse, GazelleError> {
+    pub async fn upload_torrent(&self, upload: UploadForm) -> Result<UploadResponse, GazelleError> {
         let form = upload.to_form().map_err(GazelleError::upload)?;
         self.limiter.execute().await;
         let path = "/ajax.php?action=upload";
@@ -44,7 +41,7 @@ mod tests {
         init_logger();
         for (name, config) in load_config() {
             println!("Indexer: {name}");
-            let mut client = GazelleClient::from(config.client.clone());
+            let client = GazelleClient::from(config.client.clone());
             let form = UploadForm {
                 path: PathBuf::from("/srv/shared/tests/example-1.torrent"),
                 category_id: 0,

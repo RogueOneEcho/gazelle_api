@@ -25,15 +25,12 @@ impl From<GazelleClientOptions> for GazelleClient {
 }
 
 impl GazelleClient {
-    pub(crate) async fn get<T: DeserializeOwned>(
-        &mut self,
-        query: String,
-    ) -> Result<T, GazelleError> {
+    pub(crate) async fn get<T: DeserializeOwned>(&self, query: String) -> Result<T, GazelleError> {
         let result = self.get_internal(query).await;
         handle_result(result).await
     }
 
-    pub(crate) async fn get_internal(&mut self, query: String) -> Result<Response, reqwest::Error> {
+    pub(crate) async fn get_internal(&self, query: String) -> Result<Response, reqwest::Error> {
         self.limiter.execute().await;
         let path = format!("/ajax.php?{query}");
         trace!("{} request GET {path}", "Sending".bold());
@@ -99,23 +96,23 @@ pub(crate) fn get_result<T: DeserializeOwned>(
 
 #[async_trait]
 impl GazelleClientTrait for GazelleClient {
-    async fn get_torrent(&mut self, id: u32) -> Result<TorrentResponse, GazelleError> {
+    async fn get_torrent(&self, id: u32) -> Result<TorrentResponse, GazelleError> {
         GazelleClient::get_torrent(self, id).await
     }
 
-    async fn get_torrent_group(&mut self, id: u32) -> Result<GroupResponse, GazelleError> {
+    async fn get_torrent_group(&self, id: u32) -> Result<GroupResponse, GazelleError> {
         GazelleClient::get_torrent_group(self, id).await
     }
 
-    async fn get_user(&mut self, id: u32) -> Result<User, GazelleError> {
+    async fn get_user(&self, id: u32) -> Result<User, GazelleError> {
         GazelleClient::get_user(self, id).await
     }
 
-    async fn download_torrent(&mut self, id: u32) -> Result<Vec<u8>, GazelleError> {
+    async fn download_torrent(&self, id: u32) -> Result<Vec<u8>, GazelleError> {
         GazelleClient::download_torrent(self, id).await
     }
 
-    async fn upload_torrent(&mut self, upload: UploadForm) -> Result<UploadResponse, GazelleError> {
+    async fn upload_torrent(&self, upload: UploadForm) -> Result<UploadResponse, GazelleError> {
         GazelleClient::upload_torrent(self, upload).await
     }
 }

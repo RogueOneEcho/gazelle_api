@@ -8,7 +8,7 @@ impl GazelleClient {
     ///
     /// # See Also
     /// - <https://github.com/OPSnet/Gazelle/blob/master/docs/07-API.md#torrent-group>
-    pub async fn get_user(&mut self, id: u32) -> Result<User, GazelleError> {
+    pub async fn get_user(&self, id: u32) -> Result<User, GazelleError> {
         self.get(format!("action=user&id={id}")).await
     }
 }
