@@ -12,7 +12,8 @@ pub struct User {
     pub is_friend: bool,
     /// Profile body formatted as HTML
     pub profile_text: String,
-    /// Profile body formatted as BB code
+    /// Profile body formatted as BB code.
+    ///
     /// *RED only*
     pub bb_profile_text: Option<String>,
     /// Stats
@@ -25,6 +26,7 @@ pub struct User {
     pub community: Community,
 }
 
+/// User statistics
 #[derive(Clone, Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Stats {
@@ -42,6 +44,7 @@ pub struct Stats {
     pub required_ratio: f32,
 }
 
+/// User ranking percentiles
 #[derive(Clone, Debug, Deserialize)]
 pub struct Ranks {
     /// Percentile of data uploaded
@@ -62,14 +65,15 @@ pub struct Ranks {
     pub overall: f32,
 }
 
+/// User personal information
 #[derive(Clone, Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Personal {
     /// Class
     pub class: String,
-    /// Parnoia number
+    /// Paranoia number
     pub paranoia: u8,
-    /// Parnoia level
+    /// Paranoia level
     pub paranoia_text: String,
     /// Have they donated?
     pub donor: bool,
@@ -81,6 +85,7 @@ pub struct Personal {
     pub passkey: String,
 }
 
+/// User community activity
 #[derive(Clone, Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Community {

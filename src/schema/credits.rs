@@ -1,21 +1,25 @@
 use crate::Credit;
 use serde::{Deserialize, Serialize};
 
-/// Release credits
-/// Artists, composer etc
+/// Release credits.
+///
+/// Artists, composers, etc.
 #[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Credits {
-    /// Arrangers
+    /// Arrangers.
+    ///
     /// *OPS only*
     pub arranger: Option<Vec<Credit>>,
     /// Artists
     pub artists: Vec<Credit>,
-    /// Composers
-    /// Typically present for classical works
+    /// Composers.
+    ///
+    /// Typically present for classical works.
     pub composers: Vec<Credit>,
-    /// Conductors
-    /// Typically present for classical works
+    /// Conductors.
+    ///
+    /// Typically present for classical works.
     pub conductor: Vec<Credit>,
     /// DJs
     pub dj: Vec<Credit>,

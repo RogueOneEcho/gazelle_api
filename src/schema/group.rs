@@ -2,8 +2,10 @@ use serde::Deserialize;
 
 use crate::Credits;
 
-/// A release
-/// Typically representing an album, EP, or single which may contain multiple editions.
+/// A release.
+///
+/// Typically represents an album, EP, or single which may contain multiple editions.
+///
 /// <https://github.com/OPSnet/Gazelle/blob/master/docs/07-API.md#torrent-group>
 #[derive(Clone, Debug, Default, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -56,13 +58,16 @@ pub struct Group {
     /// 6: `Comics`
     /// <https://github.com/OPSnet/Gazelle/blob/3e2f8f8ef99f654047d86ea75da166e270b85ba9/public/static/functions/upload.js#L702-L710>
     pub category_id: u8,
-    /// 0: `Music`
-    /// 1: `Applications`
-    /// 2: `E-Books`
-    /// 3: `Audiobooks`
-    /// 4: `E-Learning Videos`
-    /// 5: `Comedy`
-    /// 6: `Comics`
+    /// Category name.
+    ///
+    /// - 0: `Music`
+    /// - 1: `Applications`
+    /// - 2: `E-Books`
+    /// - 3: `Audiobooks`
+    /// - 4: `E-Learning Videos`
+    /// - 5: `Comedy`
+    /// - 6: `Comics`
+    ///
     /// <https://github.com/OPSnet/Gazelle/blob/3e2f8f8ef99f654047d86ea75da166e270b85ba9/public/static/functions/upload.js#L702-L710>
     pub category_name: String,
     /// Time of last logged event
@@ -73,8 +78,9 @@ pub struct Group {
     pub is_bookmarked: bool,
     /// Tags
     pub tags: Vec<String>,
-    /// Release credits
-    /// Artists, composer etc
+    /// Release credits.
+    ///
+    /// Artists, composers, etc.
     pub music_info: Option<Credits>,
 }
 

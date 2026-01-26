@@ -4,10 +4,11 @@ use serde::Deserialize;
 #[allow(non_snake_case)]
 #[derive(Clone, Debug, Deserialize)]
 pub struct UploadResponse {
-    /// If `true` you will need to download the torrent file.
+    /// Whether the torrent was modified to be private
     pub private: bool,
-    /// If `true` you will need to download the torrent file.
+    /// Whether the source flag was added to the torrent
     pub source: bool,
+    /// ID of the filled request, if the upload filled one
     #[serde(rename = "requestid")]
     pub request_id: Option<u32>,
     torrentid: Option<u32>,
@@ -17,11 +18,18 @@ pub struct UploadResponse {
 }
 
 impl UploadResponse {
+    /// Get the uploaded torrent ID.
+    ///
+    /// Normalizes differences between OPS and RED.
     #[must_use]
     pub fn get_torrent_id(&self) -> u32 {
         self.torrentid
             .unwrap_or_else(|| self.torrentId.unwrap_or_default())
     }
+
+    /// Get the torrent group ID.
+    ///
+    /// Normalizes differences between OPS and RED.
     #[must_use]
     pub fn get_group_id(&self) -> u32 {
         self.groupid

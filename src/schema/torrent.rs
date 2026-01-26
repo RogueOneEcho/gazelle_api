@@ -2,7 +2,8 @@ use regex::Regex;
 use serde::Deserialize;
 use std::path::PathBuf;
 
-/// An edition of a release
+/// An edition of a release.
+///
 /// <https://github.com/OPSnet/Gazelle/blob/master/docs/07-API.md#torrent>
 #[derive(Clone, Debug, Default, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -85,23 +86,29 @@ pub struct Torrent {
     #[serde(rename = "has_snatched")]
     pub has_snatched: Option<bool>,
     /// Is this trumpable?
+    ///
     /// *RED only*
     pub trumpable: Option<bool>,
     /// Is this an approved lossy web release?
+    ///
     /// *RED only*
     pub lossy_web_approved: Option<bool>,
     /// Is this an approved lossy master release?
+    ///
     /// *RED only*
     pub lossy_master_approved: Option<bool>,
-    /// TBC
-    /// *Inexplicably OPS returns this as an integer in a string*
+    /// Is this a freeleech torrent?
+    ///
+    /// *Skipped because OPS returns this as an integer in a string*
     #[serde(skip)]
     #[allow(clippy::struct_field_names)]
     pub free_torrent: Option<bool>,
     /// Is this neutral leech?
+    ///
     /// *RED only*
     pub is_neutralleech: Option<bool>,
     /// Is this freeload?
+    ///
     /// *RED only*
     pub is_freeload: Option<bool>,
     /// Has this been reported?
@@ -121,6 +128,7 @@ pub struct Torrent {
 }
 
 impl Torrent {
+    /// Extract FLAC file paths from the encoded file list
     #[must_use]
     pub fn get_flacs(&self) -> Vec<PathBuf> {
         Regex::new(r"([^|]+\.flac)\{\{\{\d+\}\}\}(?:\|\|\|)?")

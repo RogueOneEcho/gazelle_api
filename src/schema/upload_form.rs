@@ -6,6 +6,7 @@ use std::path::PathBuf;
 use reqwest::multipart::{Form, Part};
 use serde::{Deserialize, Serialize};
 
+/// Form data for uploading a torrent to a group
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct UploadForm {
     /// Path to the torrent file to upload
@@ -76,6 +77,7 @@ pub struct UploadForm {
 }
 
 impl UploadForm {
+    /// Convert to a multipart form for the upload API request
     #[allow(clippy::wrong_self_convention, clippy::absolute_paths)]
     pub fn to_form(self) -> Result<Form, std::io::Error> {
         let mut file = File::open(&self.path)?;

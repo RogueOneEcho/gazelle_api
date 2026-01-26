@@ -8,12 +8,14 @@ use crate::{GazelleClient, GazelleClientOptions, RateLimiter};
 const DEFAULT_LIMIT: usize = 5;
 const DEFAULT_LIMIT_DURATION: Duration = Duration::from_secs(10);
 
-/// Create a [`GazelleClient`]
+/// Factory for creating a [`GazelleClient`]
 pub struct GazelleClientFactory {
+    /// Configuration options for the client
     pub options: GazelleClientOptions,
 }
 
 impl GazelleClientFactory {
+    /// Create a new [`GazelleClient`] from the configured options
     #[must_use]
     pub fn create(self) -> GazelleClient {
         let GazelleClientOptions {

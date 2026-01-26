@@ -9,10 +9,15 @@ use crate::*;
 
 /// A client for the Gazelle API
 ///
-/// Created by an [`GazelleClientFactory`]
+/// Created by a [`GazelleClientFactory`] or via [`From<GazelleClientOptions>`].
 pub struct GazelleClient {
+    /// Base URL of the Gazelle indexer.
+    ///
+    /// Example: `https://orpheus.network`
     pub base_url: String,
+    /// HTTP client with configured headers for authentication
     pub client: Client,
+    /// Rate limiter to throttle API requests
     pub limiter: RateLimiter,
 }
 

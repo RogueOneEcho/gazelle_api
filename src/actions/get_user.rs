@@ -1,13 +1,10 @@
 use crate::{GazelleClient, GazelleError, User};
 
 impl GazelleClient {
-    /// Get a torrent group by id
-    ///
-    /// A torrent group is a collection of different encodings of
-    /// a release (album, EP, single, etc.).
+    /// Get a user by id.
     ///
     /// # See Also
-    /// - <https://github.com/OPSnet/Gazelle/blob/master/docs/07-API.md#torrent-group>
+    /// - <https://github.com/OPSnet/Gazelle/blob/master/docs/07-API.md#user>
     pub async fn get_user(&self, id: u32) -> Result<User, GazelleError> {
         self.get(format!("action=user&id={id}")).await
     }

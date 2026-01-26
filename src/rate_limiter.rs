@@ -30,9 +30,9 @@ impl RateLimiter {
         }
     }
 
-    /// Wait if required then execute
+    /// Wait if the rate limit requires a delay, then record the request.
     ///
-    /// Returns `None` if there was no wait, else the duration.
+    /// Returns `None` if there was no wait, otherwise returns the wait duration.
     pub async fn execute(&self) -> Option<Duration> {
         let wait_duration = self.get_wait_duration().await;
         if let Some(wait) = wait_duration {

@@ -8,21 +8,26 @@ use std::fmt::{Display, Formatter};
 #[allow(clippy::absolute_paths)]
 #[serde(rename_all = "snake_case", tag = "type")]
 pub enum GazelleError {
-    /// An error occured creating the request
-    /// Includes the `reqwest::Error` as a string
+    /// An error occurred creating the request.
+    ///
+    /// Includes the `reqwest::Error` as a string.
     Request { error: String },
-    /// An error occured extracting the body of the response
-    /// Includes the `reqwest::Error` as a string
+    /// An error occurred extracting the body of the response.
+    ///
+    /// Includes the `reqwest::Error` as a string.
     Response { error: String },
-    /// An error occured deserializing the body as JSON
-    /// Includes the `serde_json::Error` as a string
+    /// An error occurred deserializing the body as JSON.
+    ///
+    /// Includes the `serde_json::Error` as a string.
     Deserialization { error: String },
-    /// An error occured reading the torrent file
-    /// Includes the `std::io::Error` as a string
+    /// An error occurred reading the torrent file.
+    ///
+    /// Includes the `std::io::Error` as a string.
     Upload { error: String },
-    /// 400 Bad Request
+    /// 400 Bad Request.
+    ///
     /// Indicates that either the requested resource was not found,
-    /// or there was an issue with the paramters
+    /// or there was an issue with the parameters.
     BadRequest { message: String },
     /// 401 Unauthorized
     /// Indicates the API Key is invalid
