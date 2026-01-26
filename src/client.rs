@@ -182,7 +182,7 @@ mod tests {
 
         // Assert
         assert!(result.is_err());
-        assert!(matches!(result.unwrap_err(), Request { .. }));
+        assert!(matches!(result.unwrap_err(), Deserialization { .. }));
     }
 
     // get_result tests
