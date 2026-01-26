@@ -8,6 +8,7 @@ use crate::{
 /// Mock client for testing without live API calls
 ///
 /// Set return values using the builder pattern, then use as `dyn GazelleClientTrait`.
+#[derive(Clone, Debug)]
 #[allow(clippy::struct_field_names)]
 pub struct MockGazelleClient {
     get_torrent_returns: Option<Result<TorrentResponse, GazelleError>>,
