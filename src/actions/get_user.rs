@@ -15,8 +15,8 @@ impl GazelleClient {
 
 #[cfg(test)]
 mod tests {
+    use crate::GazelleError;
     use crate::tests::for_each_indexer;
-    use crate::{GazelleError, GazelleErrorKind};
     use serial_test::serial;
 
     #[tokio::test]
@@ -45,9 +45,8 @@ mod tests {
                 .get_user(u32::MAX)
                 .await
                 .expect_err("should be an error");
-            assert_eq!(
-                error.kind,
-                GazelleErrorKind::BadRequest,
+            assert!(
+                matches!(error, GazelleError::BadRequest { .. }),
                 "[{name}] expected BadRequest, got {error:?}"
             );
             Ok(())

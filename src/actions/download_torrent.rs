@@ -46,8 +46,8 @@ fn get_content_type(response: &Response) -> Option<String> {
 
 #[cfg(test)]
 mod tests {
+    use crate::GazelleError;
     use crate::tests::for_each_indexer;
-    use crate::{GazelleError, GazelleErrorKind};
     use serial_test::serial;
 
     #[tokio::test]
@@ -80,9 +80,8 @@ mod tests {
                 .download_torrent(u32::MAX)
                 .await
                 .expect_err("should be an error");
-            assert_eq!(
-                error.kind,
-                GazelleErrorKind::NotFound,
+            assert!(
+                matches!(error, GazelleError::NotFound { .. }),
                 "[{name}] expected NotFound, got {error:?}"
             );
             Ok(())

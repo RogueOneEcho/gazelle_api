@@ -66,19 +66,6 @@ impl MockGazelleClient {
     }
 }
 
-trait ResultCloneExt<T: Clone> {
-    fn clone_without_error_source(&self) -> Result<T, GazelleError>;
-}
-
-impl<T: Clone> ResultCloneExt<T> for Result<T, GazelleError> {
-    fn clone_without_error_source(&self) -> Result<T, GazelleError> {
-        match self {
-            Ok(v) => Ok(v.clone()),
-            Err(e) => Err(e.clone_without_source()),
-        }
-    }
-}
-
 impl Default for MockGazelleClient {
     /// Create a mock client with all `Ok()` responses configured
     fn default() -> Self {
@@ -96,37 +83,32 @@ impl Default for MockGazelleClient {
 impl GazelleClientTrait for MockGazelleClient {
     async fn get_torrent(&self, _id: u32) -> Result<TorrentResponse, GazelleError> {
         self.get_torrent_returns
-            .as_ref()
+            .clone()
             .expect("MockGazelleClient: get_torrent_returns not set")
-            .clone_without_error_source()
     }
 
     async fn get_torrent_group(&self, _id: u32) -> Result<GroupResponse, GazelleError> {
         self.get_torrent_group_returns
-            .as_ref()
+            .clone()
             .expect("MockGazelleClient: get_torrent_group_returns not set")
-            .clone_without_error_source()
     }
 
     async fn get_user(&self, _id: u32) -> Result<User, GazelleError> {
         self.get_user_returns
-            .as_ref()
+            .clone()
             .expect("MockGazelleClient: get_user_returns not set")
-            .clone_without_error_source()
     }
 
     async fn download_torrent(&self, _id: u32) -> Result<Vec<u8>, GazelleError> {
         self.download_torrent_returns
-            .as_ref()
+            .clone()
             .expect("MockGazelleClient: download_torrent_returns not set")
-            .clone_without_error_source()
     }
 
     async fn upload_torrent(&self, _upload: UploadForm) -> Result<UploadResponse, GazelleError> {
         self.upload_torrent_returns
-            .as_ref()
+            .clone()
             .expect("MockGazelleClient: upload_torrent_returns not set")
-            .clone_without_error_source()
     }
 }
 
@@ -138,7 +120,6 @@ mod tests {
     use tokio::sync::Mutex;
 
     use super::*;
-    use crate::GazelleErrorKind;
 
     #[tokio::test]
     async fn mock_get_torrent_returns_configured_value() {
@@ -158,18 +139,15 @@ mod tests {
     #[tokio::test]
     async fn mock_get_torrent_returns_error() {
         // Arrange
-        let mock = MockGazelleClient::new().with_get_torrent(Err(GazelleError::with_message(
-            GazelleErrorKind::NotFound,
-            "not found",
-        )));
+        let mock = MockGazelleClient::new().with_get_torrent(Err(GazelleError::NotFound {
+            message: "not found".to_owned(),
+        }));
 
         // Act
         let result = mock.get_torrent(999).await;
 
         // Assert
-        let err = result.expect_err("should be error");
-        assert_eq!(err.kind, GazelleErrorKind::NotFound);
-        assert_eq!(err.message, Some("not found".to_owned()));
+        assert!(matches!(result, Err(GazelleError::NotFound { .. })));
     }
 
     #[tokio::test]
@@ -273,20 +251,5 @@ mod tests {
             .await
             .is_ok()
         );
-    }
-
-    #[tokio::test]
-    async fn mock_error_without_message() {
-        // Arrange
-        let mock = MockGazelleClient::new()
-            .with_get_torrent(Err(GazelleError::new(GazelleErrorKind::NotFound)));
-
-        // Act
-        let result = mock.get_torrent(999).await;
-
-        // Assert
-        let err = result.expect_err("should be error");
-        assert_eq!(err.kind, GazelleErrorKind::NotFound);
-        assert!(err.message.is_none());
     }
 }
