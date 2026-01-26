@@ -1,7 +1,6 @@
 use serde::Deserialize;
 
 /// Response for the `upload` action
-#[allow(non_snake_case)]
 #[derive(Clone, Debug, Deserialize)]
 pub struct UploadResponse {
     /// Whether the torrent was modified to be private
@@ -11,30 +10,16 @@ pub struct UploadResponse {
     /// ID of the filled request, if the upload filled one
     #[serde(rename = "requestid")]
     pub request_id: Option<u32>,
-    torrentid: Option<u32>,
-    groupid: Option<u32>,
-    torrentId: Option<u32>,
-    groupId: Option<u32>,
-}
-
-impl UploadResponse {
-    /// Get the uploaded torrent ID.
+    /// ID of the uploaded torrent
     ///
-    /// Normalizes differences between OPS and RED.
-    #[must_use]
-    pub fn get_torrent_id(&self) -> u32 {
-        self.torrentid
-            .unwrap_or_else(|| self.torrentId.unwrap_or_default())
-    }
-
-    /// Get the torrent group ID.
+    /// Uses serde alias to handle both OPS (`torrentid`) and RED (`torrentId`) formats.
+    #[serde(rename = "torrentId", alias = "torrentid")]
+    pub torrent_id: Option<u32>,
+    /// ID of the torrent group
     ///
-    /// Normalizes differences between OPS and RED.
-    #[must_use]
-    pub fn get_group_id(&self) -> u32 {
-        self.groupid
-            .unwrap_or_else(|| self.groupId.unwrap_or_default())
-    }
+    /// Uses serde alias to handle both OPS (`groupid`) and RED (`groupId`) formats.
+    #[serde(rename = "groupId", alias = "groupid")]
+    pub group_id: Option<u32>,
 }
 
 #[cfg(feature = "mock")]
@@ -46,10 +31,38 @@ impl UploadResponse {
             private: true,
             source: true,
             request_id: None,
-            torrentid: Some(456),
-            groupid: Some(123),
-            torrentId: None,
-            groupId: None,
+            torrent_id: Some(456),
+            group_id: Some(123),
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    const OPS_RESPONSE: &str = include_str!("../tests/fixtures/upload_response_ops.json");
+    const RED_RESPONSE: &str = include_str!("../tests/fixtures/upload_response_red.json");
+
+    #[test]
+    fn deserialize_ops_format() {
+        // OPS uses lowercase field names: torrentid, groupid
+        let response: UploadResponse =
+            serde_json::from_str(OPS_RESPONSE).expect("Failed to deserialize OPS format");
+        assert_eq!(response.torrent_id, Some(123));
+        assert_eq!(response.group_id, Some(456));
+        assert!(response.private);
+        assert!(response.source);
+    }
+
+    #[test]
+    fn deserialize_red_format() {
+        // RED uses camelCase field names: torrentId, groupId
+        let response: UploadResponse =
+            serde_json::from_str(RED_RESPONSE).expect("Failed to deserialize RED format");
+        assert_eq!(response.torrent_id, Some(111));
+        assert_eq!(response.group_id, Some(222));
+        assert_eq!(response.request_id, Some(789));
+        assert!(response.private);
     }
 }
