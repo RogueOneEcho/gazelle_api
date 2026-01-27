@@ -14,12 +14,12 @@ pub struct UploadResponse {
     ///
     /// Uses serde alias to handle both OPS (`torrentid`) and RED (`torrentId`) formats.
     #[serde(rename = "torrentId", alias = "torrentid")]
-    pub torrent_id: Option<u32>,
+    pub torrent_id: u32,
     /// ID of the torrent group
     ///
     /// Uses serde alias to handle both OPS (`groupid`) and RED (`groupId`) formats.
     #[serde(rename = "groupId", alias = "groupid")]
-    pub group_id: Option<u32>,
+    pub group_id: u32,
 }
 
 #[cfg(feature = "mock")]
@@ -31,8 +31,8 @@ impl UploadResponse {
             private: true,
             source: true,
             request_id: None,
-            torrent_id: Some(456),
-            group_id: Some(123),
+            torrent_id: 456,
+            group_id: 123,
         }
     }
 }
@@ -49,8 +49,8 @@ mod tests {
         // OPS uses lowercase field names: torrentid, groupid
         let response: UploadResponse =
             serde_json::from_str(OPS_RESPONSE).expect("Failed to deserialize OPS format");
-        assert_eq!(response.torrent_id, Some(123));
-        assert_eq!(response.group_id, Some(456));
+        assert_eq!(response.torrent_id, 123);
+        assert_eq!(response.group_id, 456);
         assert!(response.private);
         assert!(response.source);
     }
@@ -60,8 +60,8 @@ mod tests {
         // RED uses camelCase field names: torrentId, groupId
         let response: UploadResponse =
             serde_json::from_str(RED_RESPONSE).expect("Failed to deserialize RED format");
-        assert_eq!(response.torrent_id, Some(111));
-        assert_eq!(response.group_id, Some(222));
+        assert_eq!(response.torrent_id, 111);
+        assert_eq!(response.group_id, 222);
         assert_eq!(response.request_id, Some(789));
         assert!(response.private);
     }
