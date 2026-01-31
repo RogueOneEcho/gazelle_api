@@ -114,6 +114,7 @@ impl GazelleClientTrait for MockGazelleClient {
 }
 
 #[cfg(test)]
+#[allow(clippy::unwrap_used)]
 mod tests {
     use std::path::PathBuf;
     use std::sync::Arc;
@@ -140,15 +141,19 @@ mod tests {
     #[tokio::test]
     async fn mock_get_torrent_returns_error() {
         // Arrange
-        let mock = MockGazelleClient::new().with_get_torrent(Err(GazelleError::NotFound {
-            message: "not found".to_owned(),
-        }));
+        let mock = MockGazelleClient::new()
+            .with_get_torrent(Err(GazelleError::not_found("not found".to_owned(), 404)));
 
         // Act
         let result = mock.get_torrent(999).await;
 
         // Assert
-        assert!(matches!(result, Err(GazelleError::NotFound { .. })));
+        assert!(result.is_err());
+        let error = result.unwrap_err();
+        assert_eq!(
+            error.operation,
+            crate::GazelleOperation::ApiResponse(crate::ApiResponseKind::NotFound)
+        );
     }
 
     #[tokio::test]

@@ -29,7 +29,7 @@ impl GazelleClient {
             Ok(buffer)
         } else {
             Err(GazelleError::match_status_error(status_code, None)
-                .unwrap_or(GazelleError::other(status_code, None)))
+                .unwrap_or_else(|| GazelleError::other(String::new(), status_code.as_u16())))
         }
     }
 }
@@ -80,8 +80,9 @@ mod tests {
                 .download_torrent(u32::MAX)
                 .await
                 .expect_err("should be an error");
-            assert!(
-                matches!(error, GazelleError::NotFound { .. }),
+            assert_eq!(
+                error.operation,
+                crate::GazelleOperation::ApiResponse(crate::ApiResponseKind::NotFound),
                 "[{name}] expected NotFound, got {error:?}"
             );
             Ok(())

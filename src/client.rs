@@ -1,5 +1,4 @@
 use async_trait::async_trait;
-use colored::Colorize;
 use log::*;
 use reqwest::{Client, Response, StatusCode};
 use serde::de::DeserializeOwned;
@@ -38,7 +37,7 @@ impl GazelleClient {
     pub(crate) async fn get_internal(&self, query: String) -> Result<Response, reqwest::Error> {
         self.limiter.execute().await;
         let path = format!("/ajax.php?{query}");
-        trace!("{} request GET {path}", "Sending".bold());
+        trace!("Sending request GET {path}");
         let url = format!("{}{path}", self.base_url);
         let start = SystemTime::now();
         let result = self.client.get(url).send().await;
@@ -46,7 +45,7 @@ impl GazelleClient {
             .elapsed()
             .expect("elapsed should not fail")
             .as_secs_f64();
-        trace!("{} response after {elapsed:.3}", "Received".bold());
+        trace!("Received response after {elapsed:.3}");
         result
     }
 }
@@ -80,23 +79,21 @@ pub(crate) fn get_result<T: DeserializeOwned>(
     status_code: StatusCode,
     response: ApiResponse<T>,
 ) -> Result<T, GazelleError> {
+    let status = status_code.as_u16();
     if let Some(message) = &response.error {
-        trace!(
-            "{} {status_code} response with error: {message}",
-            "Received".bold()
-        );
-        if let Some(error) = GazelleError::match_response_error(message) {
+        trace!("Received {status_code} response with error: {message}");
+        if let Some(error) = GazelleError::match_response_error(message, status) {
             return Err(error);
         }
     } else {
-        trace!("{} {status_code} response without error", "Received".bold());
+        trace!("Received {status_code} response without error");
     }
     if let Some(error) = GazelleError::match_status_error(status_code, response.error.clone()) {
         return Err(error);
     }
     response
         .response
-        .ok_or_else(|| GazelleError::other(status_code, response.error))
+        .ok_or_else(|| GazelleError::other(response.error.unwrap_or_default(), status))
 }
 
 #[async_trait]
@@ -126,9 +123,7 @@ impl GazelleClientTrait for GazelleClient {
 #[allow(clippy::unwrap_used)]
 mod tests {
     use super::*;
-    use crate::GazelleError::*;
-
-    // deserialize tests
+    use crate::{ApiResponseKind, ErrorSource, GazelleOperation};
 
     #[test]
     fn deserialize_success_response() {
@@ -139,7 +134,6 @@ mod tests {
         let result: Result<ApiResponse<serde_json::Value>, _> = deserialize(json.to_owned());
 
         // Assert
-        assert!(result.is_ok());
         let response = result.unwrap();
         assert_eq!(response.status, "success");
         assert!(response.response.is_some());
@@ -155,7 +149,6 @@ mod tests {
         let result: Result<ApiResponse<serde_json::Value>, _> = deserialize(json.to_owned());
 
         // Assert
-        assert!(result.is_ok());
         let response = result.unwrap();
         assert_eq!(response.status, "failure");
         assert!(response.response.is_none());
@@ -164,14 +157,13 @@ mod tests {
 
     #[test]
     fn deserialize_removes_malformed_ops_response() {
-        // Arrange - OPS returns malformed "response":[] on errors
+        // Arrange
         let json = r#"{"status":"failure","response":[],"error":"bad id parameter"}"#;
 
         // Act
         let result: Result<ApiResponse<serde_json::Value>, _> = deserialize(json.to_owned());
 
-        // Assert - should parse after removing malformed array
-        assert!(result.is_ok());
+        // Assert
         let response = result.unwrap();
         assert_eq!(response.status, "failure");
         assert_eq!(response.error, Some("bad id parameter".to_owned()));
@@ -187,10 +179,8 @@ mod tests {
 
         // Assert
         assert!(result.is_err());
-        assert!(matches!(result.unwrap_err(), Deserialization { .. }));
+        assert_eq!(result.unwrap_err().operation, GazelleOperation::Deserialize);
     }
-
-    // get_result tests
 
     #[test]
     fn get_result_success_extracts_response() {
@@ -205,7 +195,6 @@ mod tests {
         let result = get_result(StatusCode::OK, response);
 
         // Assert
-        assert!(result.is_ok());
         assert_eq!(result.unwrap(), 42);
     }
 
@@ -222,13 +211,16 @@ mod tests {
         let result = get_result(StatusCode::OK, response);
 
         // Assert
-        assert!(result.is_err());
-        assert!(matches!(result.unwrap_err(), BadRequest { .. }));
+        let error = result.unwrap_err();
+        assert_eq!(
+            error.operation,
+            GazelleOperation::ApiResponse(ApiResponseKind::BadRequest)
+        );
     }
 
     #[test]
     fn get_result_with_status_error_returns_error() {
-        // Arrange - RED returns proper status codes
+        // Arrange
         let response: ApiResponse<i32> = ApiResponse {
             status: "failure".to_owned(),
             response: None,
@@ -239,8 +231,11 @@ mod tests {
         let result = get_result(StatusCode::BAD_REQUEST, response);
 
         // Assert
-        assert!(result.is_err());
-        assert!(matches!(result.unwrap_err(), BadRequest { .. }));
+        let error = result.unwrap_err();
+        assert_eq!(
+            error.operation,
+            GazelleOperation::ApiResponse(ApiResponseKind::BadRequest)
+        );
     }
 
     #[test]
@@ -256,8 +251,15 @@ mod tests {
         let result = get_result(StatusCode::OK, response);
 
         // Assert
-        assert!(result.is_err());
-        assert!(matches!(result.unwrap_err(), Other { status: 200, .. }));
+        let error = result.unwrap_err();
+        assert_eq!(
+            error.operation,
+            GazelleOperation::ApiResponse(ApiResponseKind::Other)
+        );
+        let ErrorSource::ApiResponse(e) = error.source else {
+            unreachable!()
+        };
+        assert_eq!(e.status, 200);
     }
 
     #[test]
@@ -272,14 +274,17 @@ mod tests {
         // Act - Status is 400 but error message indicates rate limit
         let result = get_result(StatusCode::BAD_REQUEST, response);
 
-        // Assert - Response error matching takes priority
-        assert!(result.is_err());
-        assert!(matches!(result.unwrap_err(), TooManyRequests { .. }));
+        // Assert - Rate limit error takes priority
+        let error = result.unwrap_err();
+        assert_eq!(
+            error.operation,
+            GazelleOperation::ApiResponse(ApiResponseKind::TooManyRequests)
+        );
     }
 
     #[test]
     fn get_result_unknown_response_error_falls_through() {
-        // Arrange
+        // Arrange - Unknown error message
         let response: ApiResponse<i32> = ApiResponse {
             status: "failure".to_owned(),
             response: None,
@@ -289,14 +294,16 @@ mod tests {
         // Act
         let result = get_result(StatusCode::OK, response);
 
-        // Assert - Falls through to other error
-        assert!(result.is_err());
-        assert!(matches!(
-            result.unwrap_err(),
-            Other {
-                status: 200,
-                message: Some(msg)
-            } if msg == "some new error type"
-        ));
+        // Assert - Falls through to Other
+        let error = result.unwrap_err();
+        assert_eq!(
+            error.operation,
+            GazelleOperation::ApiResponse(ApiResponseKind::Other)
+        );
+        let ErrorSource::ApiResponse(e) = error.source else {
+            unreachable!()
+        };
+        assert_eq!(e.status, 200);
+        assert_eq!(e.message, "some new error type");
     }
 }

@@ -1,5 +1,4 @@
 use crate::Rate;
-use colored::Colorize;
 use log::trace;
 use std::collections::VecDeque;
 use std::time::{Duration, SystemTime};
@@ -36,11 +35,7 @@ impl RateLimiter {
     pub async fn execute(&self) -> Option<Duration> {
         let wait_duration = self.get_wait_duration().await;
         if let Some(wait) = wait_duration {
-            trace!(
-                "{} {:.3} for rate limiter",
-                "Waiting".bold(),
-                wait.as_secs_f64()
-            );
+            trace!("Waiting {:.3} for rate limiter", wait.as_secs_f64());
             sleep(wait).await;
             self.requests.lock().await.pop_front();
         }

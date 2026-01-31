@@ -1,6 +1,5 @@
 use crate::client::handle_result;
 use crate::{GazelleClient, GazelleError, UploadForm, UploadResponse};
-use colored::Colorize;
 use log::trace;
 use std::time::SystemTime;
 
@@ -13,7 +12,7 @@ impl GazelleClient {
         let form = upload.to_form().map_err(GazelleError::upload)?;
         self.limiter.execute().await;
         let path = "/ajax.php?action=upload";
-        trace!("{} request POST {path}", "Sending".bold());
+        trace!("Sending request POST {path}");
         let url = format!("{}{path}", self.base_url);
         let start = SystemTime::now();
         let result = self.client.post(&url).multipart(form).send().await;
@@ -21,7 +20,7 @@ impl GazelleClient {
             .elapsed()
             .expect("elapsed should not fail")
             .as_secs_f64();
-        trace!("{} response after {elapsed:.3}", "Received".bold());
+        trace!("Received response after {elapsed:.3}");
         handle_result(result).await
     }
 }
@@ -65,15 +64,15 @@ mod tests {
 
             // Assert
             if name == "ops" {
-                assert!(matches!(
-                    error,
-                    GazelleError::Other {
-                        status: 200,
-                        message: _
-                    }
-                ));
+                assert_eq!(
+                    error.operation,
+                    crate::GazelleOperation::ApiResponse(crate::ApiResponseKind::Other)
+                );
             } else {
-                assert!(matches!(error, GazelleError::BadRequest { message: _ }));
+                assert_eq!(
+                    error.operation,
+                    crate::GazelleOperation::ApiResponse(crate::ApiResponseKind::BadRequest)
+                );
             }
         }
         Ok(())

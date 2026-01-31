@@ -5,7 +5,7 @@ edition = "2024"
 publish = true
 authors = ["RogueOneEcho"]
 description = "Gazelle API Client"
-repository = "https://github.com/RogueOneEcho/logging"
+repository = "https://github.com/RogueOneEcho/gazelle_api"
 license = "AGPL-3.0-only"
 include = [
     "src/**/*",
@@ -16,20 +16,21 @@ include = [
 ]
 
 [dependencies]
-async-trait = "0.1"
-colored = "3.1.1"
+async-trait = "0.1.89"
 log = { version = "0.4.29", features = ["std"] }
+miette = { version = "7.6.0", features = ["fancy"] }
 regex = "1.12.2"
 reqwest = { version = "0.13.1", features = ["rustls", "json", "multipart", "stream"], default-features = false }
 serde = { version = "1.0.228", features = ["derive"] }
 serde_json = "1.0.149"
 serde_yaml = "0.9.34"
+thiserror = "2.0.18"
 tokio = { version = "1.49.0", features = ["full"] }
 
 [dev-dependencies]
 rogue_config = "0.2.0"
 rogue_logging = "0.3.0"
-serial_test = "3.2"
+serial_test = "3.3.1"
 
 [features]
 default = []

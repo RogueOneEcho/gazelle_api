@@ -42,8 +42,9 @@ mod tests {
                 .get_user(u32::MAX)
                 .await
                 .expect_err("should be an error");
-            assert!(
-                matches!(error, GazelleError::BadRequest { .. }),
+            assert_eq!(
+                error.operation,
+                crate::GazelleOperation::ApiResponse(crate::ApiResponseKind::BadRequest),
                 "[{name}] expected BadRequest, got {error:?}"
             );
             Ok(())
