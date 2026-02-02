@@ -18,7 +18,7 @@ include = [
 [dependencies]
 async-trait = "0.1.89"
 log = { version = "0.4.29", features = ["std"] }
-miette = { version = "7.6.0", features = ["fancy"] }
+miette = "7.6.0"
 regex = "1.12.2"
 reqwest = { version = "0.13.1", features = ["rustls", "json", "multipart", "stream"], default-features = false }
 serde = { version = "1.0.228", features = ["derive"] }
