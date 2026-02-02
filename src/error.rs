@@ -110,11 +110,20 @@ impl Error for ErrorSource {
 }
 
 /// A structured error from the Gazelle API.
-#[derive(Debug, Diagnostic)]
-#[diagnostic(code(gazelle::error))]
+#[derive(Debug)]
 pub struct GazelleError {
     pub operation: GazelleOperation,
     pub source: ErrorSource,
+}
+
+impl Diagnostic for GazelleError {
+    fn code<'a>(&'a self) -> Option<Box<dyn Display + 'a>> {
+        Some(Box::new(format!(
+            "{}::{:?}",
+            env!("CARGO_PKG_NAME"),
+            self.operation
+        )))
+    }
 }
 
 impl Display for GazelleError {
@@ -610,5 +619,75 @@ mod tests {
         assert!(
             matches!(serializable, GazelleSerializableError::Other { status: 500, message: Some(m) } if m == "unexpected")
         );
+    }
+
+    #[test]
+    fn diagnostic_code_send_request() {
+        let error = GazelleError {
+            operation: GazelleOperation::SendRequest,
+            source: ErrorSource::Io(std::io::Error::other("test")),
+        };
+        let code = error.code().unwrap().to_string();
+        assert_eq!(code, "gazelle_api::SendRequest");
+    }
+
+    #[test]
+    fn diagnostic_code_read_response() {
+        let error = GazelleError {
+            operation: GazelleOperation::ReadResponse,
+            source: ErrorSource::Io(std::io::Error::other("test")),
+        };
+        let code = error.code().unwrap().to_string();
+        assert_eq!(code, "gazelle_api::ReadResponse");
+    }
+
+    #[test]
+    fn diagnostic_code_deserialize() {
+        let error =
+            GazelleError::deserialization(serde_json::from_str::<()>("invalid").unwrap_err());
+        let code = error.code().unwrap().to_string();
+        assert_eq!(code, "gazelle_api::Deserialize");
+    }
+
+    #[test]
+    fn diagnostic_code_read_file() {
+        let error = GazelleError::upload(std::io::Error::other("test"));
+        let code = error.code().unwrap().to_string();
+        assert_eq!(code, "gazelle_api::ReadFile");
+    }
+
+    #[test]
+    fn diagnostic_code_api_response_not_found() {
+        let error = GazelleError::not_found("test".to_owned(), 404);
+        let code = error.code().unwrap().to_string();
+        assert_eq!(code, "gazelle_api::ApiResponse(NotFound)");
+    }
+
+    #[test]
+    fn diagnostic_code_api_response_unauthorized() {
+        let error = GazelleError::unauthorized("test".to_owned(), 401);
+        let code = error.code().unwrap().to_string();
+        assert_eq!(code, "gazelle_api::ApiResponse(Unauthorized)");
+    }
+
+    #[test]
+    fn diagnostic_code_api_response_bad_request() {
+        let error = GazelleError::bad_request("test".to_owned(), 400);
+        let code = error.code().unwrap().to_string();
+        assert_eq!(code, "gazelle_api::ApiResponse(BadRequest)");
+    }
+
+    #[test]
+    fn diagnostic_code_api_response_too_many_requests() {
+        let error = GazelleError::too_many_requests("test".to_owned(), 429);
+        let code = error.code().unwrap().to_string();
+        assert_eq!(code, "gazelle_api::ApiResponse(TooManyRequests)");
+    }
+
+    #[test]
+    fn diagnostic_code_api_response_other() {
+        let error = GazelleError::other("I'm a teapot".to_owned(), 418);
+        let code = error.code().unwrap().to_string();
+        assert_eq!(code, "gazelle_api::ApiResponse(Other)");
     }
 }
