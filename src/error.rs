@@ -1,3 +1,4 @@
+use crate::GazelleSerializableError::*;
 use miette::Diagnostic;
 use reqwest::StatusCode;
 use serde::{Deserialize, Serialize};
@@ -229,22 +230,38 @@ impl GazelleError {
 #[serde(rename_all = "snake_case", tag = "type")]
 pub enum GazelleSerializableError {
     /// An error occurred creating the request.
+    ///
+    /// Includes the `reqwest::Error` as a string.
     Request { error: String },
     /// An error occurred extracting the body of the response.
+    ///
+    /// Includes the `reqwest::Error` as a string.
     Response { error: String },
     /// An error occurred deserializing the body as JSON.
+    ///
+    /// Includes the `serde_json::Error` as a string.
     Deserialization { error: String },
     /// An error occurred reading the torrent file.
+    ///
+    /// Includes the `std::io::Error` as a string.
     Upload { error: String },
     /// 400 Bad Request.
+    ///
+    /// Indicates that either the requested resource was not found,
+    /// or there was an issue with the parameters.
     BadRequest { message: String },
-    /// 401 Unauthorized.
+    /// 401 Unauthorized
+    /// Indicates the API Key is invalid
     Unauthorized { message: String },
-    /// 404 Not Found.
+    /// 404 Not Found
+    /// Indicates the requested resource was not found
     NotFound { message: String },
-    /// 429 Too Many Requests.
+    /// 429 Too Many Request
+    /// Indicates the rate limit has been hit
     TooManyRequests { message: String },
-    /// An unexpected status code and error message was received from the API.
+    /// An unexpected status code and error message was received from the API
+    /// Includes the `StatusCode` as a `u16` and
+    /// the error message received from the API as a string
     Other {
         status: u16,
         message: Option<String>,
@@ -293,11 +310,72 @@ impl From<GazelleError> for GazelleSerializableError {
     }
 }
 
+impl Display for GazelleSerializableError {
+    #[allow(clippy::absolute_paths)]
+    fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
+        let message = match self {
+            Request { error } => format!("{} to send API request: {error}", "Failed"),
+            Response { error } => {
+                format!("{} to read API response: {error}", "Failed")
+            }
+            Deserialization { error } => {
+                format!("{} to deserialize API response: {error}", "Failed")
+            }
+            Upload { error } => {
+                format!("{} to upload torrent file: {error}", "Failed")
+            }
+            BadRequest { message } => {
+                format!("{} bad request response{}", "Received", append(message))
+            }
+            Unauthorized { message } => {
+                format!("{} unauthorized response{}", "Received", append(message))
+            }
+            NotFound { message } => {
+                format!("{} not found response{}", "Received", append(message))
+            }
+            TooManyRequests { message } => {
+                format!(
+                    "{} too many requests response{}",
+                    "Received",
+                    append(message)
+                )
+            }
+            Other {
+                status,
+                message: error,
+            } => {
+                format!(
+                    "{} {} response{}",
+                    "Received",
+                    status_code_and_reason(*status),
+                    append(&error.clone().unwrap_or_default())
+                )
+            }
+        };
+        message.fmt(formatter)
+    }
+}
+
+fn status_code_and_reason(code: u16) -> String {
+    StatusCode::from_u16(code)
+        .ok()
+        .and_then(|code| code.canonical_reason())
+        .map(|reason| format!("{code} {reason}"))
+        .unwrap_or(code.to_string())
+}
+
+fn append(message: &str) -> String {
+    if message.is_empty() {
+        String::new()
+    } else {
+        format!(": {message}")
+    }
+}
+
 #[cfg(test)]
 #[allow(clippy::unwrap_used, clippy::absolute_paths)]
 mod tests {
     use super::*;
-    use GazelleSerializableError::*;
 
     #[test]
     fn yaml_serialization() -> Result<(), serde_yaml::Error> {
