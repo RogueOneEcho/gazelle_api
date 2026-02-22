@@ -23,9 +23,13 @@ pub struct Group {
     /// Release Year
     pub year: u16,
     /// Record label
-    pub record_label: String,
+    ///
+    /// *RED only*
+    pub record_label: Option<String>,
     /// Release catalogue number
-    pub catalogue_number: String,
+    ///
+    /// *RED only*
+    pub catalogue_number: Option<String>,
     /// Index of release type
     ///
     /// 1: `Album`
@@ -93,8 +97,8 @@ impl Group {
             id: 123,
             name: "Test Album".to_owned(),
             year: 2020,
-            record_label: "Test Label".to_owned(),
-            catalogue_number: "TEST-001".to_owned(),
+            record_label: Some("Test Label".to_owned()),
+            catalogue_number: Some("TEST-001".to_owned()),
             category_id: 0,
             category_name: "Music".to_owned(),
             time: "2020-01-01 00:00:00".to_owned(),

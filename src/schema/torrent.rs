@@ -53,7 +53,9 @@ pub struct Torrent {
     ///
     /// `remastered` is a deprecated term from the early days of Gazelle.
     /// If `false` then it will be displayed as an "Unconfirmed Release" and likely won't have a year
-    pub remastered: bool,
+    ///
+    /// *RED only*
+    pub remastered: Option<bool>,
     /// Edition year
     ///
     /// May be `0`
@@ -149,7 +151,7 @@ impl Torrent {
             media: "CD".to_owned(),
             format: "FLAC".to_owned(),
             encoding: "Lossless".to_owned(),
-            remastered: true,
+            remastered: Some(true),
             remaster_year: Some(2020),
             remaster_title: String::new(),
             remaster_record_label: "Test Label".to_owned(),

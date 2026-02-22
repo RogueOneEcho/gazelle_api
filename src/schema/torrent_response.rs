@@ -94,7 +94,7 @@ mod tests {
         assert!(response.group.music_info.is_none());
         assert_eq!(response.torrent.id, 3000);
         assert_eq!(response.torrent.format, "MP3");
-        assert!(!response.torrent.remastered);
+        assert_eq!(response.torrent.remastered, Some(false));
         assert!(response.torrent.scene);
     }
 

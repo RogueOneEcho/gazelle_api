@@ -27,20 +27,19 @@ impl GazelleClient {
 
 #[cfg(test)]
 mod tests {
-    use crate::tests::{init_logger, load_config};
-    use crate::{GazelleClient, GazelleError, UploadForm};
-    use serial_test::serial;
     use std::path::PathBuf;
+
+    use serial_test::serial;
+
+    use crate::tests::for_each_indexer;
+    use crate::{ApiResponseKind, GazelleError, GazelleOperation, UploadForm};
 
     #[tokio::test]
     #[serial]
-    #[ignore = "require upload"]
+    #[ignore = "integration test requiring API credentials"]
     async fn upload_torrent_invalid() -> Result<(), GazelleError> {
-        // Arrange
-        init_logger();
-        for (name, config) in load_config() {
-            println!("Indexer: {name}");
-            let client = GazelleClient::from(config.client.clone());
+        for_each_indexer(|name, client, examples| async move {
+            // Arrange
             let form = UploadForm {
                 path: PathBuf::from("/srv/shared/tests/example-1.torrent"),
                 category_id: 0,
@@ -52,29 +51,30 @@ mod tests {
                 bitrate: "Lossless".to_owned(),
                 media: "Cassette".to_owned(),
                 release_desc: "DESCRIPTION".to_owned(),
-                group_id: config.examples.group,
+                group_id: examples.group,
             };
 
             // Act
             let error = client
+                .lock()
+                .await
                 .upload_torrent(form)
                 .await
                 .expect_err("should be an error");
-            println!("{error:?}");
+            println!("[{name}] {error:?}");
 
             // Assert
-            if name == "ops" {
-                assert_eq!(
-                    error.operation,
-                    crate::GazelleOperation::ApiResponse(crate::ApiResponseKind::Other)
-                );
+            let expected = if name == "ops" {
+                GazelleOperation::ApiResponse(ApiResponseKind::Other)
             } else {
-                assert_eq!(
-                    error.operation,
-                    crate::GazelleOperation::ApiResponse(crate::ApiResponseKind::BadRequest)
-                );
-            }
-        }
-        Ok(())
+                GazelleOperation::ApiResponse(ApiResponseKind::BadRequest)
+            };
+            assert_eq!(
+                error.operation, expected,
+                "[{name}] unexpected error: {error:?}"
+            );
+            Ok(())
+        })
+        .await
     }
 }
