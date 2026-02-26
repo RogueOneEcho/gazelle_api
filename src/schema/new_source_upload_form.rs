@@ -150,6 +150,41 @@ impl NewSourceUploadForm {
     }
 }
 
+#[cfg(any(test, feature = "mock"))]
+impl NewSourceUploadForm {
+    /// Create a mock form for testing.
+    #[must_use]
+    pub fn mock() -> Self {
+        Self {
+            path: PathBuf::from("/tmp/example.torrent"),
+            category_id: 0,
+            title: "Example Album".to_owned(),
+            year: 2024,
+            release_type: 1,
+            media: "WEB".to_owned(),
+            tags: vec!["electronic".to_owned()],
+            album_desc: String::new(),
+            release_desc: String::new(),
+            request_id: None,
+            image: None,
+            edition: NewSourceUploadEdition {
+                unknown_release: true,
+                remaster: None,
+                year: 0,
+                title: String::new(),
+                record_label: String::new(),
+                catalogue_number: String::new(),
+                format: "FLAC".to_owned(),
+                bitrate: "Lossless".to_owned(),
+            },
+            artists: vec![NewSourceUploadArtist {
+                name: "Artist".to_owned(),
+                role: 1,
+            }],
+        }
+    }
+}
+
 impl Display for NewSourceUploadForm {
     fn fmt(&self, formatter: &mut Formatter<'_>) -> FmtResult {
         let output = if let Ok(yaml) = yaml_to_string(self) {
@@ -172,12 +207,6 @@ mod tests {
     fn to_text_fields_contains_required_upload_keys() {
         // Arrange
         let form = NewSourceUploadForm {
-            path: PathBuf::from("/tmp/example.torrent"),
-            category_id: 0,
-            title: "Example Album".to_owned(),
-            year: 2024,
-            release_type: 1,
-            media: "WEB".to_owned(),
             tags: vec!["electronic".to_owned(), "ambient".to_owned()],
             album_desc: "Album description".to_owned(),
             release_desc: "Release description".to_owned(),
@@ -193,10 +222,7 @@ mod tests {
                 format: "FLAC".to_owned(),
                 bitrate: "Lossless".to_owned(),
             },
-            artists: vec![NewSourceUploadArtist {
-                name: "Artist".to_owned(),
-                role: 1,
-            }],
+            ..NewSourceUploadForm::mock()
         };
 
         // Act
@@ -244,30 +270,7 @@ mod tests {
         fs::write(&path, [1, 2, 3, 4]).expect("should write temp torrent");
         let form = NewSourceUploadForm {
             path: path.clone(),
-            category_id: 0,
-            title: "Example Album".to_owned(),
-            year: 2024,
-            release_type: 1,
-            media: "WEB".to_owned(),
-            tags: vec!["electronic".to_owned()],
-            album_desc: String::new(),
-            release_desc: String::new(),
-            request_id: None,
-            image: None,
-            edition: NewSourceUploadEdition {
-                unknown_release: true,
-                remaster: None,
-                year: 0,
-                title: String::new(),
-                record_label: String::new(),
-                catalogue_number: String::new(),
-                format: "FLAC".to_owned(),
-                bitrate: "Lossless".to_owned(),
-            },
-            artists: vec![NewSourceUploadArtist {
-                name: "Artist".to_owned(),
-                role: 1,
-            }],
+            ..NewSourceUploadForm::mock()
         };
 
         // Act
@@ -282,17 +285,7 @@ mod tests {
     fn to_text_fields_maps_unknown_release_and_omits_edition_fields_when_unknown() {
         // Arrange
         let known_release = NewSourceUploadForm {
-            path: PathBuf::from("/tmp/example.torrent"),
-            category_id: 0,
             title: "Known Release".to_owned(),
-            year: 2024,
-            release_type: 1,
-            media: "WEB".to_owned(),
-            tags: vec!["electronic".to_owned()],
-            album_desc: String::new(),
-            release_desc: String::new(),
-            request_id: None,
-            image: None,
             edition: NewSourceUploadEdition {
                 unknown_release: false,
                 remaster: None,
@@ -303,10 +296,7 @@ mod tests {
                 format: "FLAC".to_owned(),
                 bitrate: "Lossless".to_owned(),
             },
-            artists: vec![NewSourceUploadArtist {
-                name: "Artist".to_owned(),
-                role: 1,
-            }],
+            ..NewSourceUploadForm::mock()
         };
         let unknown_release = NewSourceUploadForm {
             edition: NewSourceUploadEdition {
@@ -339,17 +329,7 @@ mod tests {
     fn to_text_fields_maps_remaster_when_specified() {
         // Arrange
         let with_remaster = NewSourceUploadForm {
-            path: PathBuf::from("/tmp/example.torrent"),
-            category_id: 0,
             title: "Remaster".to_owned(),
-            year: 2024,
-            release_type: 1,
-            media: "WEB".to_owned(),
-            tags: vec!["electronic".to_owned()],
-            album_desc: String::new(),
-            release_desc: String::new(),
-            request_id: None,
-            image: None,
             edition: NewSourceUploadEdition {
                 unknown_release: false,
                 remaster: Some(true),
@@ -360,10 +340,7 @@ mod tests {
                 format: "FLAC".to_owned(),
                 bitrate: "Lossless".to_owned(),
             },
-            artists: vec![NewSourceUploadArtist {
-                name: "Artist".to_owned(),
-                role: 1,
-            }],
+            ..NewSourceUploadForm::mock()
         };
         let without_remaster = NewSourceUploadForm {
             edition: NewSourceUploadEdition {
@@ -391,31 +368,9 @@ mod tests {
     fn to_text_fields_maps_numeric_release_type() {
         // Arrange
         let form = NewSourceUploadForm {
-            path: PathBuf::from("/tmp/example.torrent"),
-            category_id: 0,
             title: "Release Type".to_owned(),
-            year: 2024,
             release_type: 21,
-            media: "WEB".to_owned(),
-            tags: vec!["electronic".to_owned()],
-            album_desc: String::new(),
-            release_desc: String::new(),
-            request_id: None,
-            image: None,
-            edition: NewSourceUploadEdition {
-                unknown_release: true,
-                remaster: None,
-                year: 0,
-                title: String::new(),
-                record_label: String::new(),
-                catalogue_number: String::new(),
-                format: "FLAC".to_owned(),
-                bitrate: "Lossless".to_owned(),
-            },
-            artists: vec![NewSourceUploadArtist {
-                name: "Artist".to_owned(),
-                role: 1,
-            }],
+            ..NewSourceUploadForm::mock()
         };
 
         // Act
@@ -429,31 +384,8 @@ mod tests {
     fn to_text_fields_includes_request_id_when_present() {
         // Arrange
         let with_request_id = NewSourceUploadForm {
-            path: PathBuf::from("/tmp/example.torrent"),
-            category_id: 0,
-            title: "Request Fill".to_owned(),
-            year: 2024,
-            release_type: 1,
-            media: "WEB".to_owned(),
-            tags: vec!["electronic".to_owned()],
-            album_desc: String::new(),
-            release_desc: String::new(),
             request_id: Some(364_781),
-            image: None,
-            edition: NewSourceUploadEdition {
-                unknown_release: true,
-                remaster: None,
-                year: 0,
-                title: String::new(),
-                record_label: String::new(),
-                catalogue_number: String::new(),
-                format: "FLAC".to_owned(),
-                bitrate: "Lossless".to_owned(),
-            },
-            artists: vec![NewSourceUploadArtist {
-                name: "Artist".to_owned(),
-                role: 1,
-            }],
+            ..NewSourceUploadForm::mock()
         };
         let without_request_id = NewSourceUploadForm {
             request_id: None,
