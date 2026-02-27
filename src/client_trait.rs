@@ -1,6 +1,9 @@
 use async_trait::async_trait;
 
-use crate::{GazelleError, GroupResponse, TorrentResponse, UploadForm, UploadResponse, User};
+use crate::{
+    GazelleError, GroupResponse, NewSourceUploadForm, TorrentResponse, UploadForm, UploadResponse,
+    User,
+};
 
 /// Trait for Gazelle API operations
 ///
@@ -22,4 +25,10 @@ pub trait GazelleClientTrait: Send + Sync {
 
     /// Upload a torrent
     async fn upload_torrent(&self, upload: UploadForm) -> Result<UploadResponse, GazelleError>;
+
+    /// Upload a new source torrent and create a group.
+    async fn upload_new_source(
+        &self,
+        upload: NewSourceUploadForm,
+    ) -> Result<UploadResponse, GazelleError>;
 }

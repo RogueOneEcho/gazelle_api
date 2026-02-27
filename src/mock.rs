@@ -1,8 +1,8 @@
 use async_trait::async_trait;
 
 use crate::{
-    GazelleClientTrait, GazelleError, GroupResponse, TorrentResponse, UploadForm, UploadResponse,
-    User,
+    GazelleClientTrait, GazelleError, GroupResponse, NewSourceUploadForm, TorrentResponse,
+    UploadForm, UploadResponse, User,
 };
 
 /// Mock client for testing without live API calls
@@ -16,6 +16,7 @@ pub struct MockGazelleClient {
     get_user_returns: Option<Result<User, GazelleError>>,
     download_torrent_returns: Option<Result<Vec<u8>, GazelleError>>,
     upload_torrent_returns: Option<Result<UploadResponse, GazelleError>>,
+    upload_new_source_returns: Option<Result<UploadResponse, GazelleError>>,
 }
 
 impl MockGazelleClient {
@@ -28,6 +29,7 @@ impl MockGazelleClient {
             get_user_returns: None,
             download_torrent_returns: None,
             upload_torrent_returns: None,
+            upload_new_source_returns: None,
         }
     }
 
@@ -65,6 +67,13 @@ impl MockGazelleClient {
         self.upload_torrent_returns = Some(result);
         self
     }
+
+    /// Configure the return value for `upload_new_source`
+    #[must_use]
+    pub fn with_upload_new_source(mut self, result: Result<UploadResponse, GazelleError>) -> Self {
+        self.upload_new_source_returns = Some(result);
+        self
+    }
 }
 
 impl Default for MockGazelleClient {
@@ -76,6 +85,7 @@ impl Default for MockGazelleClient {
             get_user_returns: Some(Ok(User::mock())),
             download_torrent_returns: Some(Ok(vec![0xd8, 0x3a, 0x00])),
             upload_torrent_returns: Some(Ok(UploadResponse::mock())),
+            upload_new_source_returns: Some(Ok(UploadResponse::mock())),
         }
     }
 }
@@ -110,6 +120,15 @@ impl GazelleClientTrait for MockGazelleClient {
         self.upload_torrent_returns
             .clone()
             .expect("MockGazelleClient: upload_torrent_returns not set")
+    }
+
+    async fn upload_new_source(
+        &self,
+        _upload: NewSourceUploadForm,
+    ) -> Result<UploadResponse, GazelleError> {
+        self.upload_new_source_returns
+            .clone()
+            .expect("MockGazelleClient: upload_new_source_returns not set")
     }
 }
 
@@ -253,6 +272,37 @@ mod tests {
                 media: String::new(),
                 release_desc: String::new(),
                 group_id: 1,
+            })
+            .await
+            .is_ok()
+        );
+        assert!(
+            mock.upload_new_source(crate::NewSourceUploadForm {
+                path: PathBuf::new(),
+                category_id: 0,
+                title: "Example".to_owned(),
+                year: 2024,
+                release_type: 1,
+                media: "WEB".to_owned(),
+                tags: vec!["electronic".to_owned()],
+                album_desc: String::new(),
+                release_desc: String::new(),
+                request_id: None,
+                image: None,
+                edition: crate::NewSourceUploadEdition {
+                    unknown_release: true,
+                    remaster: None,
+                    year: 0,
+                    title: String::new(),
+                    record_label: String::new(),
+                    catalogue_number: String::new(),
+                    format: "FLAC".to_owned(),
+                    bitrate: "Lossless".to_owned(),
+                },
+                artists: vec![crate::NewSourceUploadArtist {
+                    name: "Artist".to_owned(),
+                    role: 1,
+                }],
             })
             .await
             .is_ok()
