@@ -1,0 +1,12 @@
+name: CI
+on: workflow_call
+jobs:
+  ci:
+    uses: RogueOneEcho/ci/.github/workflows/rust-lib.yml@v1
+    secrets:
+      RELEASE_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+      RELEASE_SCRIPT: ${{ secrets.RELEASE_SCRIPT }}
+      CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+      CONFIG: ${{ secrets.CONFIG }}
+    with:
+      config-path: config.yml

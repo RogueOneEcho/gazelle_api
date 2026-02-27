@@ -1,0 +1,13 @@
+name: CI on PR Approved
+on:
+  pull_request_review:
+    types:
+    - submitted
+permissions:
+  actions: write
+  contents: write
+jobs:
+  ci:
+    if: github.event.review.state == 'approved'
+    uses: ./.github/workflows/ci.yml
+    secrets: inherit

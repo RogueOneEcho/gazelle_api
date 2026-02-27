@@ -1,0 +1,9 @@
+name: CI on Push
+on: push
+permissions:
+  actions: write
+  contents: write
+jobs:
+  ci:
+    uses: ./.github/workflows/ci.yml
+    secrets: inherit
