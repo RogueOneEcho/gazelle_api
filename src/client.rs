@@ -117,6 +117,13 @@ impl GazelleClientTrait for GazelleClient {
     async fn upload_torrent(&self, upload: UploadForm) -> Result<UploadResponse, GazelleError> {
         GazelleClient::upload_torrent(self, upload).await
     }
+
+    async fn upload_new_source(
+        &self,
+        upload: NewSourceUploadForm,
+    ) -> Result<UploadResponse, GazelleError> {
+        GazelleClient::upload_new_source(self, upload).await
+    }
 }
 
 #[cfg(test)]
