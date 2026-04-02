@@ -1,6 +1,6 @@
 use serde::Deserialize;
 
-use crate::Credits;
+use crate::{Credits, ReleaseType};
 
 /// A release.
 ///
@@ -30,25 +30,8 @@ pub struct Group {
     ///
     /// *RED only*
     pub catalogue_number: Option<String>,
-    /// Index of release type
-    ///
-    /// 1: `Album`
-    /// 3: `Soundtrack`
-    /// 5: `EP`
-    /// 6: `Anthology`
-    /// 7: `Compilation`
-    /// 9: `Single`
-    /// 11: `Live album`
-    /// 13: `Remix`
-    /// 14: `Bootleg`
-    /// 15: `Interview`
-    /// 16: `Mixtape`
-    /// 17: `Demo` (RED only)
-    /// 18: `Concert Recording` (RED only)
-    /// 19: `DJ Mix` (RED only)
-    /// 21: `Unknown`
-    /// <https://github.com/OPSnet/Gazelle/blob/3e2f8f8ef99f654047d86ea75da166e270b85ba9/public/static/functions/upload.js#L582-L595>
-    pub release_type: u8,
+    /// Release type
+    pub release_type: ReleaseType,
     /// ID number of the category
     ///
     /// *CAUTION: This index is inexplicably different to the [`UploadForm`] `category_id`*
@@ -109,7 +92,7 @@ impl Group {
             wiki_body: "Test wiki body".to_owned(),
             bb_body: None,
             wiki_image: "https://example.com/image.jpg".to_owned(),
-            release_type: 1,
+            release_type: ReleaseType::Album,
         }
     }
 }
