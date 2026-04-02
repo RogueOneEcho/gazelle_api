@@ -28,10 +28,13 @@ impl TorrentResponse {
 #[allow(clippy::unwrap_used, clippy::indexing_slicing)]
 mod tests {
     use super::*;
+    use crate::ReleaseType;
 
     const OPS_RESPONSE: &str = include_str!("../tests/fixtures/torrent_response_ops.json");
     const RED_RESPONSE: &str = include_str!("../tests/fixtures/torrent_response_red.json");
     const MINIMAL_RESPONSE: &str = include_str!("../tests/fixtures/torrent_response_minimal.json");
+    const OPS_EMPTY_RELEASE_TYPE: &str =
+        include_str!("../tests/fixtures/torrent_response_ops_empty_release_type.json");
 
     #[test]
     fn deserialize_ops_torrent_response() {
@@ -55,6 +58,7 @@ mod tests {
         assert_eq!(response.torrent.media, "WEB");
         assert_eq!(response.torrent.format, "FLAC");
         assert_eq!(response.torrent.encoding, "Lossless");
+        assert_eq!(response.group.release_type, ReleaseType::Single);
     }
 
     #[test]
@@ -135,5 +139,24 @@ mod tests {
         // Assert - get_flacs works with fixture data
         let flacs = response.torrent.get_flacs();
         assert_eq!(flacs.len(), 1);
+    }
+
+    /// OPS returns `releaseType: ""` for some torrents where the field is
+    /// unset in the database.
+    ///
+    /// <https://github.com/RogueOneEcho/gazelle_api/issues/5>
+    #[test]
+    fn deserialize_ops_empty_release_type() {
+        // Arrange & Act
+        let response: TorrentResponse = serde_json::from_str(OPS_EMPTY_RELEASE_TYPE).unwrap();
+
+        // Assert
+        assert_eq!(response.group.id, 99001);
+        assert_eq!(response.group.name, "Mock Author - Mock Audiobook Title");
+        assert_eq!(response.group.category_id, 4);
+        assert_eq!(response.group.category_name, "Audiobooks");
+        assert_eq!(response.torrent.id, 99002);
+        assert_eq!(response.torrent.format, "AAC");
+        assert_eq!(response.group.release_type, ReleaseType::NonMusic);
     }
 }
