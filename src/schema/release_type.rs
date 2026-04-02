@@ -4,13 +4,18 @@ use std::fmt;
 
 /// Release type of a [`Group`].
 ///
-/// Non-music categories use [`ReleaseType::NonMusic`] which are stored as in the database as `0`
+/// Non-music categories use [`ReleaseType::NonMusic`] which are stored in the database as `0`
 /// but returned by the API as `""`.
 ///
-/// - <https://github.com/OPSnet/Gazelle/blob/3e2f8f8ef99f654047d86ea75da166e270b85ba9/public/static/functions/upload.js#L582-L595>
+/// - <https://github.com/OPSnet/Gazelle/blob/be7fae7c70028db381a5738bba6277d3b6812aa8/public/static/functions/upload.js#L580-L600>
 /// - <https://github.com/OPSnet/Gazelle/blob/be7fae7c70028db381a5738bba6277d3b6812aa8/app/Json/TGroup.php#L26>
+/// - <https://github.com/OPSnet/Gazelle/blob/be7fae7c70028db381a5738bba6277d3b6812aa8/app/TGroup.php#L408>
 #[derive(Clone, Debug, PartialEq, Default)]
 pub enum ReleaseType {
+    /// Non-Music category with no specific release type.
+    ///
+    /// API returns `""` for these.
+    NonMusic,
     /// Album
     Album,
     /// Soundtrack
@@ -34,26 +39,16 @@ pub enum ReleaseType {
     /// Mixtape
     Mixtape,
     /// Demo
-    ///
-    /// *RED only*
     Demo,
     /// Concert recording
-    ///
-    /// *RED only*
     ConcertRecording,
     /// DJ mix
-    ///
-    /// *RED only*
     DjMix,
     /// Unknown release type
     ///
     /// This is Gazelle's own "Unknown" category, not a parsing fallback.
     #[default]
     Unknown,
-    /// Non-Music category with no specific release type.
-    ///
-    /// OPS returns `""` for these.
-    NonMusic,
     /// Unrecognized integer release type
     Other(i32),
 }
@@ -61,6 +56,7 @@ pub enum ReleaseType {
 impl fmt::Display for ReleaseType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
+            Self::NonMusic => write!(f, "Non-Music"),
             Self::Album => write!(f, "Album"),
             Self::Soundtrack => write!(f, "Soundtrack"),
             Self::EP => write!(f, "EP"),
@@ -76,7 +72,6 @@ impl fmt::Display for ReleaseType {
             Self::ConcertRecording => write!(f, "Concert Recording"),
             Self::DjMix => write!(f, "DJ Mix"),
             Self::Unknown => write!(f, "Unknown"),
-            Self::NonMusic => write!(f, "Non-Music"),
             Self::Other(n) => write!(f, "Other ({n})"),
         }
     }
@@ -85,32 +80,35 @@ impl fmt::Display for ReleaseType {
 impl ReleaseType {
     /// Integer value of the release type
     ///
-    /// Returns `None` for [`NonMusic`](ReleaseType::NonMusic).
+    /// Returns `0` for [`NonMusic`](ReleaseType::NonMusic).
+    ///
+    /// <https://github.com/OPSnet/Gazelle/blob/3e2f8f8ef99f654047d86ea75da166e270b85ba9/app/TGroup.php#L405>
     #[must_use]
-    pub fn to_int(&self) -> Option<i32> {
+    pub fn to_int(&self) -> i32 {
         match self {
-            Self::Album => Some(1),
-            Self::Soundtrack => Some(3),
-            Self::EP => Some(5),
-            Self::Anthology => Some(6),
-            Self::Compilation => Some(7),
-            Self::Single => Some(9),
-            Self::LiveAlbum => Some(11),
-            Self::Remix => Some(13),
-            Self::Bootleg => Some(14),
-            Self::Interview => Some(15),
-            Self::Mixtape => Some(16),
-            Self::Demo => Some(17),
-            Self::ConcertRecording => Some(18),
-            Self::DjMix => Some(19),
-            Self::Unknown => Some(21),
-            Self::NonMusic => None,
-            Self::Other(n) => Some(*n),
+            Self::NonMusic => 0,
+            Self::Album => 1,
+            Self::Soundtrack => 3,
+            Self::EP => 5,
+            Self::Anthology => 6,
+            Self::Compilation => 7,
+            Self::Single => 9,
+            Self::LiveAlbum => 11,
+            Self::Remix => 13,
+            Self::Bootleg => 14,
+            Self::Interview => 15,
+            Self::Mixtape => 16,
+            Self::Demo => 17,
+            Self::ConcertRecording => 18,
+            Self::DjMix => 19,
+            Self::Unknown => 21,
+            Self::Other(n) => *n,
         }
     }
 
     fn from_int(n: i32) -> Self {
         match n {
+            0 => Self::NonMusic,
             1 => Self::Album,
             3 => Self::Soundtrack,
             5 => Self::EP,
@@ -203,19 +201,19 @@ mod tests {
 
     #[test]
     fn to_int_known() {
-        assert_eq!(ReleaseType::Album.to_int(), Some(1));
-        assert_eq!(ReleaseType::Single.to_int(), Some(9));
-        assert_eq!(ReleaseType::Unknown.to_int(), Some(21));
+        assert_eq!(ReleaseType::Album.to_int(), 1);
+        assert_eq!(ReleaseType::Single.to_int(), 9);
+        assert_eq!(ReleaseType::Unknown.to_int(), 21);
     }
 
     #[test]
-    fn to_int_other_int() {
-        assert_eq!(ReleaseType::Other(99).to_int(), Some(99));
+    fn to_int_other() {
+        assert_eq!(ReleaseType::Other(99).to_int(), 99);
     }
 
     #[test]
     fn to_int_non_music() {
-        assert_eq!(ReleaseType::NonMusic.to_int(), None);
+        assert_eq!(ReleaseType::NonMusic.to_int(), 0);
     }
 
     #[test]
