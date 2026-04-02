@@ -1,0 +1,73 @@
+{
+  "group": {
+    "wikiBody": "<p>Test album description.</p>",
+    "bbBody": "Test album description.",
+    "wikiImage": "https://example.com/cover.jpg",
+    "id": 99701,
+    "name": "Test Album",
+    "year": 1968,
+    "recordLabel": "Test Records",
+    "catalogueNumber": "TEST-001",
+    "releaseType": 1,
+    "categoryId": 1,
+    "categoryName": "Music",
+    "time": "2026-02-20 04:00:00",
+    "collages": null,
+    "personalCollages": null,
+    "vanityHouse": false,
+    "isBookmarked": false,
+    "musicInfo": {
+      "composers": [],
+      "dj": [],
+      "artists": [
+        {
+          "id": 3001,
+          "name": "Test Artist"
+        }
+      ],
+      "with": [],
+      "conductor": [],
+      "remixedBy": [],
+      "producer": []
+    },
+    "tags": ["rock"]
+  },
+  "torrent": {
+    "id": 99702,
+    "infoHash": "6DF84E3A8CC1C678F54A07CF717D2BBC41604674",
+    "media": "Blu-Ray",
+    "format": "FLAC",
+    "encoding": "24bit Lossless",
+    "remastered": true,
+    "remasterYear": 2018,
+    "remasterTitle": "Super Deluxe Edition / Multichannel",
+    "remasterRecordLabel": "Test Records",
+    "remasterCatalogueNumber": "",
+    "scene": false,
+    "hasLog": false,
+    "hasCue": false,
+    "logScore": 0,
+    "ripLogIds": [],
+    "fileCount": 31,
+    "size": 5000000000,
+    "canUseToken": false,
+    "seeders": 50,
+    "leechers": 0,
+    "snatched": 200,
+    "has_snatched": false,
+    "trumpable": false,
+    "trumpable_reasons": [],
+    "lossyWebApproved": false,
+    "lossyMasterApproved": false,
+    "freeTorrent": false,
+    "isNeutralleech": false,
+    "isFreeload": false,
+    "reported": false,
+    "time": "2018-11-10 16:00:00",
+    "description": "",
+    "fileList": "01 - Track.flac{{{160000000}}}|||02 - Track.flac{{{160000000}}}",
+    "filePath": "Test Artist - Test Album (5.1 24-96)",
+    "userId": 3001,
+    "username": "user_a"
+  }
+}

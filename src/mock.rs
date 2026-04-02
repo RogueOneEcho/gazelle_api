@@ -122,6 +122,7 @@ mod tests {
     use tokio::sync::Mutex;
 
     use super::*;
+    use crate::{Category, Format, Media, Quality};
 
     #[tokio::test]
     async fn mock_get_torrent_returns_configured_value() {
@@ -241,16 +242,16 @@ mod tests {
         assert!(mock.get_user(1).await.is_ok());
         assert!(mock.download_torrent(1).await.is_ok());
         assert!(
-            mock.upload_torrent(crate::UploadForm {
+            mock.upload_torrent(UploadForm {
                 path: PathBuf::new(),
-                category_id: 0,
+                category_id: Category::Music,
                 remaster_year: 2020,
                 remaster_title: String::new(),
                 remaster_record_label: String::new(),
                 remaster_catalogue_number: String::new(),
-                format: String::new(),
-                bitrate: String::new(),
-                media: String::new(),
+                format: Format::FLAC,
+                bitrate: Quality::Lossless,
+                media: Media::CD,
                 release_desc: String::new(),
                 group_id: 1,
             })

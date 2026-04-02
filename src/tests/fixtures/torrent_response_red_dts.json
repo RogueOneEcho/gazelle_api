@@ -1,0 +1,73 @@
+{
+  "group": {
+    "wikiBody": "<p>Test album description.</p>",
+    "bbBody": "Test album description.",
+    "wikiImage": "https://example.com/cover.jpg",
+    "id": 99401,
+    "name": "Test Album",
+    "year": 1971,
+    "recordLabel": "Test Records",
+    "catalogueNumber": "TEST-001",
+    "releaseType": 1,
+    "categoryId": 1,
+    "categoryName": "Music",
+    "time": "2025-09-01 10:00:00",
+    "collages": null,
+    "personalCollages": null,
+    "vanityHouse": false,
+    "isBookmarked": false,
+    "musicInfo": {
+      "composers": [],
+      "dj": [],
+      "artists": [
+        {
+          "id": 3001,
+          "name": "Test Artist"
+        }
+      ],
+      "with": [],
+      "conductor": [],
+      "remixedBy": [],
+      "producer": []
+    },
+    "tags": ["rock"]
+  },
+  "torrent": {
+    "id": 99402,
+    "infoHash": "CA3267327F43D0E0210C778C8F3025E3F2C2EAAB",
+    "media": "DVD",
+    "format": "DTS",
+    "encoding": "1510",
+    "remastered": true,
+    "remasterYear": 2000,
+    "remasterTitle": "5.1 Mix",
+    "remasterRecordLabel": "Test Records",
+    "remasterCatalogueNumber": "TEST-002",
+    "scene": false,
+    "hasLog": false,
+    "hasCue": false,
+    "logScore": 0,
+    "ripLogIds": [],
+    "fileCount": 10,
+    "size": 500000000,
+    "canUseToken": false,
+    "seeders": 50,
+    "leechers": 0,
+    "snatched": 500,
+    "has_snatched": false,
+    "trumpable": false,
+    "trumpable_reasons": [],
+    "lossyWebApproved": false,
+    "lossyMasterApproved": false,
+    "freeTorrent": false,
+    "isNeutralleech": false,
+    "isFreeload": false,
+    "reported": false,
+    "time": "2024-12-24 19:00:00",
+    "description": "",
+    "fileList": "01 - Track.dts{{{50000000}}}|||02 - Track.dts{{{50000000}}}",
+    "filePath": "Test Artist - Test Album (DTS)",
+    "userId": 3001,
+    "username": "user_a"
+  }
+}

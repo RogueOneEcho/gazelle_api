@@ -28,13 +28,23 @@ impl TorrentResponse {
 #[allow(clippy::unwrap_used, clippy::indexing_slicing)]
 mod tests {
     use super::*;
-    use crate::ReleaseType;
+    use crate::{Category, Format, Media, Quality, ReleaseType};
 
     const OPS_RESPONSE: &str = include_str!("../tests/fixtures/torrent_response_ops.json");
     const RED_RESPONSE: &str = include_str!("../tests/fixtures/torrent_response_red.json");
     const MINIMAL_RESPONSE: &str = include_str!("../tests/fixtures/torrent_response_minimal.json");
     const OPS_EMPTY_RELEASE_TYPE: &str =
         include_str!("../tests/fixtures/torrent_response_ops_empty_release_type.json");
+    const RED_EBOOK: &str = include_str!("../tests/fixtures/torrent_response_red_ebook.json");
+    const RED_APP: &str = include_str!("../tests/fixtures/torrent_response_red_app.json");
+    const RED_DSD: &str = include_str!("../tests/fixtures/torrent_response_red_dsd.json");
+    const RED_DTS: &str = include_str!("../tests/fixtures/torrent_response_red_dts.json");
+    const OPS_AAC: &str = include_str!("../tests/fixtures/torrent_response_ops_aac.json");
+    const OPS_BD: &str = include_str!("../tests/fixtures/torrent_response_ops_bd.json");
+    const RED_BLURAY: &str = include_str!("../tests/fixtures/torrent_response_red_bluray.json");
+    const RED_V0: &str = include_str!("../tests/fixtures/torrent_response_red_v0.json");
+    const OPS_Q8: &str = include_str!("../tests/fixtures/torrent_response_ops_q8.json");
+    const RED_CASSETTE: &str = include_str!("../tests/fixtures/torrent_response_red_cassette.json");
 
     #[test]
     fn deserialize_ops_torrent_response() {
@@ -55,9 +65,9 @@ mod tests {
         assert_eq!(response.group.id, 16352);
         assert_eq!(response.group.name, "Test Album");
         assert_eq!(response.torrent.id, 1_520_678);
-        assert_eq!(response.torrent.media, "WEB");
-        assert_eq!(response.torrent.format, "FLAC");
-        assert_eq!(response.torrent.encoding, "Lossless");
+        assert_eq!(response.torrent.media, Media::WEB);
+        assert_eq!(response.torrent.format, Format::FLAC);
+        assert_eq!(response.torrent.encoding, Quality::Lossless);
         assert_eq!(response.group.release_type, ReleaseType::Single);
     }
 
@@ -83,7 +93,7 @@ mod tests {
         assert_eq!(response.group.id, 8126);
         assert_eq!(response.group.name, "Test Album");
         assert_eq!(response.torrent.id, 12483);
-        assert_eq!(response.torrent.media, "WEB");
+        assert_eq!(response.torrent.media, Media::WEB);
     }
 
     #[test]
@@ -97,7 +107,7 @@ mod tests {
         assert!(response.group.tags.is_empty());
         assert!(response.group.music_info.is_none());
         assert_eq!(response.torrent.id, 3000);
-        assert_eq!(response.torrent.format, "MP3");
+        assert_eq!(response.torrent.format, Format::MP3);
         assert_eq!(response.torrent.remastered, Some(false));
         assert!(response.torrent.scene);
     }
@@ -153,10 +163,203 @@ mod tests {
         // Assert
         assert_eq!(response.group.id, 99001);
         assert_eq!(response.group.name, "Mock Author - Mock Audiobook Title");
-        assert_eq!(response.group.category_id, 4);
+        assert_eq!(response.group.category_id, Category::Audiobooks);
         assert_eq!(response.group.category_name, "Audiobooks");
         assert_eq!(response.torrent.id, 99002);
-        assert_eq!(response.torrent.format, "AAC");
+        assert_eq!(response.torrent.format, Format::AAC);
         assert_eq!(response.group.release_type, ReleaseType::NonMusic);
+    }
+
+    /// RED returns `releaseType: 0` for non-Music categories (unlike OPS which returns `""`).
+    /// E-Books have empty media, format, and encoding fields.
+    #[test]
+    fn deserialize_red_ebook() {
+        // Arrange & Act
+        let response: TorrentResponse = serde_json::from_str(RED_EBOOK).unwrap();
+
+        // Assert
+        assert_eq!(response.group.id, 99101);
+        assert_eq!(response.group.category_id, Category::EBooks);
+        assert_eq!(response.group.category_name, "E-Books");
+        assert_eq!(response.group.release_type, ReleaseType::NonMusic);
+        assert_eq!(response.torrent.media, Media::Other(String::new()));
+        assert_eq!(response.torrent.format, Format::Other(String::new()));
+        assert_eq!(response.torrent.encoding, Quality::Other(String::new()));
+    }
+
+    /// Applications category with neutralleech and empty media/format/encoding.
+    #[test]
+    fn deserialize_red_app() {
+        // Arrange & Act
+        let response: TorrentResponse = serde_json::from_str(RED_APP).unwrap();
+
+        // Assert
+        assert_eq!(response.group.id, 99201);
+        assert_eq!(response.group.category_id, Category::Applications);
+        assert_eq!(response.group.category_name, "Applications");
+        assert_eq!(response.group.release_type, ReleaseType::NonMusic);
+        assert_eq!(response.torrent.is_neutralleech, Some(true));
+        assert_eq!(response.torrent.media, Media::Other(String::new()));
+        assert_eq!(response.torrent.format, Format::Other(String::new()));
+        assert_eq!(response.torrent.encoding, Quality::Other(String::new()));
+    }
+
+    /// DSD format and quality on SACD media, all RED-only enum variants.
+    #[test]
+    fn deserialize_red_dsd() {
+        // Arrange & Act
+        let response: TorrentResponse = serde_json::from_str(RED_DSD).unwrap();
+
+        // Assert
+        assert_eq!(response.group.id, 99301);
+        assert_eq!(response.group.category_id, Category::Music);
+        assert_eq!(response.group.release_type, ReleaseType::Album);
+        assert_eq!(response.torrent.media, Media::SACD);
+        assert_eq!(response.torrent.format, Format::DSD);
+        assert_eq!(response.torrent.encoding, Quality::DSD64);
+    }
+
+    /// DTS format on DVD media with a freeform bitrate value.
+    #[test]
+    fn deserialize_red_dts() {
+        // Arrange & Act
+        let response: TorrentResponse = serde_json::from_str(RED_DTS).unwrap();
+
+        // Assert
+        assert_eq!(response.group.id, 99401);
+        assert_eq!(response.torrent.media, Media::DVD);
+        assert_eq!(response.torrent.format, Format::DTS);
+        assert_eq!(response.torrent.encoding, Quality::Other("1510".to_owned()));
+    }
+
+    /// OPS AAC format with 256 kbps quality.
+    #[test]
+    fn deserialize_ops_aac() {
+        // Arrange & Act
+        let response: TorrentResponse = serde_json::from_str(OPS_AAC).unwrap();
+
+        // Assert
+        assert_eq!(response.group.id, 99501);
+        assert_eq!(response.group.release_type, ReleaseType::Single);
+        assert_eq!(response.torrent.media, Media::WEB);
+        assert_eq!(response.torrent.format, Format::AAC);
+        assert_eq!(response.torrent.encoding, Quality::_256);
+    }
+
+    /// OPS BD media with AC3 format and freeform quality value.
+    #[test]
+    fn deserialize_ops_bd() {
+        // Arrange & Act
+        let response: TorrentResponse = serde_json::from_str(OPS_BD).unwrap();
+
+        // Assert
+        assert_eq!(response.group.id, 99601);
+        assert_eq!(response.group.release_type, ReleaseType::LiveAlbum);
+        assert_eq!(response.torrent.media, Media::BD);
+        assert_eq!(response.torrent.format, Format::AC3);
+        assert_eq!(
+            response.torrent.encoding,
+            Quality::Other("384 kbps".to_owned())
+        );
+    }
+
+    /// RED Blu-Ray media (distinct from OPS BD) with 24bit Lossless quality.
+    #[test]
+    fn deserialize_red_bluray() {
+        // Arrange & Act
+        let response: TorrentResponse = serde_json::from_str(RED_BLURAY).unwrap();
+
+        // Assert
+        assert_eq!(response.group.id, 99701);
+        assert_eq!(response.torrent.media, Media::BluRay);
+        assert_eq!(response.torrent.format, Format::FLAC);
+        assert_eq!(response.torrent.encoding, Quality::Lossless24);
+    }
+
+    /// MP3 V0 (VBR) on CD media.
+    #[test]
+    fn deserialize_red_v0() {
+        // Arrange & Act
+        let response: TorrentResponse = serde_json::from_str(RED_V0).unwrap();
+
+        // Assert
+        assert_eq!(response.group.id, 99801);
+        assert_eq!(response.torrent.media, Media::CD);
+        assert_eq!(response.torrent.format, Format::MP3);
+        assert_eq!(response.torrent.encoding, Quality::V0);
+    }
+
+    /// OPS q8.x (VBR) quality, an OPS-only variant.
+    #[test]
+    fn deserialize_ops_q8() {
+        // Arrange & Act
+        let response: TorrentResponse = serde_json::from_str(OPS_Q8).unwrap();
+
+        // Assert
+        assert_eq!(response.group.id, 99901);
+        assert_eq!(response.group.release_type, ReleaseType::Anthology);
+        assert_eq!(response.torrent.media, Media::CD);
+        assert_eq!(response.torrent.format, Format::MP3);
+        assert_eq!(response.torrent.encoding, Quality::Q8x);
+    }
+
+    /// Cassette media with AAC format.
+    #[test]
+    fn deserialize_red_cassette() {
+        // Arrange & Act
+        let response: TorrentResponse = serde_json::from_str(RED_CASSETTE).unwrap();
+
+        // Assert
+        assert_eq!(response.group.id, 100_001);
+        assert_eq!(response.torrent.media, Media::Cassette);
+        assert_eq!(response.torrent.format, Format::AAC);
+        assert_eq!(response.torrent.encoding, Quality::_256);
+    }
+
+    /// Verify that `Display` output matches the original JSON string for all fixtures.
+    ///
+    /// [`UploadForm::to_form`] uses `Display` to produce the string values sent to the
+    /// upload endpoint, so the output must exactly match the API's canonical strings.
+    #[test]
+    fn display_round_trip() {
+        let fixtures = [
+            OPS_RESPONSE,
+            RED_RESPONSE,
+            MINIMAL_RESPONSE,
+            OPS_EMPTY_RELEASE_TYPE,
+            RED_EBOOK,
+            RED_APP,
+            RED_DSD,
+            RED_DTS,
+            OPS_AAC,
+            OPS_BD,
+            RED_BLURAY,
+            RED_V0,
+            OPS_Q8,
+            RED_CASSETTE,
+        ];
+        for fixture in fixtures {
+            let raw: serde_json::Value = serde_json::from_str(fixture).unwrap();
+            let response: TorrentResponse = serde_json::from_str(fixture).unwrap();
+            let torrent = &raw["torrent"];
+            assert_eq!(
+                response.torrent.media.to_string(),
+                torrent["media"].as_str().unwrap(),
+                "media mismatch in fixture with torrent id {}",
+                torrent["id"]
+            );
+            assert_eq!(
+                response.torrent.format.to_string(),
+                torrent["format"].as_str().unwrap(),
+                "format mismatch in fixture with torrent id {}",
+                torrent["id"]
+            );
+            assert_eq!(
+                response.torrent.encoding.to_string(),
+                torrent["encoding"].as_str().unwrap(),
+                "encoding mismatch in fixture with torrent id {}",
+                torrent["id"]
+            );
+        }
     }
 }

@@ -28,6 +28,7 @@ impl GroupResponse {
 #[allow(clippy::unwrap_used, clippy::indexing_slicing)]
 mod tests {
     use super::*;
+    use crate::{Media, Quality};
 
     const OPS_RESPONSE: &str = include_str!("../tests/fixtures/group_response_ops.json");
     const RED_RESPONSE: &str = include_str!("../tests/fixtures/group_response_red.json");
@@ -88,13 +89,13 @@ mod tests {
         // Assert - First torrent (24bit)
         let first_torrent = &response.torrents[0];
         assert_eq!(first_torrent.id, 2_492_578);
-        assert_eq!(first_torrent.media, "WEB");
-        assert_eq!(first_torrent.encoding, "24bit Lossless");
+        assert_eq!(first_torrent.media, Media::WEB);
+        assert_eq!(first_torrent.encoding, Quality::Lossless24);
 
         // Assert - Second torrent (16bit)
         let second_torrent = &response.torrents[1];
         assert_eq!(second_torrent.id, 1_520_678);
-        assert_eq!(second_torrent.encoding, "Lossless");
+        assert_eq!(second_torrent.encoding, Quality::Lossless);
     }
 
     #[test]
@@ -159,8 +160,8 @@ mod tests {
 
         // Assert - Three different editions
         assert_eq!(response.torrents.len(), 3);
-        assert_eq!(response.torrents[0].media, "Vinyl");
-        assert_eq!(response.torrents[1].media, "CD");
-        assert_eq!(response.torrents[2].media, "WEB");
+        assert_eq!(response.torrents[0].media, Media::Vinyl);
+        assert_eq!(response.torrents[1].media, Media::CD);
+        assert_eq!(response.torrents[2].media, Media::WEB);
     }
 }

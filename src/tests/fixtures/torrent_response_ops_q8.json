@@ -1,0 +1,70 @@
+{
+  "group": {
+    "wikiBody": "<p>Test anthology description.</p>",
+    "wikiBBcode": "Test anthology description.",
+    "wikiImage": "https://example.com/cover.jpg",
+    "proxyImage": "https://example.com/proxy/cover.jpg",
+    "id": 99901,
+    "name": "Test Greatest Hits",
+    "year": 2009,
+    "releaseType": 6,
+    "releaseTypeName": "Anthology",
+    "categoryId": 1,
+    "categoryName": "Music",
+    "time": "2024-05-01 04:00:00",
+    "vanityHouse": false,
+    "isBookmarked": false,
+    "tags": ["rock"],
+    "musicInfo": {
+      "artists": [
+        {
+          "id": 3001,
+          "aliasid": 3001,
+          "artist": {"id": 3001},
+          "name": "Test Artist"
+        }
+      ],
+      "with": [],
+      "remixedBy": [],
+      "composers": [],
+      "conductor": [],
+      "dj": [],
+      "producer": [],
+      "arranger": []
+    }
+  },
+  "torrent": {
+    "id": 99902,
+    "infoHash": "FD6CF791C9C1DEFC578D4536EA00791AF945B68B",
+    "media": "CD",
+    "format": "MP3",
+    "encoding": "q8.x (VBR)",
+    "remasterYear": 2009,
+    "remasterTitle": "",
+    "remasterRecordLabel": "",
+    "remasterCatalogueNumber": "",
+    "scene": false,
+    "hasLog": false,
+    "hasCue": false,
+    "logScore": 0,
+    "logChecksum": false,
+    "logCount": 0,
+    "ripLogIds": [],
+    "fileCount": 51,
+    "size": 450000000,
+    "seeders": 5,
+    "leechers": 0,
+    "snatched": 20,
+    "freeTorrent": "Normal",
+    "freeReason": "Normal",
+    "reported": false,
+    "trumpable": false,
+    "trumpable_reasons": [],
+    "time": "2024-05-01 04:00:00",
+    "description": "",
+    "fileList": "01 - Track.mp3{{{9000000}}}|||02 - Track.mp3{{{9000000}}}",
+    "filePath": "Test Artist - Test Greatest Hits (2009) [MP3 V0]",
+    "userId": 3001,
+    "username": "user_a"
+  }
+}

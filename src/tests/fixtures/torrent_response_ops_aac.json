@@ -1,0 +1,69 @@
+{
+  "group": {
+    "wikiBody": "<p>Test tracklist.</p>",
+    "wikiBBcode": "Test tracklist.",
+    "wikiImage": "https://example.com/cover.jpg",
+    "proxyImage": "https://example.com/proxy/cover.jpg",
+    "id": 99501,
+    "name": "Test Single",
+    "year": 2026,
+    "releaseType": 9,
+    "releaseTypeName": "Single",
+    "categoryId": 1,
+    "categoryName": "Music",
+    "time": "2026-03-01 12:00:00",
+    "vanityHouse": false,
+    "isBookmarked": false,
+    "tags": ["electronic"],
+    "musicInfo": {
+      "artists": [
+        {
+          "id": 3001,
+          "aliasid": 3001,
+          "artist": {"id": 3001},
+          "name": "Test Artist"
+        }
+      ],
+      "with": [],
+      "remixedBy": [],
+      "composers": [],
+      "conductor": [],
+      "dj": [],
+      "producer": [],
+      "arranger": []
+    }
+  },
+  "torrent": {
+    "id": 99502,
+    "media": "WEB",
+    "format": "AAC",
+    "encoding": "256",
+    "remasterYear": 2026,
+    "remasterTitle": "",
+    "remasterRecordLabel": "",
+    "remasterCatalogueNumber": "",
+    "scene": false,
+    "hasLog": false,
+    "hasCue": false,
+    "logScore": 0,
+    "logChecksum": false,
+    "logCount": 0,
+    "ripLogIds": [],
+    "fileCount": 2,
+    "size": 8000000,
+    "seeders": 3,
+    "leechers": 0,
+    "snatched": 10,
+    "freeTorrent": "Normal",
+    "freeReason": "Normal",
+    "reported": false,
+    "trumpable": false,
+    "trumpable_reasons": [],
+    "time": "2026-03-01 12:00:00",
+    "description": "",
+    "fileList": "01 - Track.m4a{{{7000000}}}|||cover.jpg{{{1000000}}}",
+    "filePath": "Test Artist - Test Single (2026) [AAC]",
+    "userId": 3001,
+    "username": "user_a"
+  }
+}

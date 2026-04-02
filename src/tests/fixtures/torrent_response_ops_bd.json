@@ -1,0 +1,69 @@
+{
+  "group": {
+    "wikiBody": "<p>Test live album description.</p>",
+    "wikiBBcode": "Test live album description.",
+    "wikiImage": "https://example.com/cover.png",
+    "proxyImage": "https://example.com/proxy/cover.png",
+    "id": 99601,
+    "name": "Test Live Album",
+    "year": 2017,
+    "releaseType": 11,
+    "releaseTypeName": "Live album",
+    "categoryId": 1,
+    "categoryName": "Music",
+    "time": "2026-03-01 03:00:00",
+    "vanityHouse": false,
+    "isBookmarked": false,
+    "tags": ["rock"],
+    "musicInfo": {
+      "artists": [
+        {
+          "id": 3001,
+          "aliasid": 3001,
+          "artist": {"id": 3001},
+          "name": "Test Artist"
+        }
+      ],
+      "with": [],
+      "remixedBy": [],
+      "composers": [],
+      "conductor": [],
+      "dj": [],
+      "producer": [],
+      "arranger": []
+    }
+  },
+  "torrent": {
+    "id": 99602,
+    "media": "BD",
+    "format": "AC3",
+    "encoding": "384 kbps",
+    "remasterYear": 2017,
+    "remasterTitle": "5.1 Multichannel",
+    "remasterRecordLabel": "Test Visual",
+    "remasterCatalogueNumber": "TEST-003",
+    "scene": false,
+    "hasLog": false,
+    "hasCue": false,
+    "logScore": 0,
+    "logChecksum": false,
+    "logCount": 0,
+    "ripLogIds": [],
+    "fileCount": 15,
+    "size": 250000000,
+    "seeders": 5,
+    "leechers": 0,
+    "snatched": 20,
+    "freeTorrent": "Normal",
+    "freeReason": "Normal",
+    "reported": false,
+    "trumpable": false,
+    "trumpable_reasons": [],
+    "time": "2026-03-01 03:00:00",
+    "description": "",
+    "fileList": "01 - Track.ac3{{{25000000}}}|||02 - Track.ac3{{{25000000}}}",
+    "filePath": "Test Artist - Test Live Album [5.1 AC3]",
+    "userId": 3001,
+    "username": "user_a"
+  }
+}

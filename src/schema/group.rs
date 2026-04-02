@@ -1,13 +1,13 @@
 use serde::Deserialize;
 
-use crate::{Credits, ReleaseType};
+use crate::{Category, Credits, ReleaseType};
 
 /// A release.
 ///
 /// Typically represents an album, EP, or single which may contain multiple editions.
 ///
 /// <https://github.com/OPSnet/Gazelle/blob/master/docs/07-API.md#torrent-group>
-#[derive(Clone, Debug, Default, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Group {
     /// Album info formatted as HTML
@@ -32,30 +32,9 @@ pub struct Group {
     pub catalogue_number: Option<String>,
     /// Release type
     pub release_type: ReleaseType,
-    /// ID number of the category
-    ///
-    /// *CAUTION: This index is inexplicably different to the [`UploadForm`] `category_id`*
-    ///
-    /// 0: `Music`
-    /// 1: `Applications`
-    /// 2: `E-Books`
-    /// 3: `Audiobooks`
-    /// 4: `E-Learning Videos`
-    /// 5: `Comedy`
-    /// 6: `Comics`
-    /// <https://github.com/OPSnet/Gazelle/blob/3e2f8f8ef99f654047d86ea75da166e270b85ba9/public/static/functions/upload.js#L702-L710>
-    pub category_id: u8,
-    /// Category name.
-    ///
-    /// - 0: `Music`
-    /// - 1: `Applications`
-    /// - 2: `E-Books`
-    /// - 3: `Audiobooks`
-    /// - 4: `E-Learning Videos`
-    /// - 5: `Comedy`
-    /// - 6: `Comics`
-    ///
-    /// <https://github.com/OPSnet/Gazelle/blob/3e2f8f8ef99f654047d86ea75da166e270b85ba9/public/static/functions/upload.js#L702-L710>
+    /// Category
+    pub category_id: Category,
+    /// Category name
     pub category_name: String,
     /// Time of last logged event
     pub time: String,
@@ -82,7 +61,7 @@ impl Group {
             year: 2020,
             record_label: Some("Test Label".to_owned()),
             catalogue_number: Some("TEST-001".to_owned()),
-            category_id: 0,
+            category_id: Category::Music,
             category_name: "Music".to_owned(),
             time: "2020-01-01 00:00:00".to_owned(),
             vanity_house: false,

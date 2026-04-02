@@ -2,53 +2,25 @@ use regex::Regex;
 use serde::Deserialize;
 use std::path::PathBuf;
 
+use crate::{Format, Media, Quality};
+
 /// An edition of a release.
 ///
 /// <https://github.com/OPSnet/Gazelle/blob/master/docs/07-API.md#torrent>
-#[derive(Clone, Debug, Default, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 #[allow(clippy::struct_excessive_bools)]
 pub struct Torrent {
     /// ID number
     pub id: u32,
     /// Media
-    ///
-    /// 0: `CD`
-    /// 1: `DVD`
-    /// 2: `Vinyl`
-    /// 3: `Soundboard`
-    /// 4: `SACD`
-    /// 5: `DAT`
-    /// 6: `Cassette`
-    /// 7: `WEB`
-    /// 8: `Blu-Ray` (Possibly `Blu-ray` on OPS)
-    pub media: String,
+    pub media: Media,
     /// Format
+    pub format: Format,
+    /// Quality
     ///
-    /// 0: `MP3`
-    /// 1: `FLAC`
-    /// 2: `AAC`
-    /// 3: `AC3`
-    /// 4: `DTS`
-    ///
-    /// *OPS may have others*
-    pub format: String,
-    /// Encoding
-    ///
-    /// 0: `192`
-    /// 1: `APS (VBR)`
-    /// 2: `V2 (VBR)`
-    /// 3: `V1 (VBR)`
-    /// 4: `256`
-    /// 5: `APX (VBR)`
-    /// 6: `V0 (VBR)`
-    /// 7: `320`
-    /// 8: `Lossless`
-    /// 9: `24bit Lossless`
-    /// 10: `Other`
-    ///
-    /// *OPS may have others*
-    pub encoding: String,
+    /// Referred to as `encoding` in the API response.
+    pub encoding: Quality,
     /// Has this release been confirmed?
     ///
     /// `remastered` is a deprecated term from the early days of Gazelle.
@@ -148,9 +120,9 @@ impl Torrent {
     pub fn mock() -> Self {
         Self {
             id: 456,
-            media: "CD".to_owned(),
-            format: "FLAC".to_owned(),
-            encoding: "Lossless".to_owned(),
+            media: Media::CD,
+            format: Format::FLAC,
+            encoding: Quality::Lossless,
             remastered: Some(true),
             remaster_year: Some(2020),
             remaster_title: String::new(),
@@ -192,8 +164,38 @@ mod tests {
         // Arrange
         let file_list = r"file1.flac{{{12345}}}|||file2.flac{{{67890}}}|||file with spaces.flac{{{54321}}}|||another_file.flac{{{98765}}}|||/path/to/file.flac{{{11111}}}|||C:\windows\path\file.flac{{{22222}}}|||Disc 1/01. track with period.flac{{{33333}}}|||Disc 1/02. track-with-dash.flac{{{44444}}}|||track_with_underscores.flac{{{55555}}}|||file_with_numbers_123.flac{{{66666}}}|||special&char#file.flac{{{77777}}}|||final_file.flac{{{88888}}}cover.jpg{{{123456}}}|||archive.zip{{{234567}}}|||executable.exe{{{345678}}}|||document.pdf{{{456789}}}|||presentation.pptx{{{567890}}}|||disc-image.iso{{{678901}}}|||compressed.tar.gz{{{789012}}}|||photo.png{{{890123}}}|||audio.mp3{{{901234}}}|||final.zip{{{912345}}}".to_owned();
         let torrent = Torrent {
+            id: 0,
+            media: Media::Other(String::new()),
+            format: Format::Other(String::new()),
+            encoding: Quality::Other(String::new()),
+            remastered: None,
+            remaster_year: None,
+            remaster_title: String::new(),
+            remaster_record_label: String::new(),
+            remaster_catalogue_number: String::new(),
+            scene: false,
+            has_log: false,
+            has_cue: false,
+            log_score: 0,
+            file_count: 0,
+            size: 0,
+            seeders: 0,
+            leechers: 0,
+            snatched: 0,
+            has_snatched: None,
+            trumpable: None,
+            lossy_web_approved: None,
+            lossy_master_approved: None,
+            free_torrent: None,
+            is_neutralleech: None,
+            is_freeload: None,
+            reported: false,
+            time: String::new(),
+            description: String::new(),
             file_list,
-            ..Torrent::default()
+            file_path: String::new(),
+            user_id: 0,
+            username: String::new(),
         };
 
         // Act

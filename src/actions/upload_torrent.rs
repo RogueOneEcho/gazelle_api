@@ -32,7 +32,10 @@ mod tests {
     use serial_test::serial;
 
     use crate::tests::for_each_indexer;
-    use crate::{ApiResponseKind, GazelleError, GazelleOperation, UploadForm};
+    use crate::{
+        ApiResponseKind, Category, Format, GazelleError, GazelleOperation, Media, Quality,
+        UploadForm,
+    };
 
     #[tokio::test]
     #[serial]
@@ -42,14 +45,14 @@ mod tests {
             // Arrange
             let form = UploadForm {
                 path: PathBuf::from("/srv/shared/tests/example-1.torrent"),
-                category_id: 0,
+                category_id: Category::Music,
                 remaster_year: 0,
                 remaster_title: "ALBUM TITLE".to_owned(),
                 remaster_record_label: "RECORD LABEL".to_owned(),
                 remaster_catalogue_number: "CATALOGUE NUMBER".to_owned(),
-                format: "FLAC".to_owned(),
-                bitrate: "Lossless".to_owned(),
-                media: "Cassette".to_owned(),
+                format: Format::FLAC,
+                bitrate: Quality::Lossless,
+                media: Media::Cassette,
                 release_desc: "DESCRIPTION".to_owned(),
                 group_id: examples.group,
             };

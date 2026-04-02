@@ -1,0 +1,73 @@
+{
+  "group": {
+    "wikiBody": "<p>Test album description.</p>",
+    "bbBody": "Test album description.",
+    "wikiImage": "https://example.com/cover.jpg",
+    "id": 99801,
+    "name": "Test Album",
+    "year": 1968,
+    "recordLabel": "Test Records",
+    "catalogueNumber": "TEST-001",
+    "releaseType": 1,
+    "categoryId": 1,
+    "categoryName": "Music",
+    "time": "2026-02-20 04:00:00",
+    "collages": null,
+    "personalCollages": null,
+    "vanityHouse": false,
+    "isBookmarked": false,
+    "musicInfo": {
+      "composers": [],
+      "dj": [],
+      "artists": [
+        {
+          "id": 3001,
+          "name": "Test Artist"
+        }
+      ],
+      "with": [],
+      "conductor": [],
+      "remixedBy": [],
+      "producer": []
+    },
+    "tags": ["rock"]
+  },
+  "torrent": {
+    "id": 99802,
+    "infoHash": "2FDC08A6B7FD7524053AF60FC287B8FD25D5942A",
+    "media": "CD",
+    "format": "MP3",
+    "encoding": "V0 (VBR)",
+    "remastered": true,
+    "remasterYear": 2018,
+    "remasterTitle": "Deluxe Edition",
+    "remasterRecordLabel": "Test Records",
+    "remasterCatalogueNumber": "TEST-002",
+    "scene": false,
+    "hasLog": false,
+    "hasCue": false,
+    "logScore": 0,
+    "ripLogIds": [],
+    "fileCount": 20,
+    "size": 600000000,
+    "canUseToken": false,
+    "seeders": 16,
+    "leechers": 0,
+    "snatched": 50,
+    "has_snatched": false,
+    "trumpable": false,
+    "trumpable_reasons": [],
+    "lossyWebApproved": false,
+    "lossyMasterApproved": false,
+    "freeTorrent": false,
+    "isNeutralleech": false,
+    "isFreeload": false,
+    "reported": false,
+    "time": "2018-11-10 22:00:00",
+    "description": "",
+    "fileList": "01 - Track.mp3{{{30000000}}}|||02 - Track.mp3{{{30000000}}}",
+    "filePath": "Test Artist - Test Album (2018) [V0]",
+    "userId": 3001,
+    "username": "user_a"
+  }
+}

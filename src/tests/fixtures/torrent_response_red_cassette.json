@@ -1,0 +1,73 @@
+{
+  "group": {
+    "wikiBody": "<p>Test album description.</p>",
+    "bbBody": "Test album description.",
+    "wikiImage": "https://example.com/cover.jpg",
+    "id": 100001,
+    "name": "Test Demo Album",
+    "year": 1994,
+    "recordLabel": "Self-released",
+    "catalogueNumber": "",
+    "releaseType": 1,
+    "categoryId": 1,
+    "categoryName": "Music",
+    "time": "2022-02-19 00:00:00",
+    "collages": null,
+    "personalCollages": null,
+    "vanityHouse": false,
+    "isBookmarked": false,
+    "musicInfo": {
+      "composers": [],
+      "dj": [],
+      "artists": [
+        {
+          "id": 3001,
+          "name": "Test Artist"
+        }
+      ],
+      "with": [],
+      "conductor": [],
+      "remixedBy": [],
+      "producer": []
+    },
+    "tags": ["experimental"]
+  },
+  "torrent": {
+    "id": 100002,
+    "infoHash": "021CDFA795C50D63708602E08FFD700973DDAE44",
+    "media": "Cassette",
+    "format": "AAC",
+    "encoding": "256",
+    "remastered": true,
+    "remasterYear": 1994,
+    "remasterTitle": "",
+    "remasterRecordLabel": "Self-released",
+    "remasterCatalogueNumber": "",
+    "scene": false,
+    "hasLog": false,
+    "hasCue": false,
+    "logScore": 0,
+    "ripLogIds": [],
+    "fileCount": 31,
+    "size": 150000000,
+    "canUseToken": false,
+    "seeders": 100,
+    "leechers": 0,
+    "snatched": 500,
+    "has_snatched": false,
+    "trumpable": false,
+    "trumpable_reasons": [],
+    "lossyWebApproved": false,
+    "lossyMasterApproved": false,
+    "freeTorrent": false,
+    "isNeutralleech": false,
+    "isFreeload": false,
+    "reported": false,
+    "time": "2022-02-06 10:00:00",
+    "description": "",
+    "fileList": "01 - Track.m4a{{{5000000}}}|||02 - Track.m4a{{{5000000}}}",
+    "filePath": "Test Artist - Test Demo Album",
+    "userId": 3001,
+    "username": "user_a"
+  }
+}
