@@ -7,7 +7,7 @@ use crate::{Format, Media, Quality};
 /// An edition of a release.
 ///
 /// <https://github.com/OPSnet/Gazelle/blob/master/docs/07-API.md#torrent>
-#[derive(Clone, Debug, Deserialize)]
+#[derive(Clone, Debug, Default, Deserialize)]
 #[serde(rename_all = "camelCase")]
 #[allow(clippy::struct_excessive_bools)]
 pub struct Torrent {
@@ -164,38 +164,8 @@ mod tests {
         // Arrange
         let file_list = r"file1.flac{{{12345}}}|||file2.flac{{{67890}}}|||file with spaces.flac{{{54321}}}|||another_file.flac{{{98765}}}|||/path/to/file.flac{{{11111}}}|||C:\windows\path\file.flac{{{22222}}}|||Disc 1/01. track with period.flac{{{33333}}}|||Disc 1/02. track-with-dash.flac{{{44444}}}|||track_with_underscores.flac{{{55555}}}|||file_with_numbers_123.flac{{{66666}}}|||special&char#file.flac{{{77777}}}|||final_file.flac{{{88888}}}cover.jpg{{{123456}}}|||archive.zip{{{234567}}}|||executable.exe{{{345678}}}|||document.pdf{{{456789}}}|||presentation.pptx{{{567890}}}|||disc-image.iso{{{678901}}}|||compressed.tar.gz{{{789012}}}|||photo.png{{{890123}}}|||audio.mp3{{{901234}}}|||final.zip{{{912345}}}".to_owned();
         let torrent = Torrent {
-            id: 0,
-            media: Media::Other(String::new()),
-            format: Format::Other(String::new()),
-            encoding: Quality::Other(String::new()),
-            remastered: None,
-            remaster_year: None,
-            remaster_title: String::new(),
-            remaster_record_label: String::new(),
-            remaster_catalogue_number: String::new(),
-            scene: false,
-            has_log: false,
-            has_cue: false,
-            log_score: 0,
-            file_count: 0,
-            size: 0,
-            seeders: 0,
-            leechers: 0,
-            snatched: 0,
-            has_snatched: None,
-            trumpable: None,
-            lossy_web_approved: None,
-            lossy_master_approved: None,
-            free_torrent: None,
-            is_neutralleech: None,
-            is_freeload: None,
-            reported: false,
-            time: String::new(),
-            description: String::new(),
             file_list,
-            file_path: String::new(),
-            user_id: 0,
-            username: String::new(),
+            ..Torrent::default()
         };
 
         // Act

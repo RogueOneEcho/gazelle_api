@@ -11,9 +11,10 @@ use std::fmt;
 /// - `DSD64`, `DSD128`, `DSD256`, `DSD512` are *RED only*
 /// - The Gazelle UI has an "Other" option with freeform text input, so the API can return
 ///   arbitrary strings
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub enum Quality {
     /// Lossless
+    #[default]
     Lossless,
     /// 24bit Lossless
     Lossless24,

@@ -6,11 +6,12 @@ use std::fmt;
 ///
 /// - `OggVorbis` is *OPS only*
 /// - `DSD` is *RED only*
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub enum Format {
     /// MP3
     MP3,
     /// FLAC
+    #[default]
     FLAC,
     /// AAC
     AAC,
