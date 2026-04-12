@@ -1,0 +1,94 @@
+{
+  "currentPage": 1,
+  "pages": 20,
+  "results": [
+    {
+      "groupId": "100200",
+      "groupName": "Mock Album",
+      "artist": "Mock Artist",
+      "cover": "https://example.com/cover.jpg",
+      "tags": ["rock", "indie"],
+      "bookmarked": false,
+      "vanityHouse": false,
+      "groupYear": 2020,
+      "releaseType": "Album",
+      "groupTime": "2026-01-15 10:00:00",
+      "maxSize": 500000000,
+      "totalSnatched": 5,
+      "totalSeeders": 3,
+      "totalLeechers": 1,
+      "torrents": [
+        {
+          "torrentId": 3000001,
+          "editionId": 1,
+          "artists": [
+            {
+              "id": 50000,
+              "aliasid": 50001,
+              "artist": {"id": 50000},
+              "name": "Mock Artist"
+            }
+          ],
+          "remasterYear": 2020,
+          "remasterRecordLabel": "Mock Label",
+          "remasterCatalogueNumber": "MOCK-001",
+          "remasterTitle": "",
+          "media": "CD",
+          "format": "FLAC",
+          "encoding": "Lossless",
+          "hasLog": true,
+          "logScore": 100,
+          "hasCue": true,
+          "scene": false,
+          "vanityHouse": false,
+          "fileCount": 12,
+          "time": "2026-01-15 10:00:00",
+          "size": 500000000,
+          "snatches": 5,
+          "seeders": 3,
+          "leechers": 1,
+          "isFreeleech": false,
+          "isNeutralLeech": false,
+          "isPersonalFreeleech": false,
+          "canUseToken": true,
+          "hasSnatched": false
+        },
+        {
+          "torrentId": 3000002,
+          "editionId": 1,
+          "artists": [
+            {
+              "id": 50000,
+              "aliasid": 50001,
+              "artist": {"id": 50000},
+              "name": "Mock Artist"
+            }
+          ],
+          "remasterYear": 2020,
+          "remasterRecordLabel": "Mock Label",
+          "remasterCatalogueNumber": "MOCK-001",
+          "remasterTitle": "",
+          "media": "CD",
+          "format": "FLAC",
+          "encoding": "24bit Lossless",
+          "hasLog": false,
+          "logScore": 0,
+          "hasCue": false,
+          "scene": false,
+          "vanityHouse": false,
+          "fileCount": 12,
+          "time": "2026-01-15 10:05:00",
+          "size": 800000000,
+          "snatches": 2,
+          "seeders": 1,
+          "leechers": 0,
+          "isFreeleech": false,
+          "isNeutralLeech": false,
+          "isPersonalFreeleech": false,
+          "canUseToken": true,
+          "hasSnatched": false
+        }
+      ]
+    }
+  ]
+}

@@ -1,6 +1,9 @@
 use async_trait::async_trait;
 
-use crate::{GazelleError, GroupResponse, TorrentResponse, UploadForm, UploadResponse, User};
+use crate::{
+    BrowseRequest, BrowseResponse, GazelleError, GroupResponse, TorrentResponse, UploadForm,
+    UploadResponse, User,
+};
 
 /// Trait for Gazelle API operations
 ///
@@ -8,6 +11,9 @@ use crate::{GazelleError, GroupResponse, TorrentResponse, UploadForm, UploadResp
 /// [`MockGazelleClient`] (with `mock` feature) for testing.
 #[async_trait]
 pub trait GazelleClientTrait: Send + Sync {
+    /// Execute a browse query
+    async fn browse(&self, request: &BrowseRequest) -> Result<BrowseResponse, GazelleError>;
+
     /// Get a torrent by id
     async fn get_torrent(&self, id: u32) -> Result<TorrentResponse, GazelleError>;
 

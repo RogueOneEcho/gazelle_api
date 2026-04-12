@@ -1,8 +1,8 @@
 use async_trait::async_trait;
 
 use crate::{
-    GazelleClientTrait, GazelleError, GroupResponse, TorrentResponse, UploadForm, UploadResponse,
-    User,
+    BrowseRequest, BrowseResponse, GazelleClientTrait, GazelleError, GroupResponse,
+    TorrentResponse, UploadForm, UploadResponse, User,
 };
 
 /// Mock client for testing without live API calls
@@ -11,6 +11,7 @@ use crate::{
 #[derive(Clone, Debug)]
 #[allow(clippy::struct_field_names)]
 pub struct MockGazelleClient {
+    browse_returns: Option<Result<BrowseResponse, GazelleError>>,
     get_torrent_returns: Option<Result<TorrentResponse, GazelleError>>,
     get_torrent_group_returns: Option<Result<GroupResponse, GazelleError>>,
     get_user_returns: Option<Result<User, GazelleError>>,
@@ -23,12 +24,20 @@ impl MockGazelleClient {
     #[must_use]
     pub fn new() -> Self {
         Self {
+            browse_returns: None,
             get_torrent_returns: None,
             get_torrent_group_returns: None,
             get_user_returns: None,
             download_torrent_returns: None,
             upload_torrent_returns: None,
         }
+    }
+
+    /// Configure the return value for `browse`
+    #[must_use]
+    pub fn with_browse(mut self, result: Result<BrowseResponse, GazelleError>) -> Self {
+        self.browse_returns = Some(result);
+        self
     }
 
     /// Configure the return value for `get_torrent`
@@ -71,6 +80,7 @@ impl Default for MockGazelleClient {
     /// Create a mock client with all `Ok()` responses configured
     fn default() -> Self {
         Self {
+            browse_returns: Some(Ok(BrowseResponse::default())),
             get_torrent_returns: Some(Ok(TorrentResponse::mock())),
             get_torrent_group_returns: Some(Ok(GroupResponse::mock())),
             get_user_returns: Some(Ok(User::mock())),
@@ -82,6 +92,12 @@ impl Default for MockGazelleClient {
 
 #[async_trait]
 impl GazelleClientTrait for MockGazelleClient {
+    async fn browse(&self, _request: &BrowseRequest) -> Result<BrowseResponse, GazelleError> {
+        self.browse_returns
+            .clone()
+            .expect("MockGazelleClient: browse_returns not set")
+    }
+
     async fn get_torrent(&self, _id: u32) -> Result<TorrentResponse, GazelleError> {
         self.get_torrent_returns
             .clone()

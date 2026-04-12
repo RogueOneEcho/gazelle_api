@@ -1,0 +1,98 @@
+{
+  "currentPage": 1,
+  "pages": 50,
+  "results": [
+    {
+      "groupId": 200300,
+      "groupName": "Mock Album",
+      "artist": "Mock Artist",
+      "cover": "https://example.com/cover.jpg",
+      "tags": ["electronic", "ambient"],
+      "bookmarked": false,
+      "vanityHouse": false,
+      "groupYear": 2025,
+      "releaseType": "Album",
+      "groupTime": "1700000000",
+      "maxSize": 300000000,
+      "totalSnatched": 10,
+      "totalSeeders": 5,
+      "totalLeechers": 2,
+      "torrents": [
+        {
+          "torrentId": 6000001,
+          "editionId": 1,
+          "artists": [
+            {
+              "id": 80000,
+              "name": "Mock Artist",
+              "aliasid": 80001
+            }
+          ],
+          "remastered": true,
+          "remasterYear": 2025,
+          "remasterCatalogueNumber": "MOCK-100",
+          "remasterTitle": "",
+          "media": "WEB",
+          "encoding": "Lossless",
+          "format": "FLAC",
+          "hasLog": false,
+          "logScore": 0,
+          "hasCue": false,
+          "scene": false,
+          "vanityHouse": false,
+          "fileCount": 8,
+          "time": "2026-02-20 14:30:00",
+          "size": 300000000,
+          "snatches": 10,
+          "seeders": 5,
+          "leechers": 2,
+          "leechStatus": 2,
+          "isFreeleech": false,
+          "isNeutralLeech": false,
+          "isFreeload": false,
+          "isPersonalFreeleech": false,
+          "canUseToken": true,
+          "trumpable": false,
+          "hasSnatched": false
+        },
+        {
+          "torrentId": 6000002,
+          "editionId": 1,
+          "artists": [
+            {
+              "id": 80000,
+              "name": "Mock Artist",
+              "aliasid": 80001
+            }
+          ],
+          "remastered": false,
+          "remasterYear": 0,
+          "remasterCatalogueNumber": "",
+          "remasterTitle": "",
+          "media": "WEB",
+          "encoding": "V0 (VBR)",
+          "format": "MP3",
+          "hasLog": false,
+          "logScore": 0,
+          "hasCue": false,
+          "scene": false,
+          "vanityHouse": false,
+          "fileCount": 8,
+          "time": "2026-02-20 14:35:00",
+          "size": 100000000,
+          "snatches": 3,
+          "seeders": 2,
+          "leechers": 0,
+          "leechStatus": 0,
+          "isFreeleech": false,
+          "isNeutralLeech": false,
+          "isFreeload": false,
+          "isPersonalFreeleech": false,
+          "canUseToken": true,
+          "trumpable": false,
+          "hasSnatched": false
+        }
+      ]
+    }
+  ]
+}

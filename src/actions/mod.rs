@@ -1,3 +1,4 @@
+mod browse;
 mod download_torrent;
 mod get_torrent;
 mod get_torrent_group;

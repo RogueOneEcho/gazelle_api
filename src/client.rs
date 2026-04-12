@@ -98,6 +98,10 @@ pub(crate) fn get_result<T: DeserializeOwned>(
 
 #[async_trait]
 impl GazelleClientTrait for GazelleClient {
+    async fn browse(&self, request: &BrowseRequest) -> Result<BrowseResponse, GazelleError> {
+        GazelleClient::browse(self, request).await
+    }
+
     async fn get_torrent(&self, id: u32) -> Result<TorrentResponse, GazelleError> {
         GazelleClient::get_torrent(self, id).await
     }

@@ -106,6 +106,34 @@ impl ReleaseType {
         }
     }
 
+    /// Parse a [`ReleaseType`] from its display name.
+    ///
+    /// - Returns [`None`] for unrecognized strings
+    /// - The browse endpoint returns release types as display names (e.g. `"Album"`)
+    ///   while the torrent/group endpoints return integers
+    #[must_use]
+    pub fn from_display(s: &str) -> Option<Self> {
+        match s {
+            "Album" => Some(Self::Album),
+            "Soundtrack" => Some(Self::Soundtrack),
+            "EP" => Some(Self::EP),
+            "Anthology" => Some(Self::Anthology),
+            "Compilation" => Some(Self::Compilation),
+            "Single" => Some(Self::Single),
+            "Live album" => Some(Self::LiveAlbum),
+            "Remix" => Some(Self::Remix),
+            "Bootleg" => Some(Self::Bootleg),
+            "Interview" => Some(Self::Interview),
+            "Mixtape" => Some(Self::Mixtape),
+            "Demo" => Some(Self::Demo),
+            "Concert Recording" => Some(Self::ConcertRecording),
+            "DJ Mix" => Some(Self::DjMix),
+            "Unknown" => Some(Self::Unknown),
+            "" => Some(Self::NonMusic),
+            _ => None,
+        }
+    }
+
     fn from_int(n: i32) -> Self {
         match n {
             0 => Self::NonMusic,
@@ -236,5 +264,28 @@ mod tests {
     #[test]
     fn display_non_music() {
         assert_eq!(ReleaseType::NonMusic.to_string(), "Non-Music");
+    }
+
+    #[test]
+    fn from_display_known() {
+        assert_eq!(ReleaseType::from_display("Album"), Some(ReleaseType::Album));
+        assert_eq!(
+            ReleaseType::from_display("Live album"),
+            Some(ReleaseType::LiveAlbum)
+        );
+        assert_eq!(
+            ReleaseType::from_display("DJ Mix"),
+            Some(ReleaseType::DjMix)
+        );
+    }
+
+    #[test]
+    fn from_display_empty() {
+        assert_eq!(ReleaseType::from_display(""), Some(ReleaseType::NonMusic));
+    }
+
+    #[test]
+    fn from_display_unrecognized() {
+        assert_eq!(ReleaseType::from_display("NotAType"), None);
     }
 }
