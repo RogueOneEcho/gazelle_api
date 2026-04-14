@@ -1,11 +1,8 @@
-use crate::GazelleError;
+use crate::prelude::*;
 use std::future::Future;
 use std::panic::resume_unwind;
 use std::sync::Arc;
 use tokio::sync::Mutex;
-
-use super::shared_clients::SharedClient;
-use super::{ExampleValues, get_shared_clients, init_logger};
 
 /// Run a test function for each configured indexer in parallel.
 ///

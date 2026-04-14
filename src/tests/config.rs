@@ -1,7 +1,5 @@
-use crate::GazelleClientOptions;
+use crate::prelude::*;
 use rogue_config::{OptionsProvider, YamlOptionsProvider};
-use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
 
 #[derive(Clone, Deserialize, Serialize)]
 pub struct ExampleValues {

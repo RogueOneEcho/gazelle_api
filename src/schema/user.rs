@@ -1,4 +1,4 @@
-use serde::Deserialize;
+use crate::prelude::*;
 
 /// Response for the `user` action
 #[derive(Clone, Debug, Deserialize)]

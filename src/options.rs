@@ -1,4 +1,4 @@
-use serde::{Deserialize, Serialize};
+use crate::prelude::*;
 use std::time::Duration;
 
 /// Configuration options for creating a [`GazelleClient`]

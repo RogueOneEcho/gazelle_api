@@ -1,4 +1,4 @@
-use crate::{BrowseRequest, BrowseResponse, GazelleClient, GazelleError};
+use crate::prelude::*;
 
 impl GazelleClient {
     /// Execute a browse query.
@@ -12,8 +12,7 @@ impl GazelleClient {
 
 #[cfg(test)]
 mod tests {
-    use crate::tests::for_each_indexer;
-    use crate::{BrowseRequest, Category, Format, GazelleError};
+    use crate::prelude::*;
     use serial_test::serial;
 
     #[tokio::test]

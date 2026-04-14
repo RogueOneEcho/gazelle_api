@@ -1,5 +1,4 @@
-use crate::Rate;
-use log::trace;
+use crate::prelude::*;
 use std::collections::VecDeque;
 use std::time::{Duration, SystemTime};
 use tokio::sync::Mutex;

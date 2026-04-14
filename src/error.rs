@@ -1,10 +1,8 @@
 use crate::GazelleSerializableError::*;
+use crate::prelude::*;
 use miette::Diagnostic;
 use reqwest::StatusCode;
-use serde::{Deserialize, Serialize};
 use std::error::Error;
-use std::fmt::{self, Display, Formatter};
-use std::io;
 use thiserror::Error as ThisError;
 
 /// The kind of API response error.
@@ -20,7 +18,7 @@ pub enum ApiResponseKind {
 
 impl Display for ApiResponseKind {
     #[allow(clippy::absolute_paths)]
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
         match self {
             Self::BadRequest => write!(f, "bad request"),
             Self::Unauthorized => write!(f, "unauthorized"),
@@ -60,13 +58,13 @@ pub struct ApiResponseError {
 pub enum ErrorSource {
     Reqwest(reqwest::Error),
     SerdeJson(serde_json::Error),
-    Io(io::Error),
+    Io(IoError),
     ApiResponse(ApiResponseError),
     Stringified(String),
 }
 
 impl Display for ErrorSource {
-    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+    fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
         match self {
             Self::Reqwest(e) => write!(f, "{e}"),
             Self::SerdeJson(e) => write!(f, "{e}"),
@@ -127,7 +125,7 @@ impl Diagnostic for GazelleError {
 }
 
 impl Display for GazelleError {
-    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+    fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
         write!(f, "Failed to {}", self.operation)
     }
 }
@@ -160,7 +158,7 @@ impl GazelleError {
         }
     }
 
-    pub(crate) fn upload(source: io::Error) -> Self {
+    pub(crate) fn upload(source: IoError) -> Self {
         Self {
             operation: GazelleOperation::ReadFile,
             source: ErrorSource::Io(source),
@@ -252,7 +250,7 @@ pub enum GazelleSerializableError {
     Deserialization { error: String },
     /// An error occurred reading the torrent file.
     ///
-    /// Includes the `std::io::Error` as a string.
+    /// Includes the `IoError` as a string.
     Upload { error: String },
     /// 400 Bad Request.
     ///
@@ -321,7 +319,7 @@ impl From<GazelleError> for GazelleSerializableError {
 
 impl Display for GazelleSerializableError {
     #[allow(clippy::absolute_paths)]
-    fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, formatter: &mut Formatter<'_>) -> FmtResult {
         let message = match self {
             Request { error } => format!("{} to send API request: {error}", "Failed"),
             Response { error } => {
@@ -595,7 +593,7 @@ mod tests {
     fn conversion_to_serializable_request() {
         let error = GazelleError {
             operation: GazelleOperation::SendRequest,
-            source: ErrorSource::Io(std::io::Error::other("test")),
+            source: ErrorSource::Io(IoError::other("test")),
         };
         let serializable = GazelleSerializableError::from(error);
         assert!(
@@ -625,7 +623,7 @@ mod tests {
     fn diagnostic_code_send_request() {
         let error = GazelleError {
             operation: GazelleOperation::SendRequest,
-            source: ErrorSource::Io(std::io::Error::other("test")),
+            source: ErrorSource::Io(IoError::other("test")),
         };
         let code = error.code().unwrap().to_string();
         assert_eq!(code, "gazelle_api::SendRequest");
@@ -635,7 +633,7 @@ mod tests {
     fn diagnostic_code_read_response() {
         let error = GazelleError {
             operation: GazelleOperation::ReadResponse,
-            source: ErrorSource::Io(std::io::Error::other("test")),
+            source: ErrorSource::Io(IoError::other("test")),
         };
         let code = error.code().unwrap().to_string();
         assert_eq!(code, "gazelle_api::ReadResponse");
@@ -651,7 +649,7 @@ mod tests {
 
     #[test]
     fn diagnostic_code_read_file() {
-        let error = GazelleError::upload(std::io::Error::other("test"));
+        let error = GazelleError::upload(IoError::other("test"));
         let code = error.code().unwrap().to_string();
         assert_eq!(code, "gazelle_api::ReadFile");
     }

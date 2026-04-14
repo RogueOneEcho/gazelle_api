@@ -1,9 +1,4 @@
-use async_trait::async_trait;
-
-use crate::{
-    BrowseRequest, BrowseResponse, GazelleError, GroupResponse, TorrentResponse, UploadForm,
-    UploadResponse, User,
-};
+use crate::prelude::*;
 
 /// Trait for Gazelle API operations
 ///

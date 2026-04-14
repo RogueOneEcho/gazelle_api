@@ -3,7 +3,7 @@ use std::time::Duration;
 use reqwest::header::{HeaderMap, HeaderValue};
 use reqwest::{Client, ClientBuilder, header};
 
-use crate::{GazelleClient, GazelleClientOptions, RateLimiter};
+use crate::prelude::*;
 
 const DEFAULT_LIMIT: usize = 5;
 const DEFAULT_LIMIT_DURATION: Duration = Duration::from_secs(10);

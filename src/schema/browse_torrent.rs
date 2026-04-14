@@ -1,5 +1,4 @@
-use crate::{Credit, Format, Media, Quality, Torrent};
-use serde::Deserialize;
+use crate::prelude::*;
 
 /// A single torrent entry in a [`BrowseGroup`].
 #[derive(Clone, Debug, Default, Deserialize)]

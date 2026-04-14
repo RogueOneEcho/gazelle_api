@@ -1,6 +1,4 @@
-use serde::Deserialize;
-
-use crate::{Group, Torrent};
+use crate::prelude::*;
 
 /// Response for the `torrent` action
 #[derive(Clone, Debug, Deserialize)]

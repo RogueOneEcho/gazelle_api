@@ -1,4 +1,4 @@
-use serde::{Deserialize, Serialize};
+use crate::prelude::*;
 
 /// Wrapper for Gazelle API responses
 #[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize)]

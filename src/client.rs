@@ -1,10 +1,5 @@
-use async_trait::async_trait;
-use log::*;
+use crate::prelude::*;
 use reqwest::{Client, Response, StatusCode};
-use serde::de::DeserializeOwned;
-use std::time::SystemTime;
-
-use crate::*;
 
 /// A client for the Gazelle API
 ///
@@ -127,7 +122,6 @@ impl GazelleClientTrait for GazelleClient {
 #[allow(clippy::unwrap_used)]
 mod tests {
     use super::*;
-    use crate::{ApiResponseKind, ErrorSource, GazelleOperation};
 
     #[test]
     fn deserialize_success_response() {

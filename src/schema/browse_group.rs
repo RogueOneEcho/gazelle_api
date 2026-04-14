@@ -1,7 +1,4 @@
-use crate::{BrowseTorrent, ReleaseType};
-use serde::Deserialize;
-use serde::de::{self, Deserializer, Visitor};
-use std::fmt::{Formatter, Result as FmtResult};
+use crate::prelude::*;
 
 /// A single group entry in a [`BrowseResponse`].
 #[derive(Clone, Debug, Default, Deserialize)]
@@ -78,7 +75,7 @@ fn release_type_from_display<'de, D: Deserializer<'de>>(
 ) -> Result<ReleaseType, D::Error> {
     let s = String::deserialize(deserializer)?;
     ReleaseType::from_display(&s)
-        .ok_or_else(|| de::Error::custom(format!("unrecognized release type: {s}")))
+        .ok_or_else(|| DeError::custom(format!("unrecognized release type: {s}")))
 }
 
 /// Deserialize a `u32` from either a number or a string.
@@ -94,12 +91,12 @@ fn string_or_u32<'de, D: Deserializer<'de>>(deserializer: D) -> Result<u32, D::E
             f.write_str("a u32 or a string containing a u32")
         }
 
-        fn visit_u64<E: de::Error>(self, value: u64) -> Result<Self::Value, E> {
-            u32::try_from(value).map_err(de::Error::custom)
+        fn visit_u64<E: DeError>(self, value: u64) -> Result<Self::Value, E> {
+            u32::try_from(value).map_err(DeError::custom)
         }
 
-        fn visit_str<E: de::Error>(self, value: &str) -> Result<Self::Value, E> {
-            value.parse().map_err(de::Error::custom)
+        fn visit_str<E: DeError>(self, value: &str) -> Result<Self::Value, E> {
+            value.parse().map_err(DeError::custom)
         }
     }
 

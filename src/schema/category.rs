@@ -1,6 +1,4 @@
-use serde::de::{self, Deserializer, Visitor};
-use serde::{Deserialize, Serialize, Serializer};
-use std::fmt;
+use crate::prelude::*;
 
 /// Category of a [`Group`].
 ///
@@ -33,8 +31,8 @@ pub enum Category {
     Other(i32),
 }
 
-impl fmt::Display for Category {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+impl Display for Category {
+    fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
         match self {
             Self::Music => write!(f, "Music"),
             Self::Applications => write!(f, "Applications"),
@@ -96,19 +94,19 @@ struct CategoryVisitor;
 impl Visitor<'_> for CategoryVisitor {
     type Value = Category;
 
-    fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+    fn expecting(&self, formatter: &mut Formatter) -> FmtResult {
         formatter.write_str("an integer")
     }
 
-    fn visit_i64<E: de::Error>(self, value: i64) -> Result<Self::Value, E> {
+    fn visit_i64<E: DeError>(self, value: i64) -> Result<Self::Value, E> {
         Ok(Category::from_group(
-            i32::try_from(value).map_err(de::Error::custom)?,
+            i32::try_from(value).map_err(DeError::custom)?,
         ))
     }
 
-    fn visit_u64<E: de::Error>(self, value: u64) -> Result<Self::Value, E> {
+    fn visit_u64<E: DeError>(self, value: u64) -> Result<Self::Value, E> {
         Ok(Category::from_group(
-            i32::try_from(value).map_err(de::Error::custom)?,
+            i32::try_from(value).map_err(DeError::custom)?,
         ))
     }
 }

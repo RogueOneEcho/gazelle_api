@@ -1,6 +1,4 @@
-use serde::Deserialize;
-
-use crate::{Category, Credits, ReleaseType};
+use crate::prelude::*;
 
 /// A release.
 ///

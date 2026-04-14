@@ -1,4 +1,4 @@
-use crate::{GazelleClient, GazelleError, GroupResponse};
+use crate::prelude::*;
 
 impl GazelleClient {
     /// Get a torrent group by id
@@ -15,8 +15,7 @@ impl GazelleClient {
 
 #[cfg(test)]
 mod tests {
-    use crate::GazelleError;
-    use crate::tests::for_each_indexer;
+    use crate::prelude::*;
     use serial_test::serial;
 
     #[tokio::test]

@@ -1,6 +1,4 @@
-use serde::Deserialize;
-use serde::de::{self, Deserializer, Visitor};
-use std::fmt;
+use crate::prelude::*;
 
 /// Release type of a [`Group`].
 ///
@@ -53,8 +51,8 @@ pub enum ReleaseType {
     Other(i32),
 }
 
-impl fmt::Display for ReleaseType {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+impl Display for ReleaseType {
+    fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
         match self {
             Self::NonMusic => write!(f, "Non-Music"),
             Self::Album => write!(f, "Album"),
@@ -162,27 +160,27 @@ struct ReleaseTypeVisitor;
 impl Visitor<'_> for ReleaseTypeVisitor {
     type Value = ReleaseType;
 
-    fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+    fn expecting(&self, formatter: &mut Formatter) -> FmtResult {
         formatter.write_str("an integer or an empty string")
     }
 
-    fn visit_i64<E: de::Error>(self, value: i64) -> Result<Self::Value, E> {
+    fn visit_i64<E: DeError>(self, value: i64) -> Result<Self::Value, E> {
         Ok(ReleaseType::from_int(
-            i32::try_from(value).map_err(de::Error::custom)?,
+            i32::try_from(value).map_err(DeError::custom)?,
         ))
     }
 
-    fn visit_u64<E: de::Error>(self, value: u64) -> Result<Self::Value, E> {
+    fn visit_u64<E: DeError>(self, value: u64) -> Result<Self::Value, E> {
         Ok(ReleaseType::from_int(
-            i32::try_from(value).map_err(de::Error::custom)?,
+            i32::try_from(value).map_err(DeError::custom)?,
         ))
     }
 
-    fn visit_str<E: de::Error>(self, value: &str) -> Result<Self::Value, E> {
+    fn visit_str<E: DeError>(self, value: &str) -> Result<Self::Value, E> {
         if value.is_empty() {
             return Ok(ReleaseType::NonMusic);
         }
-        Err(de::Error::invalid_value(de::Unexpected::Str(value), &self))
+        Err(DeError::invalid_value(Unexpected::Str(value), &self))
     }
 }
 

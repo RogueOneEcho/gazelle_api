@@ -1,5 +1,5 @@
 use crate::client::{deserialize, get_result};
-use crate::{GazelleClient, GazelleError};
+use crate::prelude::*;
 use reqwest::Response;
 use reqwest::header::CONTENT_TYPE;
 use serde_json::Value;
@@ -46,8 +46,7 @@ fn get_content_type(response: &Response) -> Option<String> {
 
 #[cfg(test)]
 mod tests {
-    use crate::GazelleError;
-    use crate::tests::for_each_indexer;
+    use crate::prelude::*;
     use serial_test::serial;
 
     #[tokio::test]

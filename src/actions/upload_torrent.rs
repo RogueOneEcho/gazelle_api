@@ -1,7 +1,5 @@
 use crate::client::handle_result;
-use crate::{GazelleClient, GazelleError, UploadForm, UploadResponse};
-use log::trace;
-use std::time::SystemTime;
+use crate::prelude::*;
 
 impl GazelleClient {
     /// Upload a torrent
@@ -27,15 +25,9 @@ impl GazelleClient {
 
 #[cfg(test)]
 mod tests {
-    use std::path::PathBuf;
-
     use serial_test::serial;
 
-    use crate::tests::for_each_indexer;
-    use crate::{
-        ApiResponseKind, Category, Format, GazelleError, GazelleOperation, Media, Quality,
-        UploadForm,
-    };
+    use crate::prelude::*;
 
     #[tokio::test]
     #[serial]

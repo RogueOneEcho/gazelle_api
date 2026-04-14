@@ -1,4 +1,4 @@
-use crate::{GazelleClient, GazelleError, TorrentResponse};
+use crate::prelude::*;
 
 impl GazelleClient {
     /// Get a torrent by id
@@ -14,8 +14,7 @@ impl GazelleClient {
 
 #[cfg(test)]
 mod tests {
-    use crate::GazelleError;
-    use crate::tests::for_each_indexer;
+    use crate::prelude::*;
     use serial_test::serial;
 
     #[tokio::test]

@@ -1,6 +1,4 @@
-use serde::de::{self, Deserializer, Visitor};
-use serde::{Deserialize, Serialize, Serializer};
-use std::fmt;
+use crate::prelude::*;
 
 /// Media type of a [`Torrent`].
 ///
@@ -38,8 +36,8 @@ pub enum Media {
     Other(String),
 }
 
-impl fmt::Display for Media {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+impl Display for Media {
+    fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
         match self {
             Self::CD => write!(f, "CD"),
             Self::DVD => write!(f, "DVD"),
@@ -79,11 +77,11 @@ struct MediaVisitor;
 impl Visitor<'_> for MediaVisitor {
     type Value = Media;
 
-    fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+    fn expecting(&self, formatter: &mut Formatter) -> FmtResult {
         formatter.write_str("a string")
     }
 
-    fn visit_str<E: de::Error>(self, value: &str) -> Result<Self::Value, E> {
+    fn visit_str<E: DeError>(self, value: &str) -> Result<Self::Value, E> {
         Ok(Media::from_str(value))
     }
 }

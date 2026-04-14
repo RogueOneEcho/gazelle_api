@@ -1,12 +1,7 @@
-use std::fmt::{Display, Formatter};
+use crate::prelude::*;
+use reqwest::multipart::{Form, Part};
 use std::fs::File;
 use std::io::Read;
-use std::path::PathBuf;
-
-use reqwest::multipart::{Form, Part};
-use serde::{Deserialize, Serialize};
-
-use crate::{Category, Format, Media, Quality};
 
 /// Form data for uploading a torrent to a group
 #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -70,7 +65,7 @@ impl UploadForm {
 
 impl Display for UploadForm {
     #[allow(clippy::absolute_paths)]
-    fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, formatter: &mut Formatter<'_>) -> FmtResult {
         let output = if let Ok(yaml) = serde_yaml::to_string(self) {
             yaml
         } else {

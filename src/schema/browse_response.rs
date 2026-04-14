@@ -1,5 +1,4 @@
-use crate::BrowseGroup;
-use serde::Deserialize;
+use crate::prelude::*;
 
 /// Response from the Gazelle browse action.
 ///

@@ -1,4 +1,4 @@
-use crate::RateLimiter;
+use crate::prelude::*;
 use std::time::{Duration, SystemTime};
 
 const LIMIT_COUNT: usize = 5;

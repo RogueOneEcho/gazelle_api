@@ -1,4 +1,4 @@
-use serde::{Deserialize, Serialize};
+use crate::prelude::*;
 
 /// A credited artist or contributor on a release
 #[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize)]

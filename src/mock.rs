@@ -1,9 +1,4 @@
-use async_trait::async_trait;
-
-use crate::{
-    BrowseRequest, BrowseResponse, GazelleClientTrait, GazelleError, GroupResponse,
-    TorrentResponse, UploadForm, UploadResponse, User,
-};
+use crate::prelude::*;
 
 /// Mock client for testing without live API calls
 ///
@@ -132,13 +127,11 @@ impl GazelleClientTrait for MockGazelleClient {
 #[cfg(test)]
 #[allow(clippy::unwrap_used)]
 mod tests {
-    use std::path::PathBuf;
     use std::sync::Arc;
 
     use tokio::sync::Mutex;
 
     use super::*;
-    use crate::{Category, Format, Media, Quality};
 
     #[tokio::test]
     async fn mock_get_torrent_returns_configured_value() {
