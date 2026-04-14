@@ -23,7 +23,10 @@ impl GroupResponse {
 }
 
 #[cfg(test)]
-#[allow(clippy::unwrap_used, clippy::indexing_slicing)]
+#[expect(
+    clippy::indexing_slicing,
+    reason = "test assertions on known fixture data"
+)]
 mod tests {
     use super::*;
     use crate::{Media, Quality};
@@ -34,7 +37,8 @@ mod tests {
     #[test]
     fn deserialize_ops_group_response() {
         // Arrange & Act
-        let response: GroupResponse = serde_json::from_str(OPS_RESPONSE).unwrap();
+        let response: GroupResponse =
+            serde_json::from_str(OPS_RESPONSE).expect("should deserialize");
 
         // Assert - OPS uses wikiBBcode not bbBody, so bb_body is None
         assert!(response.group.bb_body.is_none());
@@ -57,7 +61,8 @@ mod tests {
     #[test]
     fn deserialize_red_group_response() {
         // Arrange & Act
-        let response: GroupResponse = serde_json::from_str(RED_RESPONSE).unwrap();
+        let response: GroupResponse =
+            serde_json::from_str(RED_RESPONSE).expect("should deserialize");
 
         // Assert - RED uses bbBody, so bb_body has value
         assert!(response.group.bb_body.is_some());
@@ -79,7 +84,8 @@ mod tests {
     #[test]
     fn deserialize_group_with_multiple_torrents() {
         // Arrange & Act
-        let response: GroupResponse = serde_json::from_str(OPS_RESPONSE).unwrap();
+        let response: GroupResponse =
+            serde_json::from_str(OPS_RESPONSE).expect("should deserialize");
 
         // Assert - Multiple editions
         assert_eq!(response.torrents.len(), 2);
@@ -99,7 +105,8 @@ mod tests {
     #[test]
     fn deserialize_ops_group_music_info() {
         // Arrange & Act
-        let response: GroupResponse = serde_json::from_str(OPS_RESPONSE).unwrap();
+        let response: GroupResponse =
+            serde_json::from_str(OPS_RESPONSE).expect("should deserialize");
 
         // Assert - OPS music info with nested artist structure (extra fields ignored)
         let music_info = response.group.music_info.expect("music_info should exist");
@@ -107,13 +114,20 @@ mod tests {
         assert_eq!(music_info.artists[0].name, "Test Artist");
         // OPS has arranger field
         assert!(music_info.arranger.is_some());
-        assert!(music_info.arranger.as_ref().unwrap().is_empty());
+        assert!(
+            music_info
+                .arranger
+                .as_ref()
+                .expect("arranger should exist")
+                .is_empty()
+        );
     }
 
     #[test]
     fn deserialize_red_group_music_info() {
         // Arrange & Act
-        let response: GroupResponse = serde_json::from_str(RED_RESPONSE).unwrap();
+        let response: GroupResponse =
+            serde_json::from_str(RED_RESPONSE).expect("should deserialize");
 
         // Assert - RED music info (simpler artist structure)
         let music_info = response.group.music_info.expect("music_info should exist");
@@ -126,8 +140,10 @@ mod tests {
     #[test]
     fn deserialize_group_tags() {
         // Arrange & Act
-        let ops_response: GroupResponse = serde_json::from_str(OPS_RESPONSE).unwrap();
-        let red_response: GroupResponse = serde_json::from_str(RED_RESPONSE).unwrap();
+        let ops_response: GroupResponse =
+            serde_json::from_str(OPS_RESPONSE).expect("should deserialize");
+        let red_response: GroupResponse =
+            serde_json::from_str(RED_RESPONSE).expect("should deserialize");
 
         // Assert - OPS tags
         assert_eq!(ops_response.group.tags.len(), 1);
@@ -142,7 +158,8 @@ mod tests {
     #[test]
     fn deserialize_group_torrent_uploaders() {
         // Arrange & Act
-        let response: GroupResponse = serde_json::from_str(RED_RESPONSE).unwrap();
+        let response: GroupResponse =
+            serde_json::from_str(RED_RESPONSE).expect("should deserialize");
 
         // Assert - Different uploaders for each torrent
         assert_eq!(response.torrents[0].user_id, 2001);
@@ -154,7 +171,8 @@ mod tests {
     #[test]
     fn deserialize_red_group_with_three_editions() {
         // Arrange & Act
-        let response: GroupResponse = serde_json::from_str(RED_RESPONSE).unwrap();
+        let response: GroupResponse =
+            serde_json::from_str(RED_RESPONSE).expect("should deserialize");
 
         // Assert - Three different editions
         assert_eq!(response.torrents.len(), 3);

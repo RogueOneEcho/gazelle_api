@@ -11,7 +11,6 @@ mod rate;
 mod rate_limiter;
 mod schema;
 #[cfg(test)]
-#[allow(clippy::unwrap_used)]
 mod tests;
 
 pub use prelude::*;

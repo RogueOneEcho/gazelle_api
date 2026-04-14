@@ -124,31 +124,30 @@ impl Serialize for Category {
 }
 
 #[cfg(test)]
-#[allow(clippy::unwrap_used)]
 mod tests {
     use super::*;
 
     #[test]
     fn deserialize_music() {
-        let output: Category = serde_json::from_str("1").unwrap();
+        let output: Category = serde_json::from_str("1").expect("should deserialize");
         assert_eq!(output, Category::Music);
     }
 
     #[test]
     fn deserialize_audiobooks() {
-        let output: Category = serde_json::from_str("4").unwrap();
+        let output: Category = serde_json::from_str("4").expect("should deserialize");
         assert_eq!(output, Category::Audiobooks);
     }
 
     #[test]
     fn deserialize_comics() {
-        let output: Category = serde_json::from_str("7").unwrap();
+        let output: Category = serde_json::from_str("7").expect("should deserialize");
         assert_eq!(output, Category::Comics);
     }
 
     #[test]
     fn deserialize_unknown() {
-        let output: Category = serde_json::from_str("99").unwrap();
+        let output: Category = serde_json::from_str("99").expect("should deserialize");
         assert_eq!(output, Category::Other(99));
     }
 
@@ -191,13 +190,13 @@ mod tests {
 
     #[test]
     fn serialize_known() {
-        let output = serde_json::to_string(&Category::Music).unwrap();
+        let output = serde_json::to_string(&Category::Music).expect("should serialize");
         assert_eq!(output, "\"Music\"");
     }
 
     #[test]
     fn serialize_other() {
-        let output = serde_json::to_string(&Category::Other(99)).unwrap();
+        let output = serde_json::to_string(&Category::Other(99)).expect("should serialize");
         assert_eq!(output, "\"Other (99)\"");
     }
 

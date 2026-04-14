@@ -23,7 +23,10 @@ impl TorrentResponse {
 }
 
 #[cfg(test)]
-#[allow(clippy::unwrap_used, clippy::indexing_slicing)]
+#[expect(
+    clippy::indexing_slicing,
+    reason = "test assertions on known fixture data"
+)]
 mod tests {
     use super::*;
     use crate::{Category, Format, Media, Quality, ReleaseType};
@@ -47,7 +50,8 @@ mod tests {
     #[test]
     fn deserialize_ops_torrent_response() {
         // Arrange & Act
-        let response: TorrentResponse = serde_json::from_str(OPS_RESPONSE).unwrap();
+        let response: TorrentResponse =
+            serde_json::from_str(OPS_RESPONSE).expect("should deserialize");
 
         // Assert - OPS has trumpable
         assert_eq!(response.torrent.trumpable, Some(false));
@@ -72,7 +76,8 @@ mod tests {
     #[test]
     fn deserialize_red_torrent_response() {
         // Arrange & Act
-        let response: TorrentResponse = serde_json::from_str(RED_RESPONSE).unwrap();
+        let response: TorrentResponse =
+            serde_json::from_str(RED_RESPONSE).expect("should deserialize");
 
         // Assert - RED uses bbBody
         assert!(response.group.bb_body.is_some());
@@ -97,7 +102,8 @@ mod tests {
     #[test]
     fn deserialize_minimal_torrent_response() {
         // Arrange & Act
-        let response: TorrentResponse = serde_json::from_str(MINIMAL_RESPONSE).unwrap();
+        let response: TorrentResponse =
+            serde_json::from_str(MINIMAL_RESPONSE).expect("should deserialize");
 
         // Assert - Minimal response parses correctly
         assert_eq!(response.group.id, 3);
@@ -113,7 +119,8 @@ mod tests {
     #[test]
     fn deserialize_torrent_music_info() {
         // Arrange & Act
-        let response: TorrentResponse = serde_json::from_str(RED_RESPONSE).unwrap();
+        let response: TorrentResponse =
+            serde_json::from_str(RED_RESPONSE).expect("should deserialize");
 
         // Assert - Music info is properly populated
         let music_info = response.group.music_info.expect("music_info should exist");
@@ -124,7 +131,8 @@ mod tests {
     #[test]
     fn deserialize_torrent_numeric_fields() {
         // Arrange & Act
-        let response: TorrentResponse = serde_json::from_str(RED_RESPONSE).unwrap();
+        let response: TorrentResponse =
+            serde_json::from_str(RED_RESPONSE).expect("should deserialize");
 
         // Assert - Numeric fields parse correctly
         assert_eq!(response.torrent.file_count, 2);
@@ -139,7 +147,8 @@ mod tests {
     #[test]
     fn deserialize_torrent_file_list() {
         // Arrange & Act
-        let response: TorrentResponse = serde_json::from_str(OPS_RESPONSE).unwrap();
+        let response: TorrentResponse =
+            serde_json::from_str(OPS_RESPONSE).expect("should deserialize");
 
         // Assert - File list is preserved
         assert!(response.torrent.file_list.contains("Track.flac"));
@@ -156,7 +165,8 @@ mod tests {
     #[test]
     fn deserialize_ops_empty_release_type() {
         // Arrange & Act
-        let response: TorrentResponse = serde_json::from_str(OPS_EMPTY_RELEASE_TYPE).unwrap();
+        let response: TorrentResponse =
+            serde_json::from_str(OPS_EMPTY_RELEASE_TYPE).expect("should deserialize");
 
         // Assert
         assert_eq!(response.group.id, 99001);
@@ -173,7 +183,8 @@ mod tests {
     #[test]
     fn deserialize_red_ebook() {
         // Arrange & Act
-        let response: TorrentResponse = serde_json::from_str(RED_EBOOK).unwrap();
+        let response: TorrentResponse =
+            serde_json::from_str(RED_EBOOK).expect("should deserialize");
 
         // Assert
         assert_eq!(response.group.id, 99101);
@@ -189,7 +200,7 @@ mod tests {
     #[test]
     fn deserialize_red_app() {
         // Arrange & Act
-        let response: TorrentResponse = serde_json::from_str(RED_APP).unwrap();
+        let response: TorrentResponse = serde_json::from_str(RED_APP).expect("should deserialize");
 
         // Assert
         assert_eq!(response.group.id, 99201);
@@ -206,7 +217,7 @@ mod tests {
     #[test]
     fn deserialize_red_dsd() {
         // Arrange & Act
-        let response: TorrentResponse = serde_json::from_str(RED_DSD).unwrap();
+        let response: TorrentResponse = serde_json::from_str(RED_DSD).expect("should deserialize");
 
         // Assert
         assert_eq!(response.group.id, 99301);
@@ -221,7 +232,7 @@ mod tests {
     #[test]
     fn deserialize_red_dts() {
         // Arrange & Act
-        let response: TorrentResponse = serde_json::from_str(RED_DTS).unwrap();
+        let response: TorrentResponse = serde_json::from_str(RED_DTS).expect("should deserialize");
 
         // Assert
         assert_eq!(response.group.id, 99401);
@@ -234,7 +245,7 @@ mod tests {
     #[test]
     fn deserialize_ops_aac() {
         // Arrange & Act
-        let response: TorrentResponse = serde_json::from_str(OPS_AAC).unwrap();
+        let response: TorrentResponse = serde_json::from_str(OPS_AAC).expect("should deserialize");
 
         // Assert
         assert_eq!(response.group.id, 99501);
@@ -248,7 +259,7 @@ mod tests {
     #[test]
     fn deserialize_ops_bd() {
         // Arrange & Act
-        let response: TorrentResponse = serde_json::from_str(OPS_BD).unwrap();
+        let response: TorrentResponse = serde_json::from_str(OPS_BD).expect("should deserialize");
 
         // Assert
         assert_eq!(response.group.id, 99601);
@@ -265,7 +276,8 @@ mod tests {
     #[test]
     fn deserialize_red_bluray() {
         // Arrange & Act
-        let response: TorrentResponse = serde_json::from_str(RED_BLURAY).unwrap();
+        let response: TorrentResponse =
+            serde_json::from_str(RED_BLURAY).expect("should deserialize");
 
         // Assert
         assert_eq!(response.group.id, 99701);
@@ -278,7 +290,7 @@ mod tests {
     #[test]
     fn deserialize_red_v0() {
         // Arrange & Act
-        let response: TorrentResponse = serde_json::from_str(RED_V0).unwrap();
+        let response: TorrentResponse = serde_json::from_str(RED_V0).expect("should deserialize");
 
         // Assert
         assert_eq!(response.group.id, 99801);
@@ -291,7 +303,7 @@ mod tests {
     #[test]
     fn deserialize_ops_q8() {
         // Arrange & Act
-        let response: TorrentResponse = serde_json::from_str(OPS_Q8).unwrap();
+        let response: TorrentResponse = serde_json::from_str(OPS_Q8).expect("should deserialize");
 
         // Assert
         assert_eq!(response.group.id, 99901);
@@ -305,7 +317,8 @@ mod tests {
     #[test]
     fn deserialize_red_cassette() {
         // Arrange & Act
-        let response: TorrentResponse = serde_json::from_str(RED_CASSETTE).unwrap();
+        let response: TorrentResponse =
+            serde_json::from_str(RED_CASSETTE).expect("should deserialize");
 
         // Assert
         assert_eq!(response.group.id, 100_001);
@@ -337,24 +350,30 @@ mod tests {
             RED_CASSETTE,
         ];
         for fixture in fixtures {
-            let raw: serde_json::Value = serde_json::from_str(fixture).unwrap();
-            let response: TorrentResponse = serde_json::from_str(fixture).unwrap();
+            let raw: serde_json::Value =
+                serde_json::from_str(fixture).expect("should deserialize as value");
+            let response: TorrentResponse =
+                serde_json::from_str(fixture).expect("should deserialize as response");
             let torrent = &raw["torrent"];
             assert_eq!(
                 response.torrent.media.to_string(),
-                torrent["media"].as_str().unwrap(),
+                torrent["media"].as_str().expect("media should be a string"),
                 "media mismatch in fixture with torrent id {}",
                 torrent["id"]
             );
             assert_eq!(
                 response.torrent.format.to_string(),
-                torrent["format"].as_str().unwrap(),
+                torrent["format"]
+                    .as_str()
+                    .expect("format should be a string"),
                 "format mismatch in fixture with torrent id {}",
                 torrent["id"]
             );
             assert_eq!(
                 response.torrent.encoding.to_string(),
-                torrent["encoding"].as_str().unwrap(),
+                torrent["encoding"]
+                    .as_str()
+                    .expect("encoding should be a string"),
                 "encoding mismatch in fixture with torrent id {}",
                 torrent["id"]
             );

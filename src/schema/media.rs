@@ -99,63 +99,63 @@ impl Serialize for Media {
 }
 
 #[cfg(test)]
-#[allow(clippy::unwrap_used)]
 mod tests {
     use super::*;
 
     #[test]
     fn deserialize_known() {
-        let output: Media = serde_json::from_str("\"CD\"").unwrap();
+        let output: Media = serde_json::from_str("\"CD\"").expect("should deserialize");
         assert_eq!(output, Media::CD);
     }
 
     #[test]
     fn deserialize_blu_ray() {
-        let output: Media = serde_json::from_str("\"Blu-Ray\"").unwrap();
+        let output: Media = serde_json::from_str("\"Blu-Ray\"").expect("should deserialize");
         assert_eq!(output, Media::BluRay);
     }
 
     #[test]
     fn deserialize_bd() {
-        let output: Media = serde_json::from_str("\"BD\"").unwrap();
+        let output: Media = serde_json::from_str("\"BD\"").expect("should deserialize");
         assert_eq!(output, Media::BD);
     }
 
     #[test]
     fn deserialize_unknown() {
-        let output: Media = serde_json::from_str("\"MiniDisc\"").unwrap();
+        let output: Media = serde_json::from_str("\"MiniDisc\"").expect("should deserialize");
         assert_eq!(output, Media::Other("MiniDisc".to_owned()));
     }
 
     #[test]
     fn deserialize_empty_string() {
-        let output: Media = serde_json::from_str("\"\"").unwrap();
+        let output: Media = serde_json::from_str("\"\"").expect("should deserialize");
         assert_eq!(output, Media::Other(String::new()));
     }
 
     #[test]
     fn serialize_known() {
-        let output = serde_json::to_string(&Media::WEB).unwrap();
+        let output = serde_json::to_string(&Media::WEB).expect("should serialize");
         assert_eq!(output, "\"WEB\"");
     }
 
     #[test]
     fn serialize_blu_ray() {
-        let output = serde_json::to_string(&Media::BluRay).unwrap();
+        let output = serde_json::to_string(&Media::BluRay).expect("should serialize");
         assert_eq!(output, "\"Blu-Ray\"");
     }
 
     #[test]
     fn serialize_other() {
-        let output = serde_json::to_string(&Media::Other("MiniDisc".to_owned())).unwrap();
+        let output =
+            serde_json::to_string(&Media::Other("MiniDisc".to_owned())).expect("should serialize");
         assert_eq!(output, "\"MiniDisc\"");
     }
 
     #[test]
     fn serialize_round_trip() {
         let original = "\"Cassette\"";
-        let media: Media = serde_json::from_str(original).unwrap();
-        let serialized = serde_json::to_string(&media).unwrap();
+        let media: Media = serde_json::from_str(original).expect("should deserialize");
+        let serialized = serde_json::to_string(&media).expect("should serialize");
         assert_eq!(serialized, original);
     }
 

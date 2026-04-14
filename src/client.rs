@@ -119,7 +119,6 @@ impl GazelleClientTrait for GazelleClient {
 }
 
 #[cfg(test)]
-#[allow(clippy::unwrap_used)]
 mod tests {
     use super::*;
 
@@ -132,7 +131,7 @@ mod tests {
         let result: Result<ApiResponse<serde_json::Value>, _> = deserialize(json.to_owned());
 
         // Assert
-        let response = result.unwrap();
+        let response = result.expect("success response should deserialize");
         assert_eq!(response.status, "success");
         assert!(response.response.is_some());
         assert!(response.error.is_none());
@@ -147,7 +146,7 @@ mod tests {
         let result: Result<ApiResponse<serde_json::Value>, _> = deserialize(json.to_owned());
 
         // Assert
-        let response = result.unwrap();
+        let response = result.expect("failure response should deserialize");
         assert_eq!(response.status, "failure");
         assert!(response.response.is_none());
         assert_eq!(response.error, Some("bad id parameter".to_owned()));
@@ -162,7 +161,7 @@ mod tests {
         let result: Result<ApiResponse<serde_json::Value>, _> = deserialize(json.to_owned());
 
         // Assert
-        let response = result.unwrap();
+        let response = result.expect("malformed ops response should deserialize");
         assert_eq!(response.status, "failure");
         assert_eq!(response.error, Some("bad id parameter".to_owned()));
     }
@@ -177,7 +176,12 @@ mod tests {
 
         // Assert
         assert!(result.is_err());
-        assert_eq!(result.unwrap_err().operation, GazelleOperation::Deserialize);
+        assert_eq!(
+            result
+                .expect_err("invalid json should return error")
+                .operation,
+            GazelleOperation::Deserialize
+        );
     }
 
     #[test]
@@ -193,7 +197,7 @@ mod tests {
         let result = get_result(StatusCode::OK, response);
 
         // Assert
-        assert_eq!(result.unwrap(), 42);
+        assert_eq!(result.expect("success response should extract"), 42);
     }
 
     #[test]
@@ -209,7 +213,7 @@ mod tests {
         let result = get_result(StatusCode::OK, response);
 
         // Assert
-        let error = result.unwrap_err();
+        let error = result.expect_err("response error should return error");
         assert_eq!(
             error.operation,
             GazelleOperation::ApiResponse(ApiResponseKind::BadRequest)
@@ -229,7 +233,7 @@ mod tests {
         let result = get_result(StatusCode::BAD_REQUEST, response);
 
         // Assert
-        let error = result.unwrap_err();
+        let error = result.expect_err("status error should return error");
         assert_eq!(
             error.operation,
             GazelleOperation::ApiResponse(ApiResponseKind::BadRequest)
@@ -249,7 +253,7 @@ mod tests {
         let result = get_result(StatusCode::OK, response);
 
         // Assert
-        let error = result.unwrap_err();
+        let error = result.expect_err("missing response should return error");
         assert_eq!(
             error.operation,
             GazelleOperation::ApiResponse(ApiResponseKind::Other)
@@ -273,7 +277,7 @@ mod tests {
         let result = get_result(StatusCode::BAD_REQUEST, response);
 
         // Assert - Rate limit error takes priority
-        let error = result.unwrap_err();
+        let error = result.expect_err("rate limit should return error");
         assert_eq!(
             error.operation,
             GazelleOperation::ApiResponse(ApiResponseKind::TooManyRequests)
@@ -293,7 +297,7 @@ mod tests {
         let result = get_result(StatusCode::OK, response);
 
         // Assert - Falls through to Other
-        let error = result.unwrap_err();
+        let error = result.expect_err("unknown error should fall through");
         assert_eq!(
             error.operation,
             GazelleOperation::ApiResponse(ApiResponseKind::Other)

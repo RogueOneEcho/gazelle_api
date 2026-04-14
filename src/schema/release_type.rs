@@ -191,31 +191,30 @@ impl<'de> Deserialize<'de> for ReleaseType {
 }
 
 #[cfg(test)]
-#[allow(clippy::unwrap_used)]
 mod tests {
     use super::*;
 
     #[test]
     fn deserialize_known_int() {
-        let output: ReleaseType = serde_json::from_str("9").unwrap();
+        let output: ReleaseType = serde_json::from_str("9").expect("should deserialize");
         assert_eq!(output, ReleaseType::Single);
     }
 
     #[test]
     fn deserialize_empty_string() {
-        let output: ReleaseType = serde_json::from_str("\"\"").unwrap();
+        let output: ReleaseType = serde_json::from_str("\"\"").expect("should deserialize");
         assert_eq!(output, ReleaseType::NonMusic);
     }
 
     #[test]
     fn deserialize_unknown_int() {
-        let output: ReleaseType = serde_json::from_str("99").unwrap();
+        let output: ReleaseType = serde_json::from_str("99").expect("should deserialize");
         assert_eq!(output, ReleaseType::Other(99));
     }
 
     #[test]
     fn deserialize_negative_int() {
-        let output: ReleaseType = serde_json::from_str("-1").unwrap();
+        let output: ReleaseType = serde_json::from_str("-1").expect("should deserialize");
         assert_eq!(output, ReleaseType::Other(-1));
     }
 

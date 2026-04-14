@@ -9,7 +9,7 @@ use tokio::sync::Mutex;
 /// # Panics
 ///
 /// Panics if no indexers are configured in `config.yml`, or if any test fails.
-#[allow(clippy::panic)]
+#[expect(clippy::panic)]
 pub async fn for_each_indexer<F, Fut>(test_fn: F) -> Result<(), GazelleError>
 where
     F: Fn(String, Arc<Mutex<SharedClient>>, ExampleValues) -> Fut + Send + Sync + 'static,

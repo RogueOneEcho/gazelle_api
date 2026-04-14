@@ -34,8 +34,7 @@ pub struct UploadForm {
 
 impl UploadForm {
     /// Convert to a multipart form for the upload API request
-    #[allow(clippy::wrong_self_convention, clippy::absolute_paths)]
-    pub fn to_form(self) -> Result<Form, std::io::Error> {
+    pub fn to_form(self) -> Result<Form, IoError> {
         let mut file = File::open(&self.path)?;
         let mut buffer = Vec::new();
         let _size = file.read_to_end(&mut buffer)?;
@@ -64,7 +63,6 @@ impl UploadForm {
 }
 
 impl Display for UploadForm {
-    #[allow(clippy::absolute_paths)]
     fn fmt(&self, formatter: &mut Formatter<'_>) -> FmtResult {
         let output = if let Ok(yaml) = serde_yaml::to_string(self) {
             yaml

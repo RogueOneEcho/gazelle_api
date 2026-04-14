@@ -4,7 +4,7 @@ use crate::prelude::*;
 ///
 /// Set return values using the builder pattern, then use as `dyn GazelleClientTrait`.
 #[derive(Clone, Debug)]
-#[allow(clippy::struct_field_names)]
+#[expect(clippy::struct_field_names)]
 pub struct MockGazelleClient {
     browse_returns: Option<Result<BrowseResponse, GazelleError>>,
     get_torrent_returns: Option<Result<TorrentResponse, GazelleError>>,
@@ -125,7 +125,6 @@ impl GazelleClientTrait for MockGazelleClient {
 }
 
 #[cfg(test)]
-#[allow(clippy::unwrap_used)]
 mod tests {
     use std::sync::Arc;
 
@@ -159,7 +158,7 @@ mod tests {
 
         // Assert
         assert!(result.is_err());
-        let error = result.unwrap_err();
+        let error = result.expect_err("should be an error");
         assert_eq!(
             error.operation,
             crate::GazelleOperation::ApiResponse(crate::ApiResponseKind::NotFound)

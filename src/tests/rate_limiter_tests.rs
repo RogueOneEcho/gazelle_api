@@ -57,7 +57,7 @@ async fn test_get_wait_duration_full() {
     // Assert
     assert!(wait.is_some());
     assert!(approximately_equals(
-        wait.unwrap(),
+        wait.expect("full queue should require wait"),
         LIMIT_DURATION,
         Duration::from_millis(100)
     ));
@@ -113,7 +113,7 @@ async fn test_execute_full() {
     // Assert
     assert!(wait.is_some());
     assert!(approximately_equals(
-        wait.unwrap(),
+        wait.expect("full queue should require wait"),
         LIMIT_DURATION_SHORT,
         Duration::from_millis(50)
     ));
@@ -126,9 +126,13 @@ async fn test_execute_full() {
 
 fn approximately_equals(d1: Duration, d2: Duration, tolerance: Duration) -> bool {
     if d1 > d2 {
-        d1.checked_sub(d2).unwrap() <= tolerance
+        d1.checked_sub(d2)
+            .expect("subtraction should not underflow")
+            <= tolerance
     } else {
-        d2.checked_sub(d1).unwrap() <= tolerance
+        d2.checked_sub(d1)
+            .expect("subtraction should not underflow")
+            <= tolerance
     }
 }
 

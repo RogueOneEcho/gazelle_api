@@ -6,7 +6,7 @@ use regex::Regex;
 /// <https://github.com/OPSnet/Gazelle/blob/master/docs/07-API.md#torrent>
 #[derive(Clone, Debug, Default, Deserialize)]
 #[serde(rename_all = "camelCase")]
-#[allow(clippy::struct_excessive_bools)]
+#[expect(clippy::struct_excessive_bools)]
 pub struct Torrent {
     /// ID number
     pub id: u32,
@@ -72,7 +72,6 @@ pub struct Torrent {
     ///
     /// *Skipped because OPS returns this as an integer in a string*
     #[serde(skip)]
-    #[allow(clippy::struct_field_names)]
     pub free_torrent: Option<bool>,
     /// Is this neutral leech?
     ///

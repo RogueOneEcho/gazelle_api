@@ -20,7 +20,7 @@ pub struct ConfigSet {
     pub examples: ExampleValues,
 }
 
-#[allow(clippy::panic)]
+#[expect(clippy::panic)]
 pub fn load_config() -> HashMap<String, ConfigSet> {
     let config: ConfigFile = YamlOptionsProvider::get().unwrap_or_else(|e| {
         println!("{e}");

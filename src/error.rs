@@ -17,7 +17,6 @@ pub enum ApiResponseKind {
 }
 
 impl Display for ApiResponseKind {
-    #[allow(clippy::absolute_paths)]
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
         match self {
             Self::BadRequest => write!(f, "bad request"),
@@ -318,7 +317,6 @@ impl From<GazelleError> for GazelleSerializableError {
 }
 
 impl Display for GazelleSerializableError {
-    #[allow(clippy::absolute_paths)]
     fn fmt(&self, formatter: &mut Formatter<'_>) -> FmtResult {
         let message = match self {
             Request { error } => format!("{} to send API request: {error}", "Failed"),
@@ -380,7 +378,6 @@ fn append(message: &str) -> String {
 }
 
 #[cfg(test)]
-#[allow(clippy::unwrap_used, clippy::absolute_paths)]
 mod tests {
     use super::*;
 
@@ -424,7 +421,7 @@ mod tests {
         let result =
             GazelleError::match_status_error(StatusCode::BAD_REQUEST, Some("test".to_owned()));
         assert!(result.is_some());
-        let error = result.unwrap();
+        let error = result.expect("bad request should match");
         assert_eq!(
             error.operation,
             GazelleOperation::ApiResponse(ApiResponseKind::BadRequest)
@@ -435,7 +432,7 @@ mod tests {
     fn match_status_error_unauthorized() {
         let result = GazelleError::match_status_error(StatusCode::UNAUTHORIZED, None);
         assert!(result.is_some());
-        let error = result.unwrap();
+        let error = result.expect("unauthorized should match");
         assert_eq!(
             error.operation,
             GazelleOperation::ApiResponse(ApiResponseKind::Unauthorized)
@@ -447,7 +444,7 @@ mod tests {
         let result =
             GazelleError::match_status_error(StatusCode::NOT_FOUND, Some("not found".to_owned()));
         assert!(result.is_some());
-        let error = result.unwrap();
+        let error = result.expect("not found should match");
         assert_eq!(
             error.operation,
             GazelleOperation::ApiResponse(ApiResponseKind::NotFound)
@@ -458,7 +455,7 @@ mod tests {
     fn match_status_error_too_many_requests() {
         let result = GazelleError::match_status_error(StatusCode::TOO_MANY_REQUESTS, None);
         assert!(result.is_some());
-        let error = result.unwrap();
+        let error = result.expect("too many requests should match");
         assert_eq!(
             error.operation,
             GazelleOperation::ApiResponse(ApiResponseKind::TooManyRequests)
@@ -481,7 +478,7 @@ mod tests {
     fn match_response_error_bad_id() {
         let result = GazelleError::match_response_error("bad id parameter", 200);
         assert!(result.is_some());
-        let error = result.unwrap();
+        let error = result.expect("bad id should match");
         assert_eq!(
             error.operation,
             GazelleOperation::ApiResponse(ApiResponseKind::BadRequest)
@@ -492,7 +489,7 @@ mod tests {
     fn match_response_error_bad_parameters() {
         let result = GazelleError::match_response_error("bad parameters", 200);
         assert!(result.is_some());
-        let error = result.unwrap();
+        let error = result.expect("bad parameters should match");
         assert_eq!(
             error.operation,
             GazelleOperation::ApiResponse(ApiResponseKind::BadRequest)
@@ -503,7 +500,7 @@ mod tests {
     fn match_response_error_no_such_user() {
         let result = GazelleError::match_response_error("no such user", 200);
         assert!(result.is_some());
-        let error = result.unwrap();
+        let error = result.expect("no such user should match");
         assert_eq!(
             error.operation,
             GazelleOperation::ApiResponse(ApiResponseKind::BadRequest)
@@ -515,7 +512,7 @@ mod tests {
         let result =
             GazelleError::match_response_error("This page is limited to API key usage only.", 200);
         assert!(result.is_some());
-        let error = result.unwrap();
+        let error = result.expect("api key only should match");
         assert_eq!(
             error.operation,
             GazelleOperation::ApiResponse(ApiResponseKind::Unauthorized)
@@ -526,7 +523,7 @@ mod tests {
     fn match_response_error_api_token_required() {
         let result = GazelleError::match_response_error("This page requires an api token", 200);
         assert!(result.is_some());
-        let error = result.unwrap();
+        let error = result.expect("api token required should match");
         assert_eq!(
             error.operation,
             GazelleOperation::ApiResponse(ApiResponseKind::Unauthorized)
@@ -537,7 +534,7 @@ mod tests {
     fn match_response_error_endpoint_not_found() {
         let result = GazelleError::match_response_error("endpoint not found", 200);
         assert!(result.is_some());
-        let error = result.unwrap();
+        let error = result.expect("endpoint not found should match");
         assert_eq!(
             error.operation,
             GazelleOperation::ApiResponse(ApiResponseKind::NotFound)
@@ -548,7 +545,7 @@ mod tests {
     fn match_response_error_failure() {
         let result = GazelleError::match_response_error("failure", 200);
         assert!(result.is_some());
-        let error = result.unwrap();
+        let error = result.expect("failure should match");
         assert_eq!(
             error.operation,
             GazelleOperation::ApiResponse(ApiResponseKind::NotFound)
@@ -559,7 +556,7 @@ mod tests {
     fn match_response_error_could_not_find_torrent() {
         let result = GazelleError::match_response_error("could not find torrent", 200);
         assert!(result.is_some());
-        let error = result.unwrap();
+        let error = result.expect("could not find torrent should match");
         assert_eq!(
             error.operation,
             GazelleOperation::ApiResponse(ApiResponseKind::NotFound)
@@ -570,7 +567,7 @@ mod tests {
     fn match_response_error_rate_limit() {
         let result = GazelleError::match_response_error("Rate limit exceeded", 200);
         assert!(result.is_some());
-        let error = result.unwrap();
+        let error = result.expect("rate limit should match");
         assert_eq!(
             error.operation,
             GazelleOperation::ApiResponse(ApiResponseKind::TooManyRequests)
@@ -625,7 +622,7 @@ mod tests {
             operation: GazelleOperation::SendRequest,
             source: ErrorSource::Io(IoError::other("test")),
         };
-        let code = error.code().unwrap().to_string();
+        let code = error.code().expect("should have code").to_string();
         assert_eq!(code, "gazelle_api::SendRequest");
     }
 
@@ -635,57 +632,58 @@ mod tests {
             operation: GazelleOperation::ReadResponse,
             source: ErrorSource::Io(IoError::other("test")),
         };
-        let code = error.code().unwrap().to_string();
+        let code = error.code().expect("should have code").to_string();
         assert_eq!(code, "gazelle_api::ReadResponse");
     }
 
     #[test]
     fn diagnostic_code_deserialize() {
-        let error =
-            GazelleError::deserialization(serde_json::from_str::<()>("invalid").unwrap_err());
-        let code = error.code().unwrap().to_string();
+        let error = GazelleError::deserialization(
+            serde_json::from_str::<()>("invalid").expect_err("invalid json should fail"),
+        );
+        let code = error.code().expect("should have code").to_string();
         assert_eq!(code, "gazelle_api::Deserialize");
     }
 
     #[test]
     fn diagnostic_code_read_file() {
         let error = GazelleError::upload(IoError::other("test"));
-        let code = error.code().unwrap().to_string();
+        let code = error.code().expect("should have code").to_string();
         assert_eq!(code, "gazelle_api::ReadFile");
     }
 
     #[test]
     fn diagnostic_code_api_response_not_found() {
         let error = GazelleError::not_found("test".to_owned(), 404);
-        let code = error.code().unwrap().to_string();
+        let code = error.code().expect("should have code").to_string();
         assert_eq!(code, "gazelle_api::ApiResponse(NotFound)");
     }
 
     #[test]
     fn diagnostic_code_api_response_unauthorized() {
         let error = GazelleError::unauthorized("test".to_owned(), 401);
-        let code = error.code().unwrap().to_string();
+        let code = error.code().expect("should have code").to_string();
         assert_eq!(code, "gazelle_api::ApiResponse(Unauthorized)");
     }
 
     #[test]
     fn diagnostic_code_api_response_bad_request() {
         let error = GazelleError::bad_request("test".to_owned(), 400);
-        let code = error.code().unwrap().to_string();
+        let code = error.code().expect("should have code").to_string();
         assert_eq!(code, "gazelle_api::ApiResponse(BadRequest)");
     }
 
     #[test]
     fn diagnostic_code_api_response_too_many_requests() {
         let error = GazelleError::too_many_requests("test".to_owned(), 429);
-        let code = error.code().unwrap().to_string();
+        let code = error.code().expect("should have code").to_string();
         assert_eq!(code, "gazelle_api::ApiResponse(TooManyRequests)");
     }
 
     #[test]
     fn diagnostic_code_api_response_other() {
         let error = GazelleError::other("I'm a teapot".to_owned(), 418);
-        let code = error.code().unwrap().to_string();
+        let code = error.code().expect("should have code").to_string();
         assert_eq!(code, "gazelle_api::ApiResponse(Other)");
     }
 }
