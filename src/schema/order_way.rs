@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 /// Sort direction for [`BrowseRequest`].
-#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[derive(Clone, Copy, Debug, Deserialize, Eq, Hash, PartialEq, Serialize)]
 #[serde(rename_all = "snake_case")]
 pub enum OrderWay {
     /// Ascending

@@ -10,7 +10,7 @@ use std::fmt;
 /// - <https://github.com/OPSnet/Gazelle/blob/be7fae7c70028db381a5738bba6277d3b6812aa8/public/static/functions/upload.js#L580-L600>
 /// - <https://github.com/OPSnet/Gazelle/blob/be7fae7c70028db381a5738bba6277d3b6812aa8/app/Json/TGroup.php#L26>
 /// - <https://github.com/OPSnet/Gazelle/blob/be7fae7c70028db381a5738bba6277d3b6812aa8/app/TGroup.php#L408>
-#[derive(Clone, Debug, PartialEq, Default)]
+#[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq)]
 pub enum ReleaseType {
     /// Non-Music category with no specific release type.
     ///

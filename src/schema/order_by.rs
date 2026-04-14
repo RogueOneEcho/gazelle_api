@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 /// Sort field for [`BrowseRequest`].
 ///
 /// <https://github.com/OPSnet/Gazelle/blob/master/app/Search/Torrent.php>
-#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[derive(Clone, Copy, Debug, Deserialize, Eq, Hash, PartialEq, Serialize)]
 #[serde(rename_all = "snake_case")]
 pub enum OrderBy {
     /// Sort by release year

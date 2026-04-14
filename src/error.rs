@@ -8,7 +8,7 @@ use std::io;
 use thiserror::Error as ThisError;
 
 /// The kind of API response error.
-#[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum ApiResponseKind {
     BadRequest,
@@ -32,7 +32,7 @@ impl Display for ApiResponseKind {
 }
 
 /// The operation that failed.
-#[derive(Clone, Copy, Debug, Eq, PartialEq, ThisError, Serialize, Deserialize)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, ThisError, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case", tag = "type", content = "kind")]
 pub enum GazelleOperation {
     #[error("send request")]
@@ -235,7 +235,7 @@ impl GazelleError {
 ///
 /// This type preserves backwards compatibility with existing serialization formats.
 /// Use [`From<GazelleError>`] to convert from the structured [`GazelleError`] type.
-#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "snake_case", tag = "type")]
 pub enum GazelleSerializableError {
     /// An error occurred creating the request.

@@ -7,7 +7,7 @@ use std::fmt;
 /// - `BluRay` is the RED value (`"Blu-Ray"`)
 /// - `BD` is the OPS value (`"BD"`)
 /// - Both represent optical disc media
-#[derive(Clone, Debug, Default, PartialEq)]
+#[derive(Clone, Debug, Default, Eq, Hash, PartialEq)]
 pub enum Media {
     /// CD
     CD,

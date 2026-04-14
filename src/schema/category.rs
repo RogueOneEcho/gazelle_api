@@ -12,7 +12,7 @@ use std::fmt;
 /// get the correct ID for each context.
 ///
 /// <https://github.com/OPSnet/Gazelle/blob/3e2f8f8ef99f654047d86ea75da166e270b85ba9/public/static/functions/upload.js#L702-L710>
-#[derive(Clone, Debug, Default, PartialEq)]
+#[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq)]
 pub enum Category {
     /// Music
     #[default]
