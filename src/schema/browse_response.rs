@@ -176,6 +176,87 @@ impl BrowseTorrent {
     }
 }
 
+#[cfg(feature = "mock")]
+impl BrowseResponse {
+    /// Create a mock [`BrowseResponse`] for testing
+    #[must_use]
+    pub fn mock() -> Self {
+        Self {
+            current_page: 1,
+            pages: 1,
+            results: vec![BrowseGroup::mock()],
+        }
+    }
+}
+
+#[cfg(feature = "mock")]
+impl BrowseGroup {
+    /// Create a mock [`BrowseGroup`] for testing
+    #[must_use]
+    pub fn mock() -> Self {
+        Self {
+            group_id: 123,
+            group_name: "Test Album".to_owned(),
+            artist: "Test Artist".to_owned(),
+            cover: "https://example.com/cover.jpg".to_owned(),
+            tags: vec!["rock".to_owned()],
+            bookmarked: false,
+            vanity_house: false,
+            group_year: 2020,
+            release_type: ReleaseType::Album,
+            group_time: "2020-01-01 00:00:00".to_owned(),
+            max_size: 500_000_000,
+            total_snatched: 100,
+            total_seeders: 50,
+            total_leechers: 2,
+            torrents: vec![BrowseTorrent::mock()],
+        }
+    }
+}
+
+#[cfg(feature = "mock")]
+impl BrowseTorrent {
+    /// Create a mock [`BrowseTorrent`] for testing
+    #[must_use]
+    pub fn mock() -> Self {
+        Self {
+            torrent_id: 456,
+            edition_id: 1,
+            artists: vec![Credit {
+                id: 1,
+                name: "Test Artist".to_owned(),
+            }],
+            media: Media::CD,
+            format: Format::FLAC,
+            encoding: Quality::Lossless24,
+            remastered: Some(true),
+            remaster_year: Some(2020),
+            remaster_record_label: Some("Test Label".to_owned()),
+            remaster_catalogue_number: "TEST-001".to_owned(),
+            remaster_title: String::new(),
+            has_log: true,
+            log_score: 100,
+            has_cue: true,
+            scene: false,
+            vanity_house: false,
+            file_count: 10,
+            time: "2020-01-01 00:00:00".to_owned(),
+            size: 500_000_000,
+            snatches: 100,
+            seeders: 50,
+            leechers: 2,
+            is_freeleech: false,
+            is_neutral_leech: false,
+            is_personal_freeleech: false,
+            can_use_token: true,
+            has_snatched: false,
+            leech_status: None,
+            is_freeload: None,
+            trumpable: None,
+        }
+    }
+}
+
 /// Deserialize a [`ReleaseType`] from its display name string.
 fn release_type_from_display<'de, D: Deserializer<'de>>(
     deserializer: D,

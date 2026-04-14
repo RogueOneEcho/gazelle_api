@@ -80,7 +80,7 @@ impl Default for MockGazelleClient {
     /// Create a mock client with all `Ok()` responses configured
     fn default() -> Self {
         Self {
-            browse_returns: Some(Ok(BrowseResponse::default())),
+            browse_returns: Some(Ok(BrowseResponse::mock())),
             get_torrent_returns: Some(Ok(TorrentResponse::mock())),
             get_torrent_group_returns: Some(Ok(GroupResponse::mock())),
             get_user_returns: Some(Ok(User::mock())),
