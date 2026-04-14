@@ -1,6 +1,8 @@
 pub use api_response::*;
+pub use browse_group::*;
 pub use browse_request::*;
 pub use browse_response::*;
+pub use browse_torrent::*;
 pub use category::*;
 pub use credit::*;
 pub use credits::*;
@@ -19,8 +21,10 @@ pub use upload_response::*;
 pub use user::*;
 
 mod api_response;
+mod browse_group;
 mod browse_request;
 mod browse_response;
+mod browse_torrent;
 mod category;
 mod credit;
 mod credits;
