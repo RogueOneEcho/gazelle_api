@@ -29,7 +29,7 @@ impl GazelleClient {
         handle_result(result).await
     }
 
-    pub(crate) async fn get_internal(&self, query: String) -> Result<Response, reqwest::Error> {
+    pub(crate) async fn get_internal(&self, query: String) -> Result<Response, ReqwestError> {
         self.limiter.execute().await;
         let path = format!("/ajax.php?{query}");
         trace!("Sending request GET {path}");
@@ -46,7 +46,7 @@ impl GazelleClient {
 }
 
 pub(crate) async fn handle_result<T: DeserializeOwned>(
-    result: Result<Response, reqwest::Error>,
+    result: Result<Response, ReqwestError>,
 ) -> Result<T, GazelleError> {
     let (status_code, json) = get_response(result).await?;
     let response = deserialize(json)?;
@@ -54,7 +54,7 @@ pub(crate) async fn handle_result<T: DeserializeOwned>(
 }
 
 pub(crate) async fn get_response(
-    result: Result<Response, reqwest::Error>,
+    result: Result<Response, ReqwestError>,
 ) -> Result<(StatusCode, String), GazelleError> {
     let response = result.map_err(GazelleError::request)?;
     let status_code = response.status();
@@ -67,7 +67,7 @@ pub(crate) fn deserialize<T: DeserializeOwned>(
 ) -> Result<ApiResponse<T>, GazelleError> {
     // Remove malformed OPS response
     let json = json.replace("\"response\":[],", "");
-    serde_json::from_str(&json).map_err(GazelleError::deserialization)
+    json_from_str(&json).map_err(GazelleError::deserialization)
 }
 
 pub(crate) fn get_result<T: DeserializeOwned>(
@@ -128,7 +128,7 @@ mod tests {
         let json = r#"{"status":"success","response":{"value":42}}"#;
 
         // Act
-        let result: Result<ApiResponse<serde_json::Value>, _> = deserialize(json.to_owned());
+        let result: Result<ApiResponse<JsonValue>, _> = deserialize(json.to_owned());
 
         // Assert
         let response = result.expect("success response should deserialize");
@@ -143,7 +143,7 @@ mod tests {
         let json = r#"{"status":"failure","error":"bad id parameter"}"#;
 
         // Act
-        let result: Result<ApiResponse<serde_json::Value>, _> = deserialize(json.to_owned());
+        let result: Result<ApiResponse<JsonValue>, _> = deserialize(json.to_owned());
 
         // Assert
         let response = result.expect("failure response should deserialize");
@@ -158,7 +158,7 @@ mod tests {
         let json = r#"{"status":"failure","response":[],"error":"bad id parameter"}"#;
 
         // Act
-        let result: Result<ApiResponse<serde_json::Value>, _> = deserialize(json.to_owned());
+        let result: Result<ApiResponse<JsonValue>, _> = deserialize(json.to_owned());
 
         // Assert
         let response = result.expect("malformed ops response should deserialize");
@@ -172,7 +172,7 @@ mod tests {
         let json = r#"{"invalid json"#;
 
         // Act
-        let result: Result<ApiResponse<serde_json::Value>, _> = deserialize(json.to_owned());
+        let result: Result<ApiResponse<JsonValue>, _> = deserialize(json.to_owned());
 
         // Assert
         assert!(result.is_err());

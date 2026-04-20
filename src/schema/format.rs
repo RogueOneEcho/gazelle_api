@@ -91,51 +91,51 @@ mod tests {
 
     #[test]
     fn deserialize_known() {
-        let output: Format = serde_json::from_str("\"FLAC\"").expect("should deserialize");
+        let output: Format = json_from_str("\"FLAC\"").expect("should deserialize");
         assert_eq!(output, Format::FLAC);
     }
 
     #[test]
     fn deserialize_ogg_vorbis() {
-        let output: Format = serde_json::from_str("\"Ogg Vorbis\"").expect("should deserialize");
+        let output: Format = json_from_str("\"Ogg Vorbis\"").expect("should deserialize");
         assert_eq!(output, Format::OggVorbis);
     }
 
     #[test]
     fn deserialize_dsd() {
-        let output: Format = serde_json::from_str("\"DSD\"").expect("should deserialize");
+        let output: Format = json_from_str("\"DSD\"").expect("should deserialize");
         assert_eq!(output, Format::DSD);
     }
 
     #[test]
     fn deserialize_unknown() {
-        let output: Format = serde_json::from_str("\"Opus\"").expect("should deserialize");
+        let output: Format = json_from_str("\"Opus\"").expect("should deserialize");
         assert_eq!(output, Format::Other("Opus".to_owned()));
     }
 
     #[test]
     fn deserialize_empty_string() {
-        let output: Format = serde_json::from_str("\"\"").expect("should deserialize");
+        let output: Format = json_from_str("\"\"").expect("should deserialize");
         assert_eq!(output, Format::Other(String::new()));
     }
 
     #[test]
     fn serialize_known() {
-        let output = serde_json::to_string(&Format::FLAC).expect("should serialize");
+        let output = json_to_string(&Format::FLAC).expect("should serialize");
         assert_eq!(output, "\"FLAC\"");
     }
 
     #[test]
     fn serialize_ogg_vorbis() {
-        let output = serde_json::to_string(&Format::OggVorbis).expect("should serialize");
+        let output = json_to_string(&Format::OggVorbis).expect("should serialize");
         assert_eq!(output, "\"Ogg Vorbis\"");
     }
 
     #[test]
     fn serialize_round_trip() {
         let original = "\"Ogg Vorbis\"";
-        let format: Format = serde_json::from_str(original).expect("should deserialize");
-        let serialized = serde_json::to_string(&format).expect("should serialize");
+        let format: Format = json_from_str(original).expect("should deserialize");
+        let serialized = json_to_string(&format).expect("should serialize");
         assert_eq!(serialized, original);
     }
 

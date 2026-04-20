@@ -1,4 +1,3 @@
-use crate::client::handle_result;
 use crate::prelude::*;
 
 impl GazelleClient {

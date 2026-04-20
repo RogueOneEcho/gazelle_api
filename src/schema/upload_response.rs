@@ -48,7 +48,7 @@ mod tests {
     fn deserialize_ops_format() {
         // OPS uses lowercase field names: torrentid, groupid
         let response: UploadResponse =
-            serde_json::from_str(OPS_RESPONSE).expect("Failed to deserialize OPS format");
+            json_from_str(OPS_RESPONSE).expect("Failed to deserialize OPS format");
         assert_eq!(response.torrent_id, 123);
         assert_eq!(response.group_id, 456);
         assert!(response.private);
@@ -59,7 +59,7 @@ mod tests {
     fn deserialize_red_format() {
         // RED uses camelCase field names: torrentId, groupId
         let response: UploadResponse =
-            serde_json::from_str(RED_RESPONSE).expect("Failed to deserialize RED format");
+            json_from_str(RED_RESPONSE).expect("Failed to deserialize RED format");
         assert_eq!(response.torrent_id, 111);
         assert_eq!(response.group_id, 222);
         assert_eq!(response.request_id, Some(789));

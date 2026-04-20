@@ -1,5 +1,6 @@
 use crate::prelude::*;
 use reqwest::multipart::{Form, Part};
+use serde_yaml::to_string as yaml_to_string;
 use std::fs::File;
 use std::io::Read;
 
@@ -64,7 +65,7 @@ impl UploadForm {
 
 impl Display for UploadForm {
     fn fmt(&self, formatter: &mut Formatter<'_>) -> FmtResult {
-        let output = if let Ok(yaml) = serde_yaml::to_string(self) {
+        let output = if let Ok(yaml) = yaml_to_string(self) {
             yaml
         } else {
             format!("{self:?}")

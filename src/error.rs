@@ -55,8 +55,8 @@ pub struct ApiResponseError {
 /// The source of a [`GazelleError`].
 #[derive(Debug)]
 pub enum ErrorSource {
-    Reqwest(reqwest::Error),
-    SerdeJson(serde_json::Error),
+    Reqwest(ReqwestError),
+    SerdeJson(JsonError),
     Io(IoError),
     ApiResponse(ApiResponseError),
     Stringified(String),
@@ -136,21 +136,21 @@ impl Error for GazelleError {
 }
 
 impl GazelleError {
-    pub(crate) fn request(source: reqwest::Error) -> Self {
+    pub(crate) fn request(source: ReqwestError) -> Self {
         Self {
             operation: GazelleOperation::SendRequest,
             source: ErrorSource::Reqwest(source),
         }
     }
 
-    pub(crate) fn response(source: reqwest::Error) -> Self {
+    pub(crate) fn response(source: ReqwestError) -> Self {
         Self {
             operation: GazelleOperation::ReadResponse,
             source: ErrorSource::Reqwest(source),
         }
     }
 
-    pub(crate) fn deserialization(source: serde_json::Error) -> Self {
+    pub(crate) fn deserialization(source: JsonError) -> Self {
         Self {
             operation: GazelleOperation::Deserialize,
             source: ErrorSource::SerdeJson(source),
@@ -382,7 +382,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn yaml_serialization() -> Result<(), serde_yaml::Error> {
+    fn yaml_serialization() -> Result<(), YamlError> {
         let example = vec![
             BadRequest {
                 message: String::new(),
@@ -408,9 +408,9 @@ mod tests {
   status: 500
   message: Hello, world
 ";
-        let yaml = serde_yaml::to_string(&example)?;
+        let yaml = yaml_to_string(&example)?;
         println!("{yaml}");
-        let deserialized: Vec<GazelleSerializableError> = serde_yaml::from_str(expected)?;
+        let deserialized: Vec<GazelleSerializableError> = yaml_from_str(expected)?;
         assert_eq!(yaml, expected);
         assert_eq!(deserialized, example);
         Ok(())
@@ -639,7 +639,7 @@ mod tests {
     #[test]
     fn diagnostic_code_deserialize() {
         let error = GazelleError::deserialization(
-            serde_json::from_str::<()>("invalid").expect_err("invalid json should fail"),
+            json_from_str::<()>("invalid").expect_err("invalid json should fail"),
         );
         let code = error.code().expect("should have code").to_string();
         assert_eq!(code, "gazelle_api::Deserialize");

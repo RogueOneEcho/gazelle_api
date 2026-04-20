@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use std::future::Future;
 use std::panic::resume_unwind;
-use std::sync::Arc;
+use tokio::spawn;
 use tokio::sync::Mutex;
 
 /// Run a test function for each configured indexer in parallel.
@@ -30,7 +30,7 @@ where
             let client = client.clone();
             let examples = examples.clone();
             let task_name = name.clone();
-            let handle = tokio::spawn(async move {
+            let handle = spawn(async move {
                 println!("Indexer: {name}");
                 test_fn(name, client, examples)
                     .await

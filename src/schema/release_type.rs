@@ -196,31 +196,31 @@ mod tests {
 
     #[test]
     fn deserialize_known_int() {
-        let output: ReleaseType = serde_json::from_str("9").expect("should deserialize");
+        let output: ReleaseType = json_from_str("9").expect("should deserialize");
         assert_eq!(output, ReleaseType::Single);
     }
 
     #[test]
     fn deserialize_empty_string() {
-        let output: ReleaseType = serde_json::from_str("\"\"").expect("should deserialize");
+        let output: ReleaseType = json_from_str("\"\"").expect("should deserialize");
         assert_eq!(output, ReleaseType::NonMusic);
     }
 
     #[test]
     fn deserialize_unknown_int() {
-        let output: ReleaseType = serde_json::from_str("99").expect("should deserialize");
+        let output: ReleaseType = json_from_str("99").expect("should deserialize");
         assert_eq!(output, ReleaseType::Other(99));
     }
 
     #[test]
     fn deserialize_negative_int() {
-        let output: ReleaseType = serde_json::from_str("-1").expect("should deserialize");
+        let output: ReleaseType = json_from_str("-1").expect("should deserialize");
         assert_eq!(output, ReleaseType::Other(-1));
     }
 
     #[test]
     fn deserialize_non_empty_string_fails() {
-        let result = serde_json::from_str::<ReleaseType>("\"Album\"");
+        let result = json_from_str::<ReleaseType>("\"Album\"");
         assert!(result.is_err());
     }
 

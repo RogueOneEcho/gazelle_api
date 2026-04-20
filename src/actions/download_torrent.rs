@@ -1,8 +1,6 @@
-use crate::client::{deserialize, get_result};
 use crate::prelude::*;
 use reqwest::Response;
 use reqwest::header::CONTENT_TYPE;
-use serde_json::Value;
 
 impl GazelleClient {
     /// Get the content of the .torrent file as a buffer
@@ -17,7 +15,7 @@ impl GazelleClient {
         let content_type = get_content_type(&response).unwrap_or_default();
         if !content_type.contains("application/x-bittorrent") {
             let json = response.text().await.map_err(GazelleError::response)?;
-            let response = deserialize::<Value>(json)?;
+            let response = deserialize::<JsonValue>(json)?;
             return get_result(status_code, response).map(|_| Vec::new());
         }
         if status_code.is_success() {
@@ -81,7 +79,7 @@ mod tests {
                 .expect_err("should be an error");
             assert_eq!(
                 error.operation,
-                crate::GazelleOperation::ApiResponse(crate::ApiResponseKind::NotFound),
+                GazelleOperation::ApiResponse(ApiResponseKind::NotFound),
                 "[{name}] expected NotFound, got {error:?}"
             );
             Ok(())

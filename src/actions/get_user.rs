@@ -43,7 +43,7 @@ mod tests {
                 .expect_err("should be an error");
             assert_eq!(
                 error.operation,
-                crate::GazelleOperation::ApiResponse(crate::ApiResponseKind::BadRequest),
+                GazelleOperation::ApiResponse(ApiResponseKind::BadRequest),
                 "[{name}] expected BadRequest, got {error:?}"
             );
             Ok(())

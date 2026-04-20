@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use std::sync::{Arc, OnceLock};
+use std::sync::OnceLock;
 use tokio::sync::Mutex;
 
 pub type SharedClient = GazelleClient;

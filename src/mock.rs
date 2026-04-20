@@ -126,8 +126,6 @@ impl GazelleClientTrait for MockGazelleClient {
 
 #[cfg(test)]
 mod tests {
-    use std::sync::Arc;
-
     use tokio::sync::Mutex;
 
     use super::*;
@@ -161,7 +159,7 @@ mod tests {
         let error = result.expect_err("should be an error");
         assert_eq!(
             error.operation,
-            crate::GazelleOperation::ApiResponse(crate::ApiResponseKind::NotFound)
+            GazelleOperation::ApiResponse(ApiResponseKind::NotFound)
         );
     }
 

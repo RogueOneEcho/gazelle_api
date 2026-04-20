@@ -33,7 +33,7 @@ impl BrowseResponse {
     reason = "test assertions on known fixture data"
 )]
 mod tests {
-    use crate::{BrowseResponse, Format, Media, Quality};
+    use super::*;
 
     const OPS_RESPONSE: &str = include_str!("../tests/fixtures/browse_response_ops.json");
     const RED_RESPONSE: &str = include_str!("../tests/fixtures/browse_response_red.json");
@@ -41,7 +41,7 @@ mod tests {
     #[test]
     fn deserialize_ops() {
         let response: BrowseResponse =
-            serde_json::from_str(OPS_RESPONSE).expect("fixture should deserialize");
+            json_from_str(OPS_RESPONSE).expect("fixture should deserialize");
         assert_eq!(response.current_page, 1);
         assert_eq!(response.pages, 20);
         assert_eq!(response.results.len(), 1);
@@ -60,7 +60,7 @@ mod tests {
     #[test]
     fn deserialize_red() {
         let response: BrowseResponse =
-            serde_json::from_str(RED_RESPONSE).expect("fixture should deserialize");
+            json_from_str(RED_RESPONSE).expect("fixture should deserialize");
         assert_eq!(response.current_page, 1);
         assert_eq!(response.pages, 50);
         assert_eq!(response.results.len(), 1);
@@ -80,7 +80,7 @@ mod tests {
     fn browse_torrent_to_torrent_round_trip() {
         // Arrange
         let response: BrowseResponse =
-            serde_json::from_str(RED_RESPONSE).expect("fixture should deserialize");
+            json_from_str(RED_RESPONSE).expect("fixture should deserialize");
         let browse_torrent = &response.results[0].torrents[0];
 
         // Act

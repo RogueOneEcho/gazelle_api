@@ -224,7 +224,7 @@ mod tests {
     #[test]
     fn deserialize_ops_user_response() {
         // Arrange & Act
-        let user: User = serde_json::from_str(OPS_RESPONSE).expect("should deserialize");
+        let user: User = json_from_str(OPS_RESPONSE).expect("should deserialize");
 
         // Assert - OPS lacks bb_profile_text
         assert!(user.bb_profile_text.is_none());
@@ -238,7 +238,7 @@ mod tests {
     #[test]
     fn deserialize_red_user_response() {
         // Arrange & Act
-        let user: User = serde_json::from_str(RED_RESPONSE).expect("should deserialize");
+        let user: User = json_from_str(RED_RESPONSE).expect("should deserialize");
 
         // Assert - RED has bb_profile_text
         assert!(user.bb_profile_text.is_some());
@@ -258,7 +258,7 @@ mod tests {
     #[test]
     fn deserialize_user_stats() {
         // Arrange & Act
-        let user: User = serde_json::from_str(OPS_RESPONSE).expect("should deserialize");
+        let user: User = json_from_str(OPS_RESPONSE).expect("should deserialize");
 
         // Assert - Stats fields
         assert_eq!(user.stats.joined_date, "2023-04-13 03:49:47");
@@ -271,7 +271,7 @@ mod tests {
     #[test]
     fn deserialize_user_ranks() {
         // Arrange & Act
-        let user: User = serde_json::from_str(OPS_RESPONSE).expect("should deserialize");
+        let user: User = json_from_str(OPS_RESPONSE).expect("should deserialize");
 
         // Assert - Ranks fields
         assert_eq!(user.ranks.uploaded, 95.0);
@@ -283,7 +283,7 @@ mod tests {
     #[test]
     fn deserialize_user_personal() {
         // Arrange & Act
-        let user: User = serde_json::from_str(OPS_RESPONSE).expect("should deserialize");
+        let user: User = json_from_str(OPS_RESPONSE).expect("should deserialize");
 
         // Assert - Personal fields
         assert_eq!(user.personal.class, "Torrent Master");
@@ -297,7 +297,7 @@ mod tests {
     #[test]
     fn deserialize_user_community() {
         // Arrange & Act
-        let user: User = serde_json::from_str(OPS_RESPONSE).expect("should deserialize");
+        let user: User = json_from_str(OPS_RESPONSE).expect("should deserialize");
 
         // Assert - Community fields
         assert_eq!(user.community.posts, 9);
@@ -311,7 +311,7 @@ mod tests {
     #[test]
     fn deserialize_red_user_community() {
         // Arrange & Act
-        let user: User = serde_json::from_str(RED_RESPONSE).expect("should deserialize");
+        let user: User = json_from_str(RED_RESPONSE).expect("should deserialize");
 
         // Assert - RED community has different values
         assert_eq!(user.community.posts, 63);

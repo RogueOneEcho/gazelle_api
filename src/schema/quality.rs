@@ -158,76 +158,75 @@ mod tests {
 
     #[test]
     fn deserialize_lossless() {
-        let output: Quality = serde_json::from_str("\"Lossless\"").expect("should deserialize");
+        let output: Quality = json_from_str("\"Lossless\"").expect("should deserialize");
         assert_eq!(output, Quality::Lossless);
     }
 
     #[test]
     fn deserialize_24bit_lossless() {
-        let output: Quality =
-            serde_json::from_str("\"24bit Lossless\"").expect("should deserialize");
+        let output: Quality = json_from_str("\"24bit Lossless\"").expect("should deserialize");
         assert_eq!(output, Quality::Lossless24);
     }
 
     #[test]
     fn deserialize_vbr() {
-        let output: Quality = serde_json::from_str("\"V0 (VBR)\"").expect("should deserialize");
+        let output: Quality = json_from_str("\"V0 (VBR)\"").expect("should deserialize");
         assert_eq!(output, Quality::V0);
     }
 
     #[test]
     fn deserialize_numeric() {
-        let output: Quality = serde_json::from_str("\"320\"").expect("should deserialize");
+        let output: Quality = json_from_str("\"320\"").expect("should deserialize");
         assert_eq!(output, Quality::_320);
     }
 
     #[test]
     fn deserialize_q8x() {
-        let output: Quality = serde_json::from_str("\"q8.x (VBR)\"").expect("should deserialize");
+        let output: Quality = json_from_str("\"q8.x (VBR)\"").expect("should deserialize");
         assert_eq!(output, Quality::Q8x);
     }
 
     #[test]
     fn deserialize_dsd() {
-        let output: Quality = serde_json::from_str("\"DSD128\"").expect("should deserialize");
+        let output: Quality = json_from_str("\"DSD128\"").expect("should deserialize");
         assert_eq!(output, Quality::DSD128);
     }
 
     #[test]
     fn deserialize_unknown() {
-        let output: Quality = serde_json::from_str("\"Custom 448\"").expect("should deserialize");
+        let output: Quality = json_from_str("\"Custom 448\"").expect("should deserialize");
         assert_eq!(output, Quality::Other("Custom 448".to_owned()));
     }
 
     #[test]
     fn deserialize_empty_string() {
-        let output: Quality = serde_json::from_str("\"\"").expect("should deserialize");
+        let output: Quality = json_from_str("\"\"").expect("should deserialize");
         assert_eq!(output, Quality::Other(String::new()));
     }
 
     #[test]
     fn serialize_lossless() {
-        let output = serde_json::to_string(&Quality::Lossless).expect("should serialize");
+        let output = json_to_string(&Quality::Lossless).expect("should serialize");
         assert_eq!(output, "\"Lossless\"");
     }
 
     #[test]
     fn serialize_vbr() {
-        let output = serde_json::to_string(&Quality::V0).expect("should serialize");
+        let output = json_to_string(&Quality::V0).expect("should serialize");
         assert_eq!(output, "\"V0 (VBR)\"");
     }
 
     #[test]
     fn serialize_numeric() {
-        let output = serde_json::to_string(&Quality::_320).expect("should serialize");
+        let output = json_to_string(&Quality::_320).expect("should serialize");
         assert_eq!(output, "\"320\"");
     }
 
     #[test]
     fn serialize_round_trip() {
         let original = "\"24bit Lossless\"";
-        let quality: Quality = serde_json::from_str(original).expect("should deserialize");
-        let serialized = serde_json::to_string(&quality).expect("should serialize");
+        let quality: Quality = json_from_str(original).expect("should deserialize");
+        let serialized = json_to_string(&quality).expect("should serialize");
         assert_eq!(serialized, original);
     }
 
