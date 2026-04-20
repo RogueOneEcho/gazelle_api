@@ -155,6 +155,20 @@ impl ReleaseType {
     }
 }
 
+impl FromStr for ReleaseType {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Self::from_display(s).ok_or_else(|| format!("unrecognized release type: {s}"))
+    }
+}
+
+impl Serialize for ReleaseType {
+    fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+        serializer.serialize_str(&self.to_string())
+    }
+}
+
 struct ReleaseTypeVisitor;
 
 impl Visitor<'_> for ReleaseTypeVisitor {

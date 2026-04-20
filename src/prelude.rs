@@ -30,9 +30,11 @@ pub(crate) use serde_yaml::from_str as yaml_from_str;
 pub(crate) use serde_yaml::to_string as yaml_to_string;
 #[cfg(test)]
 pub(crate) use std::collections::HashMap;
+pub(crate) use std::convert::Infallible;
 pub(crate) use std::fmt::{Display, Formatter, Result as FmtResult};
 pub(crate) use std::io::Error as IoError;
 pub(crate) use std::path::PathBuf;
+pub(crate) use std::str::FromStr;
 #[cfg(test)]
 pub(crate) use std::sync::Arc;
 pub(crate) use std::time::SystemTime;

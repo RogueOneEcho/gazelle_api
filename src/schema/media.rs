@@ -55,7 +55,7 @@ impl Display for Media {
 }
 
 impl Media {
-    fn from_str(s: &str) -> Self {
+    fn parse(s: &str) -> Self {
         match s.to_ascii_lowercase().as_str() {
             "cd" => Self::CD,
             "dvd" => Self::DVD,
@@ -72,6 +72,14 @@ impl Media {
     }
 }
 
+impl FromStr for Media {
+    type Err = Infallible;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Ok(Self::parse(s))
+    }
+}
+
 struct MediaVisitor;
 
 impl Visitor<'_> for MediaVisitor {
@@ -82,7 +90,7 @@ impl Visitor<'_> for MediaVisitor {
     }
 
     fn visit_str<E: DeError>(self, value: &str) -> Result<Self::Value, E> {
-        Ok(Media::from_str(value))
+        Ok(Media::parse(value))
     }
 }
 
