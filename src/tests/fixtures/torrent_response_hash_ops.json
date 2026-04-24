@@ -1,0 +1,73 @@
+{
+  "group": {
+    "wikiBody": "<span class=\"size5\"><strong>Test Artist &ndash; Test Album</strong></span><br />\r\n<br />\r\n<strong>Label/Cat#:</strong> Test Records<br />\r\n<strong>Year:</strong> 2026<br />",
+    "wikiBBcode": "[size=5][b]Test Artist[/b] – Test Album[/b][/size]\r\n\r\n[b]Label/Cat#:[/b] Test Records\r\n[b]Year:[/b] 2026",
+    "wikiImage": "https://example.com/cover.jpg",
+    "proxyImage": "https://imgcache.example.com/i/full/abc123",
+    "id": 8126,
+    "name": "Test Album",
+    "year": 2026,
+    "releaseType": 1,
+    "releaseTypeName": "Album",
+    "categoryId": 1,
+    "categoryName": "Music",
+    "time": "2026-04-23 18:30:55",
+    "vanityHouse": false,
+    "isBookmarked": false,
+    "tags": [
+      "pop"
+    ],
+    "musicInfo": {
+      "artists": [
+        {
+          "id": 2454,
+          "aliasid": 2454,
+          "artist": {
+            "id": 2454
+          },
+          "name": "Test Artist"
+        }
+      ],
+      "with": [],
+      "remixedBy": [],
+      "composers": [],
+      "conductor": [],
+      "dj": [],
+      "producer": [],
+      "arranger": []
+    }
+  },
+  "torrent": {
+    "id": 3597342,
+    "media": "WEB",
+    "format": "FLAC",
+    "encoding": "24bit Lossless",
+    "remasterYear": 2026,
+    "remasterTitle": "",
+    "remasterRecordLabel": "Test Records",
+    "remasterCatalogueNumber": "123456789",
+    "scene": false,
+    "hasLog": false,
+    "hasCue": false,
+    "logScore": 0,
+    "logChecksum": false,
+    "logCount": 0,
+    "ripLogIds": [],
+    "fileCount": 12,
+    "size": 951367147,
+    "seeders": 46,
+    "leechers": 0,
+    "snatched": 36,
+    "freeTorrent": "Normal",
+    "freeReason": "Normal",
+    "reported": false,
+    "trumpable": false,
+    "trumpable_reasons": [],
+    "time": "2026-04-23 12:27:41",
+    "description": "",
+    "fileList": "01 - Track One.flac{{{76203790}}}|||02 - Track Two.flac{{{70440793}}}|||03 - Track Three.flac{{{98836386}}}|||04 - Track Four.flac{{{99033548}}}|||05 - Track Five.flac{{{81691872}}}|||06 - Track Six.flac{{{90630610}}}|||07 - Track Seven.flac{{{81591435}}}|||08 - Track Eight.flac{{{88367364}}}|||09 - Track Nine.flac{{{80909272}}}|||10 - Track Ten.flac{{{100754528}}}|||11 - Track Eleven.flac{{{80091811}}}|||cover.jpg{{{2815738}}}",
+    "filePath": "Test Artist - Test Album (2026) [FLAC 24-96]",
+    "userId": 1,
+    "username": "uploader"
+  }
+}

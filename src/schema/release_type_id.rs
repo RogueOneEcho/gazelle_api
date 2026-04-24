@@ -10,6 +10,14 @@ use crate::prelude::*;
 #[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq)]
 pub struct ReleaseTypeId(pub(crate) i32);
 
+impl ReleaseTypeId {
+    /// Create a [`ReleaseTypeId`] from a raw integer.
+    #[must_use]
+    pub const fn from_int(id: i32) -> Self {
+        Self(id)
+    }
+}
+
 impl Display for ReleaseTypeId {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
         write!(f, "{}", self.0)

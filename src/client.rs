@@ -101,6 +101,10 @@ impl GazelleClientTrait for GazelleClient {
         GazelleClient::get_torrent(self, id).await
     }
 
+    async fn get_torrent_by_hash(&self, hash: &str) -> Result<TorrentResponse, GazelleError> {
+        GazelleClient::get_torrent_by_hash(self, hash).await
+    }
+
     async fn get_torrent_group(&self, id: u32) -> Result<GroupResponse, GazelleError> {
         GazelleClient::get_torrent_group(self, id).await
     }

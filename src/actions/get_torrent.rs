@@ -10,6 +10,18 @@ impl GazelleClient {
     pub async fn get_torrent(&self, id: u32) -> Result<TorrentResponse, GazelleError> {
         self.get(format!("action=torrent&id={id}")).await
     }
+
+    /// Get a torrent by its info hash
+    ///
+    /// - Case-insensitive
+    /// - Gazelle expects uppercase
+    ///
+    /// # See Also
+    /// - <https://github.com/OPSnet/Gazelle/blob/master/docs/07-API.md#torrent>
+    pub async fn get_torrent_by_hash(&self, hash: &str) -> Result<TorrentResponse, GazelleError> {
+        self.get(format!("action=torrent&hash={}", hash.to_uppercase()))
+            .await
+    }
 }
 
 #[cfg(test)]

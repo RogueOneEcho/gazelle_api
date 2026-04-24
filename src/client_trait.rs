@@ -12,6 +12,9 @@ pub trait GazelleClientTrait: Send + Sync {
     /// Get a torrent by id
     async fn get_torrent(&self, id: u32) -> Result<TorrentResponse, GazelleError>;
 
+    /// Get a torrent by its info hash.
+    async fn get_torrent_by_hash(&self, hash: &str) -> Result<TorrentResponse, GazelleError>;
+
     /// Get a torrent group by id
     async fn get_torrent_group(&self, id: u32) -> Result<GroupResponse, GazelleError>;
 

@@ -1,5 +1,4 @@
 use crate::prelude::*;
-use regex::Regex;
 
 /// An edition of a release.
 ///
@@ -101,11 +100,19 @@ impl Torrent {
     /// Extract FLAC file paths from the encoded file list
     #[must_use]
     pub fn get_flacs(&self) -> Vec<PathBuf> {
-        Regex::new(r"([^|]+\.flac)\{\{\{\d+\}\}\}(?:\|\|\|)?")
-            .expect("Regex should compile")
-            .captures_iter(&self.file_list)
-            .map(|cap| PathBuf::from(&cap[1]))
+        self.get_files()
+            .into_iter()
+            .filter(|item| item.name.to_lowercase().ends_with(".flac"))
+            .map(|item| PathBuf::from(item.name))
             .collect()
+    }
+
+    /// Parse the file list into a vec of [`FileItem`] entries, sorted by filename.
+    #[must_use]
+    pub fn get_files(&self) -> Vec<FileItem> {
+        let mut files = parse_file_list(&self.file_list);
+        files.sort_by(|a, b| a.name.cmp(&b.name));
+        files
     }
 }
 
@@ -158,7 +165,7 @@ mod tests {
     #[test]
     fn get_flacs() {
         // Arrange
-        let file_list = r"file1.flac{{{12345}}}|||file2.flac{{{67890}}}|||file with spaces.flac{{{54321}}}|||another_file.flac{{{98765}}}|||/path/to/file.flac{{{11111}}}|||C:\windows\path\file.flac{{{22222}}}|||Disc 1/01. track with period.flac{{{33333}}}|||Disc 1/02. track-with-dash.flac{{{44444}}}|||track_with_underscores.flac{{{55555}}}|||file_with_numbers_123.flac{{{66666}}}|||special&char#file.flac{{{77777}}}|||final_file.flac{{{88888}}}cover.jpg{{{123456}}}|||archive.zip{{{234567}}}|||executable.exe{{{345678}}}|||document.pdf{{{456789}}}|||presentation.pptx{{{567890}}}|||disc-image.iso{{{678901}}}|||compressed.tar.gz{{{789012}}}|||photo.png{{{890123}}}|||audio.mp3{{{901234}}}|||final.zip{{{912345}}}".to_owned();
+        let file_list = r"file1.flac{{{12345}}}|||file2.flac{{{67890}}}|||file with spaces.flac{{{54321}}}|||another_file.flac{{{98765}}}|||/path/to/file.flac{{{11111}}}|||C:\windows\path\file.flac{{{22222}}}|||Disc 1/01. track with period.flac{{{33333}}}|||Disc 1/02. track-with-dash.flac{{{44444}}}|||track_with_underscores.flac{{{55555}}}|||file_with_numbers_123.flac{{{66666}}}|||special&char#file.flac{{{77777}}}|||final_file.flac{{{88888}}}|||cover.jpg{{{123456}}}|||archive.zip{{{234567}}}|||executable.exe{{{345678}}}|||document.pdf{{{456789}}}|||presentation.pptx{{{567890}}}|||disc-image.iso{{{678901}}}|||compressed.tar.gz{{{789012}}}|||photo.png{{{890123}}}|||audio.mp3{{{901234}}}|||final.zip{{{912345}}}".to_owned();
         let torrent = Torrent {
             file_list,
             ..Torrent::default()
@@ -169,19 +176,70 @@ mod tests {
 
         // Assert
         let expected = vec![
-            PathBuf::from("file1.flac"),
-            PathBuf::from("file2.flac"),
-            PathBuf::from("file with spaces.flac"),
-            PathBuf::from("another_file.flac"),
             PathBuf::from("/path/to/file.flac"),
             PathBuf::from(r"C:\windows\path\file.flac"),
             PathBuf::from("Disc 1/01. track with period.flac"),
             PathBuf::from("Disc 1/02. track-with-dash.flac"),
-            PathBuf::from("track_with_underscores.flac"),
+            PathBuf::from("another_file.flac"),
+            PathBuf::from("file with spaces.flac"),
+            PathBuf::from("file1.flac"),
+            PathBuf::from("file2.flac"),
             PathBuf::from("file_with_numbers_123.flac"),
-            PathBuf::from("special&char#file.flac"),
             PathBuf::from("final_file.flac"),
+            PathBuf::from("special&char#file.flac"),
+            PathBuf::from("track_with_underscores.flac"),
         ];
         assert_eq!(actual, expected);
+    }
+
+    #[cfg(feature = "mock")]
+    mod parse_file_list_tests {
+        use super::*;
+
+        #[test]
+        fn torrent_get_files() {
+            // Arrange
+            let torrent = Torrent {
+                file_list: "01 - Track.flac{{{12345678}}}|||cover.jpg{{{98765}}}|||".to_owned(),
+                ..Torrent::mock()
+            };
+
+            // Act
+            let output = torrent.get_files();
+
+            // Assert
+            assert_eq!(output.len(), 2);
+            assert!(output.contains(&FileItem {
+                name: "01 - Track.flac".to_owned(),
+                size: 12_345_678,
+            }));
+            assert!(output.contains(&FileItem {
+                name: "cover.jpg".to_owned(),
+                size: 98_765,
+            }));
+        }
+
+        #[test]
+        fn torrent_get_files_empty() {
+            let torrent = Torrent {
+                file_list: String::new(),
+                ..Torrent::mock()
+            };
+            assert!(torrent.get_files().is_empty());
+        }
+
+        #[test]
+        fn torrent_get_files_malformed_entries_skipped() {
+            let torrent = Torrent {
+                file_list: "goodfile.flac{{{100}}}|||badentry|||".to_owned(),
+                ..Torrent::mock()
+            };
+            let output = torrent.get_files();
+            assert_eq!(output.len(), 1);
+            assert!(output.contains(&FileItem {
+                name: "goodfile.flac".to_owned(),
+                size: 100,
+            }));
+        }
     }
 }

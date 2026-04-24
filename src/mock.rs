@@ -8,6 +8,7 @@ use crate::prelude::*;
 pub struct MockGazelleClient {
     browse_returns: Option<Result<BrowseResponse, GazelleError>>,
     get_torrent_returns: Option<Result<TorrentResponse, GazelleError>>,
+    get_torrent_by_hash_returns: Option<Result<TorrentResponse, GazelleError>>,
     get_torrent_group_returns: Option<Result<GroupResponse, GazelleError>>,
     get_user_returns: Option<Result<User, GazelleError>>,
     download_torrent_returns: Option<Result<Vec<u8>, GazelleError>>,
@@ -21,6 +22,7 @@ impl MockGazelleClient {
         Self {
             browse_returns: None,
             get_torrent_returns: None,
+            get_torrent_by_hash_returns: None,
             get_torrent_group_returns: None,
             get_user_returns: None,
             download_torrent_returns: None,
@@ -39,6 +41,16 @@ impl MockGazelleClient {
     #[must_use]
     pub fn with_get_torrent(mut self, result: Result<TorrentResponse, GazelleError>) -> Self {
         self.get_torrent_returns = Some(result);
+        self
+    }
+
+    /// Configure the return value for `get_torrent_by_hash`
+    #[must_use]
+    pub fn with_get_torrent_by_hash(
+        mut self,
+        result: Result<TorrentResponse, GazelleError>,
+    ) -> Self {
+        self.get_torrent_by_hash_returns = Some(result);
         self
     }
 
@@ -77,6 +89,7 @@ impl Default for MockGazelleClient {
         Self {
             browse_returns: Some(Ok(BrowseResponse::mock())),
             get_torrent_returns: Some(Ok(TorrentResponse::mock())),
+            get_torrent_by_hash_returns: Some(Ok(TorrentResponse::mock())),
             get_torrent_group_returns: Some(Ok(GroupResponse::mock())),
             get_user_returns: Some(Ok(User::mock())),
             download_torrent_returns: Some(Ok(vec![0xd8, 0x3a, 0x00])),
@@ -97,6 +110,12 @@ impl GazelleClientTrait for MockGazelleClient {
         self.get_torrent_returns
             .clone()
             .expect("MockGazelleClient: get_torrent_returns not set")
+    }
+
+    async fn get_torrent_by_hash(&self, _hash: &str) -> Result<TorrentResponse, GazelleError> {
+        self.get_torrent_by_hash_returns
+            .clone()
+            .expect("MockGazelleClient: get_torrent_by_hash_returns not set")
     }
 
     async fn get_torrent_group(&self, _id: u32) -> Result<GroupResponse, GazelleError> {
@@ -129,6 +148,23 @@ mod tests {
     use tokio::sync::Mutex;
 
     use super::*;
+
+    #[tokio::test]
+    async fn mock_get_torrent_by_hash_returns_configured_value() {
+        // Arrange
+        let expected = TorrentResponse::mock();
+        let mock = MockGazelleClient::new().with_get_torrent_by_hash(Ok(expected.clone()));
+
+        // Act
+        let result = mock.get_torrent_by_hash("ABC123").await;
+
+        // Assert
+        assert!(result.is_ok());
+        assert_eq!(
+            result.expect("should be ok").torrent.id,
+            expected.torrent.id
+        );
+    }
 
     #[tokio::test]
     async fn mock_get_torrent_returns_configured_value() {

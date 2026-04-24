@@ -50,6 +50,11 @@ pub struct BrowseRequest {
     pub media: Option<Media>,
     /// Release type.
     pub release_type: Option<ReleaseTypeId>,
+    /// File name to search within torrent file lists.
+    ///
+    /// Passed as the `filelist` query parameter. Gazelle uses Sphinx proximity
+    /// search (`"term"~20`) so all words must appear within 20 words of each other.
+    pub filelist: Option<String>,
 }
 
 impl BrowseRequest {
@@ -112,6 +117,9 @@ impl BrowseRequest {
         }
         if let Some(release_type) = &self.release_type {
             parts.push(("releasetype", release_type.to_string()));
+        }
+        if let Some(filelist) = &self.filelist {
+            parts.push(("filelist", filelist.clone()));
         }
         parts
             .iter()
@@ -201,6 +209,27 @@ mod tests {
             output,
             "action=browse&searchstr=test%20album&artistname=test%20artist&groupname=test%20group&taglist=jazz%2Cpiano&tags_type=1&year=2024&remastertitle=Deluxe&remasteryear=2025&media=WEB&releasetype=1"
         );
+    }
+
+    #[test]
+    fn browse_request_to_query_with_filelist() {
+        // Arrange
+        let request = BrowseRequest {
+            filelist: Some("01 - Track Name.flac".to_owned()),
+            media: Some(Media::CD),
+            category: Some(Category::Music),
+            ..BrowseRequest::default()
+        };
+
+        // Act
+        let output = request.to_query();
+
+        // Assert
+        assert!(
+            output.contains("filelist=01%20-%20Track%20Name.flac"),
+            "query: {output}"
+        );
+        assert!(output.contains("media=CD"), "query: {output}");
     }
 
     #[test]

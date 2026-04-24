@@ -49,6 +49,8 @@ mod tests {
         include_str!("../tests/fixtures/torrent_response_red_id_conflict.json");
     const OPS_ID_CONFLICT: &str =
         include_str!("../tests/fixtures/torrent_response_ops_id_conflict.json");
+    const RED_HASH: &str = include_str!("../tests/fixtures/torrent_response_hash_red.json");
+    const OPS_HASH: &str = include_str!("../tests/fixtures/torrent_response_hash_ops.json");
 
     #[test]
     fn deserialize_ops_torrent_response() {
@@ -343,6 +345,8 @@ mod tests {
             RED_V0,
             OPS_Q8,
             RED_CASSETTE,
+            RED_HASH,
+            OPS_HASH,
         ];
         for fixture in fixtures {
             let raw: JsonValue = json_from_str(fixture).expect("should deserialize as value");
@@ -396,5 +400,58 @@ mod tests {
             ReleaseType::from_int_ops(response.group.release_type),
             Some(ReleaseType::DjMix)
         );
+    }
+
+    #[test]
+    fn deserialize_red_hash_response() {
+        // Arrange & Act
+        let response: TorrentResponse = json_from_str(RED_HASH).expect("should deserialize");
+
+        // Assert - Core fields
+        assert_eq!(response.torrent.id, 12_483);
+        assert_eq!(response.torrent.format, Format::FLAC);
+        assert_eq!(response.torrent.encoding, Quality::Lossless);
+        assert_eq!(response.torrent.media, Media::CD);
+        assert_eq!(response.torrent.size, 155_159_178);
+        assert_eq!(response.torrent.file_count, 16);
+
+        // Assert - RED-only optional fields populated
+        assert_eq!(response.torrent.remastered, Some(true));
+        assert_eq!(response.torrent.has_snatched, Some(true));
+        assert_eq!(response.torrent.trumpable, Some(false));
+        assert_eq!(response.torrent.lossy_web_approved, Some(false));
+        assert_eq!(response.torrent.lossy_master_approved, Some(false));
+        assert_eq!(response.torrent.is_neutralleech, Some(false));
+        assert_eq!(response.torrent.is_freeload, Some(false));
+
+        // Assert - parse_file_list
+        let files = response.torrent.get_files();
+        assert_eq!(files.len(), 16);
+    }
+
+    #[test]
+    fn deserialize_ops_hash_response() {
+        // Arrange & Act
+        let response: TorrentResponse = json_from_str(OPS_HASH).expect("should deserialize");
+
+        // Assert - Core fields
+        assert_eq!(response.torrent.id, 3_597_342);
+        assert_eq!(response.torrent.format, Format::FLAC);
+        assert_eq!(response.torrent.encoding, Quality::Lossless24);
+        assert_eq!(response.torrent.media, Media::WEB);
+        assert_eq!(response.torrent.size, 951_367_147);
+        assert_eq!(response.torrent.file_count, 12);
+
+        // Assert - RED-only fields absent, typed as None
+        assert!(response.torrent.has_snatched.is_none());
+        assert!(response.torrent.remastered.is_none());
+        assert!(response.torrent.lossy_web_approved.is_none());
+        assert!(response.torrent.lossy_master_approved.is_none());
+        assert!(response.torrent.is_neutralleech.is_none());
+        assert!(response.torrent.is_freeload.is_none());
+
+        // Assert - parse_file_list
+        let files = response.torrent.get_files();
+        assert_eq!(files.len(), 12);
     }
 }
