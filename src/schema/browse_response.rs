@@ -7,9 +7,13 @@ use crate::prelude::*;
 #[serde(rename_all = "camelCase")]
 pub struct BrowseResponse {
     /// Current page number (1-indexed).
-    pub current_page: u32,
+    ///
+    /// - `None` when the browse returned no results
+    pub current_page: Option<u32>,
     /// Total number of pages.
-    pub pages: u32,
+    ///
+    /// - `None` when the browse returned no results
+    pub pages: Option<u32>,
     /// One entry per matching torrent group.
     pub results: Vec<BrowseGroup>,
 }
@@ -20,8 +24,8 @@ impl BrowseResponse {
     #[must_use]
     pub fn mock() -> Self {
         Self {
-            current_page: 1,
-            pages: 1,
+            current_page: Some(1),
+            pages: Some(1),
             results: vec![BrowseGroup::mock()],
         }
     }
@@ -34,18 +38,21 @@ impl BrowseResponse {
 )]
 mod tests {
     use super::*;
+    use crate::client::deserialize;
 
     const OPS_RESPONSE: &str = include_str!("../tests/fixtures/browse_response_ops.json");
     const RED_RESPONSE: &str = include_str!("../tests/fixtures/browse_response_red.json");
     const OPS_CASING: &str = include_str!("../tests/fixtures/browse_response_ops_casing.json");
     const RED_CASING: &str = include_str!("../tests/fixtures/browse_response_red_casing.json");
+    const OPS_EMPTY: &str = include_str!("../tests/fixtures/browse_response_ops_empty.json");
+    const RED_EMPTY: &str = include_str!("../tests/fixtures/browse_response_red_empty.json");
 
     #[test]
     fn deserialize_ops() {
         let response: BrowseResponse =
             json_from_str(OPS_RESPONSE).expect("fixture should deserialize");
-        assert_eq!(response.current_page, 1);
-        assert_eq!(response.pages, 20);
+        assert_eq!(response.current_page, Some(1));
+        assert_eq!(response.pages, Some(20));
         assert_eq!(response.results.len(), 1);
         let group = &response.results[0];
         assert_eq!(group.group_id, 100_200);
@@ -63,8 +70,8 @@ mod tests {
     fn deserialize_red() {
         let response: BrowseResponse =
             json_from_str(RED_RESPONSE).expect("fixture should deserialize");
-        assert_eq!(response.current_page, 1);
-        assert_eq!(response.pages, 50);
+        assert_eq!(response.current_page, Some(1));
+        assert_eq!(response.pages, Some(50));
         assert_eq!(response.results.len(), 1);
         let group = &response.results[0];
         assert_eq!(group.group_id, 200_300);
@@ -94,6 +101,32 @@ mod tests {
             json_from_str(RED_CASING).expect("fixture should deserialize");
         let group = &response.results[0];
         assert_eq!(group.release_type, ReleaseType::ConcertRecording);
+    }
+
+    /// OPS omits `currentPage` and `pages` when a browse returns zero results.
+    #[test]
+    fn deserialize_ops_empty() {
+        let api_response = deserialize::<BrowseResponse>(OPS_EMPTY.to_owned())
+            .expect("empty ops response should deserialize");
+        let response = api_response
+            .response
+            .expect("success response should contain body");
+        assert_eq!(response.current_page, None);
+        assert_eq!(response.pages, None);
+        assert!(response.results.is_empty());
+    }
+
+    /// RED omits `currentPage` and `pages` when a browse returns zero results.
+    #[test]
+    fn deserialize_red_empty() {
+        let api_response = deserialize::<BrowseResponse>(RED_EMPTY.to_owned())
+            .expect("empty red response should deserialize");
+        let response = api_response
+            .response
+            .expect("success response should contain body");
+        assert_eq!(response.current_page, None);
+        assert_eq!(response.pages, None);
+        assert!(response.results.is_empty());
     }
 
     #[test]

@@ -31,7 +31,7 @@ mod tests {
                 !response.results.is_empty(),
                 "[{name}] expected at least one result"
             );
-            assert_eq!(response.current_page, 1, "[{name}] expected page 1");
+            assert_eq!(response.current_page, Some(1), "[{name}] expected page 1");
             Ok(())
         })
         .await
