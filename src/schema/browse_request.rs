@@ -49,7 +49,7 @@ pub struct BrowseRequest {
     /// Media type.
     pub media: Option<Media>,
     /// Release type.
-    pub release_type: Option<ReleaseType>,
+    pub release_type: Option<ReleaseTypeId>,
 }
 
 impl BrowseRequest {
@@ -111,7 +111,7 @@ impl BrowseRequest {
             parts.push(("media", media.to_string()));
         }
         if let Some(release_type) = &self.release_type {
-            parts.push(("releasetype", release_type.to_int().to_string()));
+            parts.push(("releasetype", release_type.to_string()));
         }
         parts
             .iter()
@@ -189,7 +189,7 @@ mod tests {
             edition_title: Some("Deluxe".to_owned()),
             edition_year: Some(2025),
             media: Some(Media::WEB),
-            release_type: Some(ReleaseType::Album),
+            release_type: Some(ReleaseTypeId(1)),
             ..BrowseRequest::default()
         };
 

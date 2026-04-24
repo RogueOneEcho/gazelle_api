@@ -45,6 +45,10 @@ mod tests {
     const RED_V0: &str = include_str!("../tests/fixtures/torrent_response_red_v0.json");
     const OPS_Q8: &str = include_str!("../tests/fixtures/torrent_response_ops_q8.json");
     const RED_CASSETTE: &str = include_str!("../tests/fixtures/torrent_response_red_cassette.json");
+    const RED_ID_CONFLICT: &str =
+        include_str!("../tests/fixtures/torrent_response_red_id_conflict.json");
+    const OPS_ID_CONFLICT: &str =
+        include_str!("../tests/fixtures/torrent_response_ops_id_conflict.json");
 
     #[test]
     fn deserialize_ops_torrent_response() {
@@ -68,7 +72,7 @@ mod tests {
         assert_eq!(response.torrent.media, Media::WEB);
         assert_eq!(response.torrent.format, Format::FLAC);
         assert_eq!(response.torrent.encoding, Quality::Lossless);
-        assert_eq!(response.group.release_type, ReleaseType::Single);
+        assert_eq!(response.group.release_type, ReleaseTypeId(9));
     }
 
     #[test]
@@ -169,7 +173,7 @@ mod tests {
         assert_eq!(response.group.category_name, "Audiobooks");
         assert_eq!(response.torrent.id, 99002);
         assert_eq!(response.torrent.format, Format::AAC);
-        assert_eq!(response.group.release_type, ReleaseType::NonMusic);
+        assert_eq!(response.group.release_type, ReleaseTypeId(0));
     }
 
     /// RED returns `releaseType: 0` for non-Music categories (unlike OPS which returns `""`).
@@ -183,7 +187,7 @@ mod tests {
         assert_eq!(response.group.id, 99101);
         assert_eq!(response.group.category_id, Category::EBooks);
         assert_eq!(response.group.category_name, "E-Books");
-        assert_eq!(response.group.release_type, ReleaseType::NonMusic);
+        assert_eq!(response.group.release_type, ReleaseTypeId(0));
         assert_eq!(response.torrent.media, Media::Other(String::new()));
         assert_eq!(response.torrent.format, Format::Other(String::new()));
         assert_eq!(response.torrent.encoding, Quality::Other(String::new()));
@@ -199,7 +203,7 @@ mod tests {
         assert_eq!(response.group.id, 99201);
         assert_eq!(response.group.category_id, Category::Applications);
         assert_eq!(response.group.category_name, "Applications");
-        assert_eq!(response.group.release_type, ReleaseType::NonMusic);
+        assert_eq!(response.group.release_type, ReleaseTypeId(0));
         assert_eq!(response.torrent.is_neutralleech, Some(true));
         assert_eq!(response.torrent.media, Media::Other(String::new()));
         assert_eq!(response.torrent.format, Format::Other(String::new()));
@@ -215,7 +219,7 @@ mod tests {
         // Assert
         assert_eq!(response.group.id, 99301);
         assert_eq!(response.group.category_id, Category::Music);
-        assert_eq!(response.group.release_type, ReleaseType::Album);
+        assert_eq!(response.group.release_type, ReleaseTypeId(1));
         assert_eq!(response.torrent.media, Media::SACD);
         assert_eq!(response.torrent.format, Format::DSD);
         assert_eq!(response.torrent.encoding, Quality::DSD64);
@@ -242,7 +246,7 @@ mod tests {
 
         // Assert
         assert_eq!(response.group.id, 99501);
-        assert_eq!(response.group.release_type, ReleaseType::Single);
+        assert_eq!(response.group.release_type, ReleaseTypeId(9));
         assert_eq!(response.torrent.media, Media::WEB);
         assert_eq!(response.torrent.format, Format::AAC);
         assert_eq!(response.torrent.encoding, Quality::_256);
@@ -256,7 +260,7 @@ mod tests {
 
         // Assert
         assert_eq!(response.group.id, 99601);
-        assert_eq!(response.group.release_type, ReleaseType::LiveAlbum);
+        assert_eq!(response.group.release_type, ReleaseTypeId(11));
         assert_eq!(response.torrent.media, Media::BD);
         assert_eq!(response.torrent.format, Format::AC3);
         assert_eq!(
@@ -299,7 +303,7 @@ mod tests {
 
         // Assert
         assert_eq!(response.group.id, 99901);
-        assert_eq!(response.group.release_type, ReleaseType::Anthology);
+        assert_eq!(response.group.release_type, ReleaseTypeId(6));
         assert_eq!(response.torrent.media, Media::CD);
         assert_eq!(response.torrent.format, Format::MP3);
         assert_eq!(response.torrent.encoding, Quality::Q8x);
@@ -368,5 +372,29 @@ mod tests {
                 torrent["id"]
             );
         }
+    }
+
+    /// RED uses ID 17 for Demo. The raw `ReleaseTypeId` deserializes as 17,
+    /// and `from_int_red` resolves it to `Demo`.
+    #[test]
+    fn deserialize_red_id_conflict() {
+        let response: TorrentResponse = json_from_str(RED_ID_CONFLICT).expect("should deserialize");
+        assert_eq!(response.group.release_type, ReleaseTypeId(17));
+        assert_eq!(
+            ReleaseType::from_int_red(response.group.release_type),
+            Some(ReleaseType::Demo)
+        );
+    }
+
+    /// OPS uses ID 17 for DJ Mix (not Demo). The raw `ReleaseTypeId` deserializes
+    /// as 17, but `from_int_ops` correctly resolves it to `DjMix`.
+    #[test]
+    fn deserialize_ops_id_conflict() {
+        let response: TorrentResponse = json_from_str(OPS_ID_CONFLICT).expect("should deserialize");
+        assert_eq!(response.group.release_type, ReleaseTypeId(17));
+        assert_eq!(
+            ReleaseType::from_int_ops(response.group.release_type),
+            Some(ReleaseType::DjMix)
+        );
     }
 }

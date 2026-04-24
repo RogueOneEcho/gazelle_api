@@ -29,7 +29,7 @@ pub struct Group {
     /// *RED only*
     pub catalogue_number: Option<String>,
     /// Release type
-    pub release_type: ReleaseType,
+    pub release_type: ReleaseTypeId,
     /// Category
     pub category_id: Category,
     /// Category name
@@ -69,7 +69,7 @@ impl Group {
             wiki_body: "Test wiki body".to_owned(),
             bb_body: None,
             wiki_image: "https://example.com/image.jpg".to_owned(),
-            release_type: ReleaseType::Album,
+            release_type: ReleaseTypeId(1),
         }
     }
 }

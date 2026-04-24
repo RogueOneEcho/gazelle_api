@@ -1,0 +1,61 @@
+{
+  "currentPage": 1,
+  "pages": 1,
+  "results": [
+    {
+      "groupId": 200400,
+      "groupName": "Mock Live Album",
+      "artist": "Mock Artist",
+      "cover": "https://example.com/cover.jpg",
+      "tags": ["rock"],
+      "bookmarked": false,
+      "vanityHouse": false,
+      "groupYear": 2023,
+      "releaseType": "Concert Recording",
+      "groupTime": "1700000000",
+      "maxSize": 400000000,
+      "totalSnatched": 3,
+      "totalSeeders": 2,
+      "totalLeechers": 0,
+      "torrents": [
+        {
+          "torrentId": 6000010,
+          "editionId": 1,
+          "artists": [
+            {
+              "id": 80000,
+              "name": "Mock Artist",
+              "aliasid": 80001
+            }
+          ],
+          "remastered": true,
+          "remasterYear": 2023,
+          "remasterCatalogueNumber": "",
+          "remasterTitle": "",
+          "media": "WEB",
+          "format": "FLAC",
+          "encoding": "Lossless",
+          "hasLog": false,
+          "logScore": 0,
+          "hasCue": false,
+          "scene": false,
+          "vanityHouse": false,
+          "fileCount": 15,
+          "time": "2026-03-01 12:00:00",
+          "size": 400000000,
+          "snatches": 3,
+          "seeders": 2,
+          "leechers": 0,
+          "leechStatus": 0,
+          "isFreeleech": false,
+          "isNeutralLeech": false,
+          "isFreeload": false,
+          "isPersonalFreeleech": false,
+          "canUseToken": true,
+          "trumpable": false,
+          "hasSnatched": false
+        }
+      ]
+    }
+  ]
+}

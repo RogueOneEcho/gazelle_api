@@ -37,6 +37,8 @@ mod tests {
 
     const OPS_RESPONSE: &str = include_str!("../tests/fixtures/browse_response_ops.json");
     const RED_RESPONSE: &str = include_str!("../tests/fixtures/browse_response_red.json");
+    const OPS_CASING: &str = include_str!("../tests/fixtures/browse_response_ops_casing.json");
+    const RED_CASING: &str = include_str!("../tests/fixtures/browse_response_red_casing.json");
 
     #[test]
     fn deserialize_ops() {
@@ -74,6 +76,24 @@ mod tests {
         assert_eq!(group.torrents[0].encoding, Quality::Lossless);
         assert_eq!(group.torrents[1].torrent_id, 6_000_002);
         assert_eq!(group.torrents[1].remastered, Some(false));
+    }
+
+    /// OPS returns `"Concert recording"` (lowercase r) from the DB `release_type` table.
+    #[test]
+    fn deserialize_ops_casing() {
+        let response: BrowseResponse =
+            json_from_str(OPS_CASING).expect("fixture should deserialize");
+        let group = &response.results[0];
+        assert_eq!(group.release_type, ReleaseType::ConcertRecording);
+    }
+
+    /// RED returns `"Concert Recording"` (uppercase R) from `upload.js`.
+    #[test]
+    fn deserialize_red_casing() {
+        let response: BrowseResponse =
+            json_from_str(RED_CASING).expect("fixture should deserialize");
+        let group = &response.results[0];
+        assert_eq!(group.release_type, ReleaseType::ConcertRecording);
     }
 
     #[test]

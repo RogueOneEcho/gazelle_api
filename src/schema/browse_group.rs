@@ -25,7 +25,6 @@ pub struct BrowseGroup {
     /// Release year of the group.
     pub group_year: u32,
     /// Release type.
-    #[serde(deserialize_with = "release_type_from_display")]
     pub release_type: ReleaseType,
     /// Group upload time.
     ///
@@ -67,15 +66,6 @@ impl BrowseGroup {
             torrents: vec![BrowseTorrent::mock()],
         }
     }
-}
-
-/// Deserialize a [`ReleaseType`] from its display name string.
-fn release_type_from_display<'de, D: Deserializer<'de>>(
-    deserializer: D,
-) -> Result<ReleaseType, D::Error> {
-    let s = String::deserialize(deserializer)?;
-    ReleaseType::from_display(&s)
-        .ok_or_else(|| DeError::custom(format!("unrecognized release type: {s}")))
 }
 
 /// Deserialize a `u32` from either a number or a string.
