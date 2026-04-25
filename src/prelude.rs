@@ -2,6 +2,8 @@ pub use crate::client::*;
 pub use crate::client_trait::*;
 pub use crate::error::*;
 pub use crate::factory::*;
+#[allow(unused_imports, reason = "RustRover incorrectly flags this as unused")]
+pub(crate) use crate::helpers::*;
 #[cfg(feature = "mock")]
 pub use crate::mock::*;
 pub use crate::options::*;

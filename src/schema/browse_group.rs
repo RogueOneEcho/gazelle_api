@@ -11,8 +11,10 @@ pub struct BrowseGroup {
     #[serde(deserialize_with = "string_or_u32")]
     pub group_id: u32,
     /// Group (album) name.
+    #[serde(deserialize_with = "decode_entities")]
     pub group_name: String,
     /// Primary artist name.
+    #[serde(deserialize_with = "decode_entities")]
     pub artist: String,
     /// Cover art URL.
     pub cover: String,
@@ -91,4 +93,33 @@ fn string_or_u32<'de, D: Deserializer<'de>>(deserializer: D) -> Result<u32, D::E
     }
 
     deserializer.deserialize_any(StringOrU32Visitor)
+}
+
+#[cfg(test)]
+mod decode_tests {
+    use super::*;
+
+    #[test]
+    fn group_name_and_artist_decoded() {
+        let json = r#"{
+            "groupId": 1,
+            "groupName": "Rock &amp; Roll",
+            "artist": "AC&#x2F;DC",
+            "cover": "",
+            "tags": [],
+            "bookmarked": false,
+            "vanityHouse": false,
+            "groupYear": 2020,
+            "releaseType": "Album",
+            "groupTime": "2020-01-01 00:00:00",
+            "maxSize": 0,
+            "totalSnatched": 0,
+            "totalSeeders": 0,
+            "totalLeechers": 0,
+            "torrents": []
+        }"#;
+        let group: BrowseGroup = json_from_str(json).expect("fixture should deserialize");
+        assert_eq!(group.group_name, "Rock & Roll");
+        assert_eq!(group.artist, "AC/DC");
+    }
 }

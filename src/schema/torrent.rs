@@ -29,10 +29,13 @@ pub struct Torrent {
     /// May be `0`
     pub remaster_year: Option<u16>,
     /// Edition title
+    #[serde(deserialize_with = "decode_entities")]
     pub remaster_title: String,
     /// Edition record label
+    #[serde(deserialize_with = "decode_entities")]
     pub remaster_record_label: String,
     /// Edition catalogue number
+    #[serde(deserialize_with = "decode_entities")]
     pub remaster_catalogue_number: String,
     /// Is this a scene release?
     pub scene: bool,
@@ -85,14 +88,20 @@ pub struct Torrent {
     /// Time of last logged event
     pub time: String,
     /// Description formatted as BB code
+    #[serde(deserialize_with = "decode_entities")]
     pub description: String,
-    /// Encoded string of files and their sizes
+    /// Raw `name{{{size}}}|||...` file list.
+    ///
+    /// - File names are HTML-entity-encoded as returned by Gazelle.
+    /// - Use [`parse_file_list`] to get decoded [`FileItem`].
     pub file_list: String,
     /// The name of the torrent directory
+    #[serde(deserialize_with = "decode_entities")]
     pub file_path: String,
     /// ID of uploader
     pub user_id: u32,
     /// Username of uploader
+    #[serde(deserialize_with = "decode_entities")]
     pub username: String,
 }
 
@@ -197,6 +206,26 @@ mod tests {
         use super::*;
 
         #[test]
+        fn torrent_get_files_decodes_entities() {
+            let torrent = Torrent {
+                file_list:
+                    "Artist &amp; Title.flac{{{12345}}}|||cover &#039;art&#039;.jpg{{{500}}}|||"
+                        .to_owned(),
+                ..Torrent::mock()
+            };
+            let output = torrent.get_files();
+            assert_eq!(output.len(), 2);
+            assert!(output.contains(&FileItem {
+                name: "Artist & Title.flac".to_owned(),
+                size: 12_345,
+            }));
+            assert!(output.contains(&FileItem {
+                name: "cover 'art'.jpg".to_owned(),
+                size: 500,
+            }));
+        }
+
+        #[test]
         fn torrent_get_files() {
             // Arrange
             let torrent = Torrent {
@@ -241,5 +270,54 @@ mod tests {
                 size: 100,
             }));
         }
+    }
+}
+
+#[cfg(test)]
+mod decode_tests {
+    use super::*;
+
+    #[test]
+    fn torrent_text_fields_decoded() {
+        let json = r#"{
+            "id": 1,
+            "media": "WEB",
+            "format": "FLAC",
+            "encoding": "Lossless",
+            "remastered": true,
+            "remasterYear": 2020,
+            "remasterTitle": "Deluxe &amp; Expanded",
+            "remasterRecordLabel": "Acme &amp; Co",
+            "remasterCatalogueNumber": "ABC&#039;123",
+            "scene": false,
+            "hasLog": false,
+            "hasCue": false,
+            "logScore": 0,
+            "fileCount": 1,
+            "size": 1,
+            "seeders": 0,
+            "leechers": 0,
+            "snatched": 0,
+            "has_snatched": false,
+            "trumpable": null,
+            "lossyWebApproved": null,
+            "lossyMasterApproved": null,
+            "isNeutralleech": null,
+            "isFreeload": null,
+            "reported": false,
+            "time": "2020-01-01 00:00:00",
+            "description": "Notes &amp; info",
+            "fileList": "",
+            "filePath": "Artist &amp; Title",
+            "userId": 1,
+            "username": "DJ &amp; MC"
+        }"#;
+        let torrent: Torrent = json_from_str(json).expect("fixture should deserialize");
+        assert_eq!(torrent.remaster_title, "Deluxe & Expanded");
+        assert_eq!(torrent.remaster_record_label, "Acme & Co");
+        assert_eq!(torrent.remaster_catalogue_number, "ABC'123");
+        assert_eq!(torrent.description, "Notes & info");
+        assert_eq!(torrent.file_path, "Artist & Title");
+        assert_eq!(torrent.username, "DJ & MC");
     }
 }

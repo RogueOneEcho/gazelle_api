@@ -5,16 +5,19 @@ use crate::prelude::*;
 #[serde(rename_all = "camelCase")]
 pub struct User {
     /// Username
+    #[serde(deserialize_with = "decode_entities")]
     pub username: String,
     /// Avatar image URL
     pub avatar: String,
     /// Are they a friend?
     pub is_friend: bool,
     /// Profile body formatted as HTML
+    #[serde(deserialize_with = "decode_entities")]
     pub profile_text: String,
     /// Profile body formatted as BB code.
     ///
     /// *RED only*
+    #[serde(default, deserialize_with = "decode_entities_opt")]
     pub bb_profile_text: Option<String>,
     /// Stats
     pub stats: Stats,
@@ -318,5 +321,67 @@ mod tests {
         assert_eq!(user.community.perfect_flacs, 246);
         assert_eq!(user.community.seeding, 2660);
         assert_eq!(user.community.snatched, 4789);
+    }
+}
+
+#[cfg(test)]
+mod decode_tests {
+    use super::*;
+
+    #[test]
+    fn user_text_fields_decoded() {
+        let json = r#"{
+            "username": "DJ &amp; MC",
+            "avatar": "",
+            "isFriend": false,
+            "profileText": "Hello &amp; welcome",
+            "bbProfileText": "[b]bb &amp; text[/b]",
+            "stats": {
+                "joinedDate": "2020-01-01 00:00:00",
+                "lastAccess": "2020-01-01 00:00:00",
+                "uploaded": 0,
+                "downloaded": 0,
+                "ratio": 1.0,
+                "requiredRatio": 0.0
+            },
+            "ranks": {
+                "uploaded": 0.0,
+                "downloaded": 0.0,
+                "uploads": 0.0,
+                "requests": 0.0,
+                "bounty": 0.0,
+                "posts": 0.0,
+                "artists": 0.0,
+                "overall": 0.0
+            },
+            "personal": {
+                "class": "Member",
+                "paranoia": 0,
+                "paranoiaText": "Off",
+                "donor": false,
+                "warned": false,
+                "enabled": true,
+                "passkey": "x"
+            },
+            "community": {
+                "posts": 0,
+                "torrentComments": 0,
+                "collagesStarted": 0,
+                "collagesContrib": 0,
+                "requestsFilled": 0,
+                "requestsVoted": 0,
+                "perfectFlacs": 0,
+                "uploaded": 0,
+                "groups": 0,
+                "seeding": 0,
+                "leeching": 0,
+                "snatched": 0,
+                "invited": 0
+            }
+        }"#;
+        let user: User = json_from_str(json).expect("fixture should deserialize");
+        assert_eq!(user.username, "DJ & MC");
+        assert_eq!(user.profile_text, "Hello & welcome");
+        assert_eq!(user.bb_profile_text.as_deref(), Some("[b]bb & text[/b]"));
     }
 }

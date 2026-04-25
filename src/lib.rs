@@ -3,6 +3,7 @@ mod client;
 mod client_trait;
 mod error;
 mod factory;
+mod helpers;
 #[cfg(feature = "mock")]
 mod mock;
 mod options;

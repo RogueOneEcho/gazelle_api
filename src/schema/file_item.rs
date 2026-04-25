@@ -1,3 +1,5 @@
+use html_escape::decode_html_entities;
+
 /// A single file entry from a Gazelle torrent file list.
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct FileItem {
@@ -8,6 +10,8 @@ pub struct FileItem {
 }
 
 /// Parse a file list string into a vec of [`FileItem`].
+///
+/// HTML entities in file names are decoded.
 #[must_use]
 pub fn parse_file_list(file_list: &str) -> Vec<FileItem> {
     file_list
@@ -18,7 +22,7 @@ pub fn parse_file_list(file_list: &str) -> Vec<FileItem> {
             let size_str = rest.strip_suffix("}}}")?;
             let size = size_str.parse::<u64>().ok()?;
             Some(FileItem {
-                name: name.to_owned(),
+                name: decode_html_entities(name).into_owned(),
                 size,
             })
         })

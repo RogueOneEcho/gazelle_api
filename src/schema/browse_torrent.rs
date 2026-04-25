@@ -29,10 +29,13 @@ pub struct BrowseTorrent {
     /// Edition record label.
     ///
     /// *OPS only*
+    #[serde(default, deserialize_with = "decode_entities_opt")]
     pub remaster_record_label: Option<String>,
     /// Edition catalogue number.
+    #[serde(deserialize_with = "decode_entities")]
     pub remaster_catalogue_number: String,
     /// Edition title.
+    #[serde(deserialize_with = "decode_entities")]
     pub remaster_title: String,
     /// Whether the torrent has a log file.
     pub has_log: bool,
@@ -155,5 +158,47 @@ impl BrowseTorrent {
             is_freeload: None,
             trumpable: None,
         }
+    }
+}
+
+#[cfg(test)]
+mod decode_tests {
+    use super::*;
+
+    #[test]
+    fn browse_torrent_text_fields_decoded() {
+        let json = r#"{
+            "torrentId": 1,
+            "editionId": 1,
+            "artists": [],
+            "media": "WEB",
+            "format": "FLAC",
+            "encoding": "Lossless",
+            "remastered": true,
+            "remasterYear": 2020,
+            "remasterTitle": "Deluxe &amp; Expanded",
+            "remasterCatalogueNumber": "ABC&#039;123",
+            "remasterRecordLabel": "Acme &amp; Co",
+            "scene": false,
+            "vanityHouse": false,
+            "hasLog": false,
+            "hasCue": false,
+            "logScore": 100,
+            "fileCount": 1,
+            "size": 1,
+            "seeders": 0,
+            "leechers": 0,
+            "snatches": 0,
+            "isFreeleech": false,
+            "isNeutralLeech": false,
+            "isPersonalFreeleech": false,
+            "canUseToken": false,
+            "hasSnatched": false,
+            "time": "2020-01-01 00:00:00"
+        }"#;
+        let torrent: BrowseTorrent = json_from_str(json).expect("fixture should deserialize");
+        assert_eq!(torrent.remaster_title, "Deluxe & Expanded");
+        assert_eq!(torrent.remaster_catalogue_number, "ABC'123");
+        assert_eq!(torrent.remaster_record_label.as_deref(), Some("Acme & Co"));
     }
 }
