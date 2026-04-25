@@ -159,7 +159,7 @@ impl Torrent {
             reported: false,
             time: "2020-01-01 00:00:00".to_owned(),
             description: "Test description".to_owned(),
-            file_list: "test.flac{{{100000}}}|||".to_owned(),
+            file_list: "test.flac{{{100000}}}".to_owned(),
             file_path: "Test Album (2020) [FLAC]".to_owned(),
             user_id: 1,
             username: "uploader".to_owned(),
@@ -209,7 +209,7 @@ mod tests {
         fn torrent_get_files_decodes_entities() {
             let torrent = Torrent {
                 file_list:
-                    "Artist &amp; Title.flac{{{12345}}}|||cover &#039;art&#039;.jpg{{{500}}}|||"
+                    "Artist &amp; Title.flac{{{12345}}}|||cover &#039;art&#039;.jpg{{{500}}}"
                         .to_owned(),
                 ..Torrent::mock()
             };
@@ -229,7 +229,7 @@ mod tests {
         fn torrent_get_files() {
             // Arrange
             let torrent = Torrent {
-                file_list: "01 - Track.flac{{{12345678}}}|||cover.jpg{{{98765}}}|||".to_owned(),
+                file_list: "01 - Track.flac{{{12345678}}}|||cover.jpg{{{98765}}}".to_owned(),
                 ..Torrent::mock()
             };
 
@@ -249,6 +249,20 @@ mod tests {
         }
 
         #[test]
+        fn torrent_get_files_single_item() {
+            let torrent = Torrent {
+                file_list: "single.flac{{{100}}}".to_owned(),
+                ..Torrent::mock()
+            };
+            let output = torrent.get_files();
+            assert_eq!(output.len(), 1);
+            assert!(output.contains(&FileItem {
+                name: "single.flac".to_owned(),
+                size: 100,
+            }));
+        }
+
+        #[test]
         fn torrent_get_files_empty() {
             let torrent = Torrent {
                 file_list: String::new(),
@@ -260,7 +274,7 @@ mod tests {
         #[test]
         fn torrent_get_files_malformed_entries_skipped() {
             let torrent = Torrent {
-                file_list: "goodfile.flac{{{100}}}|||badentry|||".to_owned(),
+                file_list: "goodfile.flac{{{100}}}|||badentry".to_owned(),
                 ..Torrent::mock()
             };
             let output = torrent.get_files();
