@@ -24,6 +24,7 @@ impl GazelleClientFactory {
             url: base_url,
             requests_allowed_per_duration: num,
             request_limit_duration: per,
+            retry_delays,
         } = self.options;
         let client = create_client(user_agent, key);
         let limiter = RateLimiter::new(
@@ -34,6 +35,7 @@ impl GazelleClientFactory {
             base_url,
             client,
             limiter,
+            retry_delays,
         }
     }
 }

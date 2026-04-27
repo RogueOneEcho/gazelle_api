@@ -20,4 +20,12 @@ pub struct GazelleClientOptions {
     ///
     /// Default: `10` seconds
     pub request_limit_duration: Option<Duration>,
+    /// Delays between retry attempts when the API returns `TooManyRequests`.
+    ///
+    /// - Empty: no retry, errors propagate immediately
+    /// - `vec![Duration::from_secs(5), Duration::from_secs(10)]`: up to 3 attempts total
+    ///
+    /// Only applies to GET requests. Uploads and downloads are not retried.
+    #[serde(default)]
+    pub retry_delays: Vec<Duration>,
 }

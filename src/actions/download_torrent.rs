@@ -9,7 +9,7 @@ impl GazelleClient {
     /// - <https://github.com/OPSnet/Gazelle/blob/master/docs/07-API.md#download>
     pub async fn download_torrent(&self, id: u32) -> Result<Vec<u8>, GazelleError> {
         let query = format!("action=download&id={id}");
-        let result = self.get_internal(query).await;
+        let result = self.get_internal(&query).await;
         let response = result.map_err(GazelleError::request)?;
         let status_code = response.status();
         let content_type = get_content_type(&response).unwrap_or_default();

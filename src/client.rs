@@ -13,6 +13,10 @@ pub struct GazelleClient {
     pub client: Client,
     /// Rate limiter to throttle API requests
     pub limiter: RateLimiter,
+    /// Delays between retry attempts on `TooManyRequests`.
+    ///
+    /// Empty vec disables retry.
+    pub retry_delays: Vec<Duration>,
 }
 
 impl From<GazelleClientOptions> for GazelleClient {
@@ -25,11 +29,25 @@ impl From<GazelleClientOptions> for GazelleClient {
 
 impl GazelleClient {
     pub(crate) async fn get<T: DeserializeOwned>(&self, query: String) -> Result<T, GazelleError> {
-        let result = self.get_internal(query).await;
-        handle_result(result).await
+        let mut attempt = 0;
+        loop {
+            let result = self.get_internal(&query).await;
+            match handle_result(result).await {
+                Ok(value) => return Ok(value),
+                Err(error) => {
+                    if !error.is_retryable() {
+                        return Err(error);
+                    }
+                    if !self.wait_before_retry(attempt).await {
+                        return Err(error);
+                    }
+                    attempt += 1;
+                }
+            }
+        }
     }
 
-    pub(crate) async fn get_internal(&self, query: String) -> Result<Response, ReqwestError> {
+    pub(crate) async fn get_internal(&self, query: &str) -> Result<Response, ReqwestError> {
         self.limiter.execute().await;
         let path = format!("/ajax.php?{query}");
         trace!("Sending request GET {path}");
@@ -42,6 +60,28 @@ impl GazelleClient {
             .as_secs_f64();
         trace!("Received response after {elapsed:.3}");
         result
+    }
+
+    /// Log a retry warning and sleep for the configured delay before the next attempt.
+    ///
+    /// Returns `true` when a delay was waited and the caller should retry, or
+    /// `false` when retries are exhausted and the caller should give up.
+    async fn wait_before_retry(&self, attempt: usize) -> bool {
+        let delay = next_retry_delay(attempt, &self.retry_delays);
+        let host = display_base_url(&self.base_url);
+        let total = self.retry_delays.len() + 1;
+        let current = attempt + 1;
+        if let Some(delay) = delay {
+            warn!(
+                "Rate limited by {host}, attempt {current} of {total} failed, retrying in {:.1}s",
+                delay.as_secs_f64(),
+            );
+            tokio_sleep(delay).await;
+            true
+        } else {
+            warn!("Rate limited by {host}, attempt {current} of {total} failed");
+            false
+        }
     }
 }
 
@@ -89,6 +129,25 @@ pub(crate) fn get_result<T: DeserializeOwned>(
     response
         .response
         .ok_or_else(|| GazelleError::other(response.error.unwrap_or_default(), status))
+}
+
+/// Return the delay before the next attempt, or `None` if no more retries are configured.
+///
+/// `attempt` is 0-indexed: attempt 0 is the initial request, attempt 1 is the first retry.
+/// `delays[i]` is the gap before attempt `i + 1`.
+fn next_retry_delay(attempt: usize, delays: &[Duration]) -> Option<Duration> {
+    delays.get(attempt).copied()
+}
+
+/// Strip scheme and trailing slash from a base URL for display.
+///
+/// `https://example.com` -> `example.com`
+fn display_base_url(url: &str) -> &str {
+    let stripped = url
+        .strip_prefix("https://")
+        .or_else(|| url.strip_prefix("http://"))
+        .unwrap_or(url);
+    stripped.trim_end_matches('/')
 }
 
 #[async_trait]
@@ -311,5 +370,47 @@ mod tests {
         };
         assert_eq!(e.status, 200);
         assert_eq!(e.message, "some new error type");
+    }
+
+    #[test]
+    fn next_retry_delay_within_bounds() {
+        let delays = [Duration::from_secs(5), Duration::from_secs(10)];
+        assert_eq!(next_retry_delay(0, &delays), Some(Duration::from_secs(5)));
+        assert_eq!(next_retry_delay(1, &delays), Some(Duration::from_secs(10)));
+    }
+
+    #[test]
+    fn next_retry_delay_exhausted() {
+        let delays = [Duration::from_secs(5), Duration::from_secs(10)];
+        assert_eq!(next_retry_delay(2, &delays), None);
+    }
+
+    #[test]
+    fn next_retry_delay_empty() {
+        let delays: [Duration; 0] = [];
+        assert_eq!(next_retry_delay(0, &delays), None);
+    }
+
+    #[test]
+    fn display_base_url_https() {
+        assert_eq!(display_base_url("https://example.com"), "example.com");
+    }
+
+    #[test]
+    fn display_base_url_http_with_port() {
+        assert_eq!(
+            display_base_url("http://example.com:8080"),
+            "example.com:8080"
+        );
+    }
+
+    #[test]
+    fn display_base_url_no_scheme() {
+        assert_eq!(display_base_url("example.com"), "example.com");
+    }
+
+    #[test]
+    fn display_base_url_trailing_slash() {
+        assert_eq!(display_base_url("https://example.com/"), "example.com");
     }
 }
