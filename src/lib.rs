@@ -1,7 +1,7 @@
 mod actions;
 mod client;
 mod client_trait;
-mod error;
+mod errors;
 mod factory;
 mod helpers;
 #[cfg(feature = "mock")]

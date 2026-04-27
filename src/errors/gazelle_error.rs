@@ -1,110 +1,4 @@
-use crate::GazelleSerializableError::*;
 use crate::prelude::*;
-use miette::Diagnostic;
-use reqwest::StatusCode;
-use std::error::Error;
-use thiserror::Error as ThisError;
-
-/// The kind of API response error.
-#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "snake_case")]
-pub enum ApiResponseKind {
-    BadRequest,
-    Unauthorized,
-    NotFound,
-    TooManyRequests,
-    Other,
-}
-
-impl Display for ApiResponseKind {
-    fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
-        match self {
-            Self::BadRequest => write!(f, "bad request"),
-            Self::Unauthorized => write!(f, "unauthorized"),
-            Self::NotFound => write!(f, "not found"),
-            Self::TooManyRequests => write!(f, "too many requests"),
-            Self::Other => write!(f, "unexpected response"),
-        }
-    }
-}
-
-/// The operation that failed.
-#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, ThisError, Serialize, Deserialize)]
-#[serde(rename_all = "snake_case", tag = "type", content = "kind")]
-pub enum GazelleOperation {
-    #[error("send request")]
-    SendRequest,
-    #[error("read response body")]
-    ReadResponse,
-    #[error("deserialize response")]
-    Deserialize,
-    #[error("read file")]
-    ReadFile,
-    #[error("{0}")]
-    ApiResponse(ApiResponseKind),
-}
-
-/// An error from the API response.
-#[derive(Clone, Debug, ThisError)]
-#[error("{message}")]
-pub struct ApiResponseError {
-    pub message: String,
-    pub status: u16,
-}
-
-/// The source of a [`GazelleError`].
-#[derive(Debug)]
-pub enum ErrorSource {
-    Reqwest(ReqwestError),
-    SerdeJson(JsonError),
-    Io(IoError),
-    ApiResponse(ApiResponseError),
-    Stringified(String),
-}
-
-impl Display for ErrorSource {
-    fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
-        match self {
-            Self::Reqwest(e) => write!(f, "{e}"),
-            Self::SerdeJson(e) => write!(f, "{e}"),
-            Self::Io(e) => write!(f, "{e}"),
-            Self::ApiResponse(e) => write!(f, "{e}"),
-            Self::Stringified(s) => write!(f, "{s}"),
-        }
-    }
-}
-
-#[cfg(feature = "mock")]
-impl Clone for ErrorSource {
-    fn clone(&self) -> Self {
-        match self {
-            Self::ApiResponse(e) => Self::ApiResponse(e.clone()),
-            other => Self::Stringified(other.to_string()),
-        }
-    }
-}
-
-#[cfg(feature = "mock")]
-impl Clone for GazelleError {
-    fn clone(&self) -> Self {
-        Self {
-            operation: self.operation,
-            source: self.source.clone(),
-        }
-    }
-}
-
-impl Error for ErrorSource {
-    fn source(&self) -> Option<&(dyn Error + 'static)> {
-        match self {
-            Self::Reqwest(e) => Some(e),
-            Self::SerdeJson(e) => Some(e),
-            Self::Io(e) => Some(e),
-            Self::ApiResponse(e) => Some(e),
-            Self::Stringified(_) => None,
-        }
-    }
-}
 
 /// A structured error from the Gazelle API.
 #[derive(Debug)]
@@ -132,6 +26,16 @@ impl Display for GazelleError {
 impl Error for GazelleError {
     fn source(&self) -> Option<&(dyn Error + 'static)> {
         Some(&self.source)
+    }
+}
+
+#[cfg(feature = "mock")]
+impl Clone for GazelleError {
+    fn clone(&self) -> Self {
+        Self {
+            operation: self.operation,
+            source: self.source.clone(),
+        }
     }
 }
 
@@ -191,6 +95,28 @@ impl GazelleError {
         Self::api_response(ApiResponseKind::Other, message, status)
     }
 
+    /// Whether the error is a transient rate-limit that warrants retry.
+    ///
+    /// - Returns `false` for non-API-response operations
+    #[must_use]
+    pub fn is_retryable(&self) -> bool {
+        match self.operation {
+            GazelleOperation::ApiResponse(kind) => kind.is_retryable(),
+            _ => false,
+        }
+    }
+
+    /// Whether the error indicates the requested resource is missing.
+    ///
+    /// - Returns `false` for non-API-response operations
+    #[must_use]
+    pub fn is_missing(&self) -> bool {
+        match self.operation {
+            GazelleOperation::ApiResponse(kind) => kind.is_missing(),
+            _ => false,
+        }
+    }
+
     /// Get a [`GazelleError`] if the status code indicates a known client error.
     ///
     /// *RED only as OPS returns `200 Success` for everything*
@@ -228,193 +154,9 @@ impl GazelleError {
     }
 }
 
-/// A serializable error from the Gazelle API.
-///
-/// This type preserves backwards compatibility with existing serialization formats.
-/// Use [`From<GazelleError>`] to convert from the structured [`GazelleError`] type.
-#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
-#[serde(rename_all = "snake_case", tag = "type")]
-pub enum GazelleSerializableError {
-    /// An error occurred creating the request.
-    ///
-    /// Includes the `reqwest::Error` as a string.
-    Request { error: String },
-    /// An error occurred extracting the body of the response.
-    ///
-    /// Includes the `reqwest::Error` as a string.
-    Response { error: String },
-    /// An error occurred deserializing the body as JSON.
-    ///
-    /// Includes the `serde_json::Error` as a string.
-    Deserialization { error: String },
-    /// An error occurred reading the torrent file.
-    ///
-    /// Includes the `IoError` as a string.
-    Upload { error: String },
-    /// 400 Bad Request.
-    ///
-    /// Indicates that either the requested resource was not found,
-    /// or there was an issue with the parameters.
-    BadRequest { message: String },
-    /// 401 Unauthorized
-    /// Indicates the API Key is invalid
-    Unauthorized { message: String },
-    /// 404 Not Found
-    /// Indicates the requested resource was not found
-    NotFound { message: String },
-    /// 429 Too Many Request
-    /// Indicates the rate limit has been hit
-    TooManyRequests { message: String },
-    /// An unexpected status code and error message was received from the API
-    /// Includes the `StatusCode` as a `u16` and
-    /// the error message received from the API as a string
-    Other {
-        status: u16,
-        message: Option<String>,
-    },
-}
-
-impl From<GazelleError> for GazelleSerializableError {
-    fn from(error: GazelleError) -> Self {
-        match (error.operation, error.source) {
-            (GazelleOperation::SendRequest, source) => Self::Request {
-                error: source.to_string(),
-            },
-            (GazelleOperation::ReadResponse, source) => Self::Response {
-                error: source.to_string(),
-            },
-            (GazelleOperation::Deserialize, source) => Self::Deserialization {
-                error: source.to_string(),
-            },
-            (GazelleOperation::ReadFile, source) => Self::Upload {
-                error: source.to_string(),
-            },
-            (GazelleOperation::ApiResponse(kind), ErrorSource::ApiResponse(api_err)) => {
-                match kind {
-                    ApiResponseKind::BadRequest => Self::BadRequest {
-                        message: api_err.message,
-                    },
-                    ApiResponseKind::Unauthorized => Self::Unauthorized {
-                        message: api_err.message,
-                    },
-                    ApiResponseKind::NotFound => Self::NotFound {
-                        message: api_err.message,
-                    },
-                    ApiResponseKind::TooManyRequests => Self::TooManyRequests {
-                        message: api_err.message,
-                    },
-                    ApiResponseKind::Other => Self::Other {
-                        status: api_err.status,
-                        message: Some(api_err.message),
-                    },
-                }
-            }
-            (GazelleOperation::ApiResponse(_), _) => {
-                unreachable!("ApiResponse operation must have ApiResponse source")
-            }
-        }
-    }
-}
-
-impl Display for GazelleSerializableError {
-    fn fmt(&self, formatter: &mut Formatter<'_>) -> FmtResult {
-        let message = match self {
-            Request { error } => format!("{} to send API request: {error}", "Failed"),
-            Response { error } => {
-                format!("{} to read API response: {error}", "Failed")
-            }
-            Deserialization { error } => {
-                format!("{} to deserialize API response: {error}", "Failed")
-            }
-            Upload { error } => {
-                format!("{} to upload torrent file: {error}", "Failed")
-            }
-            BadRequest { message } => {
-                format!("{} bad request response{}", "Received", append(message))
-            }
-            Unauthorized { message } => {
-                format!("{} unauthorized response{}", "Received", append(message))
-            }
-            NotFound { message } => {
-                format!("{} not found response{}", "Received", append(message))
-            }
-            TooManyRequests { message } => {
-                format!(
-                    "{} too many requests response{}",
-                    "Received",
-                    append(message)
-                )
-            }
-            Other {
-                status,
-                message: error,
-            } => {
-                format!(
-                    "{} {} response{}",
-                    "Received",
-                    status_code_and_reason(*status),
-                    append(&error.clone().unwrap_or_default())
-                )
-            }
-        };
-        message.fmt(formatter)
-    }
-}
-
-fn status_code_and_reason(code: u16) -> String {
-    StatusCode::from_u16(code)
-        .ok()
-        .and_then(|code| code.canonical_reason())
-        .map(|reason| format!("{code} {reason}"))
-        .unwrap_or(code.to_string())
-}
-
-fn append(message: &str) -> String {
-    if message.is_empty() {
-        String::new()
-    } else {
-        format!(": {message}")
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    #[test]
-    fn yaml_serialization() -> Result<(), YamlError> {
-        let example = vec![
-            BadRequest {
-                message: String::new(),
-            },
-            BadRequest {
-                message: "bad id parameter".to_owned(),
-            },
-            NotFound {
-                message: "no such user".to_owned(),
-            },
-            Other {
-                status: 500,
-                message: Some("Hello, world".to_owned()),
-            },
-        ];
-        let expected = "- type: bad_request
-  message: ''
-- type: bad_request
-  message: bad id parameter
-- type: not_found
-  message: no such user
-- type: other
-  status: 500
-  message: Hello, world
-";
-        let yaml = yaml_to_string(&example)?;
-        println!("{yaml}");
-        let deserialized: Vec<GazelleSerializableError> = yaml_from_str(expected)?;
-        assert_eq!(yaml, expected);
-        assert_eq!(deserialized, example);
-        Ok(())
-    }
 
     #[test]
     fn match_status_error_bad_request() {
@@ -587,33 +329,81 @@ mod tests {
     }
 
     #[test]
-    fn conversion_to_serializable_request() {
+    fn is_retryable_too_many_requests() {
+        let error = GazelleError::too_many_requests("Rate limit exceeded".to_owned(), 429);
+        assert!(error.is_retryable());
+    }
+
+    #[test]
+    fn is_retryable_bad_request() {
+        let error = GazelleError::bad_request("bad id parameter".to_owned(), 400);
+        assert!(!error.is_retryable());
+    }
+
+    #[test]
+    fn is_retryable_unauthorized() {
+        let error = GazelleError::unauthorized("nope".to_owned(), 401);
+        assert!(!error.is_retryable());
+    }
+
+    #[test]
+    fn is_retryable_not_found() {
+        let error = GazelleError::not_found("nope".to_owned(), 404);
+        assert!(!error.is_retryable());
+    }
+
+    #[test]
+    fn is_retryable_other() {
+        let error = GazelleError::other("boom".to_owned(), 500);
+        assert!(!error.is_retryable());
+    }
+
+    #[test]
+    fn is_retryable_send_request() {
         let error = GazelleError {
             operation: GazelleOperation::SendRequest,
-            source: ErrorSource::Io(IoError::other("test")),
+            source: ErrorSource::Io(IoError::other("network down")),
         };
-        let serializable = GazelleSerializableError::from(error);
-        assert!(
-            matches!(serializable, GazelleSerializableError::Request { error } if error == "test")
-        );
+        assert!(!error.is_retryable());
     }
 
     #[test]
-    fn conversion_to_serializable_api_response() {
-        let error = GazelleError::not_found("resource not found".to_owned(), 404);
-        let serializable = GazelleSerializableError::from(error);
-        assert!(
-            matches!(serializable, GazelleSerializableError::NotFound { message } if message == "resource not found")
-        );
+    fn is_missing_not_found() {
+        let error = GazelleError::not_found("nope".to_owned(), 404);
+        assert!(error.is_missing());
     }
 
     #[test]
-    fn conversion_to_serializable_other() {
-        let error = GazelleError::other("unexpected".to_owned(), 500);
-        let serializable = GazelleSerializableError::from(error);
-        assert!(
-            matches!(serializable, GazelleSerializableError::Other { status: 500, message: Some(m) } if m == "unexpected")
-        );
+    fn is_missing_bad_request() {
+        let error = GazelleError::bad_request("bad id parameter".to_owned(), 400);
+        assert!(error.is_missing());
+    }
+
+    #[test]
+    fn is_missing_unauthorized() {
+        let error = GazelleError::unauthorized("nope".to_owned(), 401);
+        assert!(!error.is_missing());
+    }
+
+    #[test]
+    fn is_missing_too_many_requests() {
+        let error = GazelleError::too_many_requests("Rate limit exceeded".to_owned(), 429);
+        assert!(!error.is_missing());
+    }
+
+    #[test]
+    fn is_missing_other() {
+        let error = GazelleError::other("boom".to_owned(), 500);
+        assert!(!error.is_missing());
+    }
+
+    #[test]
+    fn is_missing_send_request() {
+        let error = GazelleError {
+            operation: GazelleOperation::SendRequest,
+            source: ErrorSource::Io(IoError::other("network down")),
+        };
+        assert!(!error.is_missing());
     }
 
     #[test]
