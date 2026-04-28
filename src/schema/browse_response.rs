@@ -146,5 +146,6 @@ mod tests {
         assert_eq!(torrent.encoding, Quality::Lossless);
         assert_eq!(torrent.remastered, Some(true));
         assert_eq!(torrent.remaster_catalogue_number, "MOCK-100");
+        assert_eq!(torrent.can_use_token, Some(true));
     }
 }

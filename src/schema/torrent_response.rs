@@ -75,6 +75,47 @@ mod tests {
         assert_eq!(response.torrent.format, Format::FLAC);
         assert_eq!(response.torrent.encoding, Quality::Lossless);
         assert_eq!(response.group.release_type, ReleaseTypeId(9));
+
+        // Assert - New fields
+        assert_eq!(
+            response.torrent.free_torrent,
+            Some(LeechType::Kind(LeechKind::Normal))
+        );
+        assert_eq!(
+            response.torrent.info_hash.as_deref(),
+            Some("c8c59284150338a369caedd8172a00bcfa6256fd")
+        );
+        assert!(
+            response
+                .torrent
+                .rip_log_ids
+                .as_ref()
+                .expect("should exist")
+                .is_empty()
+        );
+        assert!(
+            response
+                .torrent
+                .trumpable_reasons
+                .as_ref()
+                .expect("should exist")
+                .is_empty()
+        );
+        assert_eq!(response.torrent.log_checksum, Some(false));
+        assert_eq!(response.torrent.log_count, Some(0));
+        assert_eq!(response.torrent.free_reason.as_deref(), Some("Normal"));
+        assert!(response.torrent.can_use_token.is_none());
+        assert!(response.torrent.edition_id.is_none());
+        // Assert - OPS group fields
+        assert_eq!(
+            response.group.proxy_image.as_deref(),
+            Some("https://example.com/proxy/cover.jpg")
+        );
+        assert_eq!(response.group.release_type_name.as_deref(), Some("Single"));
+        assert!(response.group.wiki_bb_code.is_some());
+        assert!(response.group.collages.is_none());
+        assert!(response.group.personal_collages.is_none());
+        assert!(response.group.num_comments.is_none());
     }
 
     #[test]
@@ -100,6 +141,52 @@ mod tests {
         assert_eq!(response.group.name, "Test Album");
         assert_eq!(response.torrent.id, 12483);
         assert_eq!(response.torrent.media, Media::WEB);
+
+        // Assert - New fields
+        assert_eq!(response.torrent.free_torrent, Some(LeechType::Bool(false)));
+        assert_eq!(
+            response.torrent.info_hash.as_deref(),
+            Some("2282B5513CBEA24A83D557D1EBFBC3611A0951B7")
+        );
+        assert_eq!(response.torrent.can_use_token, Some(true));
+        assert!(
+            response
+                .torrent
+                .rip_log_ids
+                .as_ref()
+                .expect("should exist")
+                .is_empty()
+        );
+        assert!(
+            response
+                .torrent
+                .trumpable_reasons
+                .as_ref()
+                .expect("should exist")
+                .is_empty()
+        );
+        assert!(response.torrent.log_checksum.is_none());
+        assert!(response.torrent.log_count.is_none());
+        assert!(response.torrent.free_reason.is_none());
+        assert!(response.torrent.edition_id.is_none());
+        // Assert - RED group fields
+        assert_eq!(
+            response
+                .group
+                .collages
+                .as_ref()
+                .expect("should exist")
+                .len(),
+            1
+        );
+        assert_eq!(
+            response.group.collages.as_ref().expect("should exist")[0].name,
+            "Test Collage"
+        );
+        assert!(response.group.personal_collages.is_none());
+        assert!(response.group.proxy_image.is_none());
+        assert!(response.group.release_type_name.is_none());
+        assert!(response.group.wiki_bb_code.is_none());
     }
 
     #[test]

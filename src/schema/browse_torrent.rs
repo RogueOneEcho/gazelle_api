@@ -113,6 +113,7 @@ impl BrowseTorrent {
             trumpable: self.trumpable,
             is_freeload: self.is_freeload,
             time: self.time.clone(),
+            can_use_token: Some(self.can_use_token),
             ..Torrent::default()
         }
     }

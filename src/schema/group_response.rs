@@ -54,6 +54,24 @@ mod tests {
         assert!(response.torrents[0].lossy_master_approved.is_none());
         assert!(response.torrents[0].is_neutralleech.is_none());
         assert!(response.torrents[0].is_freeload.is_none());
+        // Assert - OPS new group fields
+        assert_eq!(
+            response.group.proxy_image.as_deref(),
+            Some("https://example.com/proxy/cover.jpg")
+        );
+        assert_eq!(response.group.release_type_name.as_deref(), Some("Album"));
+        assert!(response.group.wiki_bb_code.is_some());
+        assert!(response.group.collages.is_none());
+        assert!(response.group.personal_collages.is_none());
+        assert!(response.group.num_comments.is_none());
+        // Assert - OPS new torrent fields
+        assert_eq!(
+            response.torrents[0].free_torrent,
+            Some(LeechType::Kind(LeechKind::Normal))
+        );
+        assert_eq!(response.torrents[0].log_checksum, Some(false));
+        assert_eq!(response.torrents[0].log_count, Some(0));
+        assert_eq!(response.torrents[0].free_reason.as_deref(), Some("Normal"));
     }
 
     #[test]
@@ -76,6 +94,38 @@ mod tests {
         assert_eq!(response.torrents[2].trumpable, Some(true));
         assert_eq!(response.torrents[2].lossy_web_approved, Some(true));
         assert_eq!(response.torrents[2].is_neutralleech, Some(true));
+        // Assert - RED new group fields
+        assert_eq!(
+            response
+                .group
+                .collages
+                .as_ref()
+                .expect("should exist")
+                .len(),
+            2
+        );
+        assert_eq!(
+            response
+                .group
+                .personal_collages
+                .as_ref()
+                .expect("should exist")
+                .len(),
+            1
+        );
+        assert_eq!(response.group.num_comments, Some(7));
+        assert!(response.group.proxy_image.is_none());
+        assert!(response.group.release_type_name.is_none());
+        assert!(response.group.wiki_bb_code.is_none());
+        // Assert - RED new torrent fields
+        assert_eq!(
+            response.torrents[0].free_torrent,
+            Some(LeechType::Bool(false))
+        );
+        assert_eq!(response.torrents[0].edition_id, Some(1));
+        assert!(response.torrents[0].log_checksum.is_none());
+        assert!(response.torrents[0].log_count.is_none());
+        assert!(response.torrents[0].free_reason.is_none());
     }
 
     #[test]

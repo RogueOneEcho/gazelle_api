@@ -70,11 +70,12 @@ pub struct Torrent {
     ///
     /// *RED only*
     pub lossy_master_approved: Option<bool>,
-    /// Is this a freeleech torrent?
+    /// Freeleech status.
     ///
-    /// *Skipped because OPS returns this as an integer in a string*
-    #[serde(skip)]
-    pub free_torrent: Option<bool>,
+    /// - *RED*: [`LeechType::Bool`] - `true` is ambiguous between free and neutral
+    /// - *OPS*: [`LeechType::Kind`] with unambiguous [`LeechKind`]
+    #[serde(default, deserialize_with = "deserialize_leech_type")]
+    pub free_torrent: Option<LeechType>,
     /// Is this neutral leech?
     ///
     /// *RED only*
@@ -95,7 +96,9 @@ pub struct Torrent {
     /// - File names are HTML-entity-encoded as returned by Gazelle.
     /// - Use [`parse_file_list`] to get decoded [`FileItem`].
     pub file_list: String,
-    /// The name of the torrent directory
+    /// The name of the torrent directory.
+    ///
+    /// - May be empty for legacy single-file torrents.
     #[serde(deserialize_with = "decode_entities")]
     pub file_path: String,
     /// ID of uploader
@@ -103,6 +106,40 @@ pub struct Torrent {
     /// Username of uploader
     #[serde(deserialize_with = "decode_entities")]
     pub username: String,
+    /// Info hash (uppercase hex).
+    #[serde(default)]
+    pub info_hash: Option<String>,
+    /// Whether a freeleech token can be used.
+    ///
+    /// *RED only*
+    #[serde(default)]
+    pub can_use_token: Option<bool>,
+    /// Log IDs for rip logs.
+    #[serde(default)]
+    pub rip_log_ids: Option<Vec<u32>>,
+    /// Reasons for trumpability.
+    #[serde(default, rename = "trumpable_reasons")]
+    pub trumpable_reasons: Option<Vec<String>>,
+    /// Whether the log checksum is valid.
+    ///
+    /// *OPS only*
+    #[serde(default)]
+    pub log_checksum: Option<bool>,
+    /// Number of rip logs.
+    ///
+    /// *OPS only*
+    #[serde(default)]
+    pub log_count: Option<u32>,
+    /// Reason for freeleech status.
+    ///
+    /// *OPS only*
+    #[serde(default)]
+    pub free_reason: Option<String>,
+    /// Edition ID.
+    ///
+    /// *RED torrentgroup only*
+    #[serde(default)]
+    pub edition_id: Option<u32>,
 }
 
 impl Torrent {
@@ -122,6 +159,19 @@ impl Torrent {
         let mut files = parse_file_list(&self.file_list);
         files.sort_by(|a, b| a.name.cmp(&b.name));
         files
+    }
+
+    /// Whether this torrent is freeleech.
+    ///
+    /// - *OPS*: checks [`LeechKind`] directly
+    /// - *RED*: [`LeechType::Bool`]`(true)` is only free if [`Torrent::is_neutralleech`] is not `true`
+    #[must_use]
+    pub fn is_free(&self) -> bool {
+        match &self.free_torrent {
+            Some(LeechType::Kind(LeechKind::Free)) => true,
+            Some(LeechType::Bool(true)) => self.is_neutralleech != Some(true),
+            _ => false,
+        }
     }
 }
 
@@ -163,6 +213,14 @@ impl Torrent {
             file_path: "Test Album (2020) [FLAC]".to_owned(),
             user_id: 1,
             username: "uploader".to_owned(),
+            info_hash: None,
+            can_use_token: None,
+            rip_log_ids: None,
+            trumpable_reasons: None,
+            log_checksum: None,
+            log_count: None,
+            free_reason: None,
+            edition_id: None,
         }
     }
 }
@@ -333,5 +391,86 @@ mod decode_tests {
         assert_eq!(torrent.description, "Notes & info");
         assert_eq!(torrent.file_path, "Artist & Title");
         assert_eq!(torrent.username, "DJ & MC");
+    }
+}
+
+#[cfg(test)]
+#[cfg(feature = "mock")]
+mod is_free_tests {
+    use super::*;
+
+    #[test]
+    fn kind_free() {
+        let torrent = Torrent {
+            free_torrent: Some(LeechType::Kind(LeechKind::Free)),
+            ..Torrent::mock()
+        };
+        assert!(torrent.is_free());
+    }
+
+    #[test]
+    fn kind_normal() {
+        let torrent = Torrent {
+            free_torrent: Some(LeechType::Kind(LeechKind::Normal)),
+            ..Torrent::mock()
+        };
+        assert!(!torrent.is_free());
+    }
+
+    #[test]
+    fn kind_neutral() {
+        let torrent = Torrent {
+            free_torrent: Some(LeechType::Kind(LeechKind::Neutral)),
+            ..Torrent::mock()
+        };
+        assert!(!torrent.is_free());
+    }
+
+    #[test]
+    fn bool_true_not_neutral() {
+        let torrent = Torrent {
+            free_torrent: Some(LeechType::Bool(true)),
+            is_neutralleech: Some(false),
+            ..Torrent::mock()
+        };
+        assert!(torrent.is_free());
+    }
+
+    #[test]
+    fn bool_true_neutral() {
+        let torrent = Torrent {
+            free_torrent: Some(LeechType::Bool(true)),
+            is_neutralleech: Some(true),
+            ..Torrent::mock()
+        };
+        assert!(!torrent.is_free());
+    }
+
+    #[test]
+    fn bool_true_neutral_unknown() {
+        let torrent = Torrent {
+            free_torrent: Some(LeechType::Bool(true)),
+            is_neutralleech: None,
+            ..Torrent::mock()
+        };
+        assert!(torrent.is_free());
+    }
+
+    #[test]
+    fn bool_false() {
+        let torrent = Torrent {
+            free_torrent: Some(LeechType::Bool(false)),
+            ..Torrent::mock()
+        };
+        assert!(!torrent.is_free());
+    }
+
+    #[test]
+    fn none() {
+        let torrent = Torrent {
+            free_torrent: None,
+            ..Torrent::mock()
+        };
+        assert!(!torrent.is_free());
     }
 }
