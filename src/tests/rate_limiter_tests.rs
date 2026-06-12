@@ -149,12 +149,12 @@ fn print_duration(name: &str, duration: Option<Duration>) {
 #[tokio::test]
 async fn test_constructor_initializes_empty_queue() {
     // Arrange & Act
-    let limiter = RateLimiter::new(10, Duration::from_secs(60));
+    let limiter = RateLimiter::new(10, Duration::from_mins(1));
 
     // Assert
     assert!(limiter.requests.lock().await.is_empty());
     assert_eq!(limiter.rate.num, 10);
-    assert_eq!(limiter.rate.per, Duration::from_secs(60));
+    assert_eq!(limiter.rate.per, Duration::from_mins(1));
 }
 
 #[tokio::test]

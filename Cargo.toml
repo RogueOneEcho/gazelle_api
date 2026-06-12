@@ -18,22 +18,22 @@ include = [
 [dependencies]
 async-trait = "0.1.89"
 html-escape = "0.2.13"
-log = { version = "0.4.29", features = ["std"] }
+log = { version = "0.4.32", features = ["std"] }
 miette = "7.6.0"
-regex = "1.12.3"
-reqwest = { version = "0.13.2", features = ["rustls", "json", "multipart", "stream"], default-features = false }
+regex = "1.12.4"
+reqwest = { version = "0.13.4", features = ["rustls", "json", "multipart", "stream"], default-features = false }
 rogue_logging = { version = "0.7.2", features = ["log"] }
 serde = { version = "1.0.228", features = ["derive"] }
-serde_json = "1.0.149"
+serde_json = "1.0.150"
 serde_yaml = "0.9.34"
 thiserror = "2.0.18"
-tokio = { version = "1.52.1", features = ["full"] }
+tokio = { version = "1.52.3", features = ["full"] }
 urlencoding = { version = "2.1.3" }
 
 [dev-dependencies]
 rogue_config = "0.2.0"
 rogue_logging = "0.7.2"
-serial_test = "3.4.0"
+serial_test = "3.5.0"
 
 [features]
 default = []
