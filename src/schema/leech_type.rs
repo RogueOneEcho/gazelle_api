@@ -27,6 +27,15 @@ pub enum LeechKind {
     Free,
     /// No upload credit and no download cost
     Neutral,
+    /// Token-applied personal freeleech.
+    ///
+    /// OPS returns the string `"personal"`, overriding the leech type label
+    /// when `isFreeleechPersonal()` is set.
+    ///
+    /// <https://github.com/OPSnet/Gazelle/blob/58e3b9e73031ff1082f3909123f52f57263970cc/app/Json/Torrent.php#L55>
+    Personal,
+    /// Unrecognized value.
+    Other(String),
 }
 
 /// Deserialize [`LeechType`] from a bool, a string label, or null.
@@ -47,16 +56,12 @@ pub(crate) fn deserialize_leech_type<'de, D: Deserializer<'de>>(
         }
 
         fn visit_str<E: DeError>(self, value: &str) -> Result<Self::Value, E> {
-            let kind = match value {
-                "Normal" | "0" => LeechKind::Normal,
-                "Freeleech" | "1" => LeechKind::Free,
-                "Neutral Leech" | "2" => LeechKind::Neutral,
-                other => {
-                    return Err(DeError::invalid_value(
-                        Unexpected::Str(other),
-                        &"Normal, Freeleech, Neutral Leech, 0, 1, or 2",
-                    ));
-                }
+            let kind = match value.to_ascii_lowercase().as_str() {
+                "normal" | "0" => LeechKind::Normal,
+                "freeleech" | "1" => LeechKind::Free,
+                "neutral leech" | "2" => LeechKind::Neutral,
+                "personal" => LeechKind::Personal,
+                _ => LeechKind::Other(value.to_owned()),
             };
             Ok(Some(LeechType::Kind(kind)))
         }
@@ -115,6 +120,30 @@ mod tests {
     fn string_neutral_leech() {
         let output = deser(r#"{"value": "Neutral Leech"}"#);
         assert_eq!(output, Some(LeechType::Kind(LeechKind::Neutral)));
+    }
+
+    #[test]
+    fn string_personal() {
+        let output = deser(r#"{"value": "personal"}"#);
+        assert_eq!(output, Some(LeechType::Kind(LeechKind::Personal)));
+    }
+
+    #[test]
+    fn string_personal_uppercase() {
+        let output = deser(r#"{"value": "Personal"}"#);
+        assert_eq!(output, Some(LeechType::Kind(LeechKind::Personal)));
+    }
+
+    /// Unknown leech type strings must not fail the whole response.
+    ///
+    /// <https://github.com/RogueOneEcho/caesura/discussions/241>
+    #[test]
+    fn string_unknown() {
+        let output = deser(r#"{"value": "mystery"}"#);
+        assert_eq!(
+            output,
+            Some(LeechType::Kind(LeechKind::Other("mystery".to_owned())))
+        );
     }
 
     #[test]

@@ -168,7 +168,7 @@ impl Torrent {
     #[must_use]
     pub fn is_free(&self) -> bool {
         match &self.free_torrent {
-            Some(LeechType::Kind(LeechKind::Free)) => true,
+            Some(LeechType::Kind(LeechKind::Free | LeechKind::Personal)) => true,
             Some(LeechType::Bool(true)) => self.is_neutralleech != Some(true),
             _ => false,
         }
@@ -424,6 +424,15 @@ mod is_free_tests {
             ..Torrent::mock()
         };
         assert!(!torrent.is_free());
+    }
+
+    #[test]
+    fn kind_personal() {
+        let torrent = Torrent {
+            free_torrent: Some(LeechType::Kind(LeechKind::Personal)),
+            ..Torrent::mock()
+        };
+        assert!(torrent.is_free());
     }
 
     #[test]
