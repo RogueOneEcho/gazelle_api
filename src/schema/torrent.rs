@@ -326,7 +326,7 @@ mod tests {
                 file_list: String::new(),
                 ..Torrent::mock()
             };
-            assert!(torrent.get_files().is_empty());
+            assert_eq!(torrent.get_files(), Vec::new());
         }
 
         #[test]

@@ -158,14 +158,7 @@ mod tests {
         assert_eq!(music_info.artists.len(), 1);
         assert_eq!(music_info.artists[0].name, "Test Artist");
         // OPS has arranger field
-        assert!(music_info.arranger.is_some());
-        assert!(
-            music_info
-                .arranger
-                .as_ref()
-                .expect("arranger should exist")
-                .is_empty()
-        );
+        assert_eq!(music_info.arranger, Some(Vec::new()));
     }
 
     #[test]

@@ -85,22 +85,8 @@ mod tests {
             response.torrent.info_hash.as_deref(),
             Some("c8c59284150338a369caedd8172a00bcfa6256fd")
         );
-        assert!(
-            response
-                .torrent
-                .rip_log_ids
-                .as_ref()
-                .expect("should exist")
-                .is_empty()
-        );
-        assert!(
-            response
-                .torrent
-                .trumpable_reasons
-                .as_ref()
-                .expect("should exist")
-                .is_empty()
-        );
+        assert_eq!(response.torrent.rip_log_ids, Some(Vec::new()));
+        assert_eq!(response.torrent.trumpable_reasons, Some(Vec::new()));
         assert_eq!(response.torrent.log_checksum, Some(false));
         assert_eq!(response.torrent.log_count, Some(0));
         assert_eq!(response.torrent.free_reason.as_deref(), Some("Normal"));
@@ -149,22 +135,8 @@ mod tests {
             Some("2282B5513CBEA24A83D557D1EBFBC3611A0951B7")
         );
         assert_eq!(response.torrent.can_use_token, Some(true));
-        assert!(
-            response
-                .torrent
-                .rip_log_ids
-                .as_ref()
-                .expect("should exist")
-                .is_empty()
-        );
-        assert!(
-            response
-                .torrent
-                .trumpable_reasons
-                .as_ref()
-                .expect("should exist")
-                .is_empty()
-        );
+        assert_eq!(response.torrent.rip_log_ids, Some(Vec::new()));
+        assert_eq!(response.torrent.trumpable_reasons, Some(Vec::new()));
         assert!(response.torrent.log_checksum.is_none());
         assert!(response.torrent.log_count.is_none());
         assert!(response.torrent.free_reason.is_none());
@@ -198,7 +170,7 @@ mod tests {
         // Assert - Minimal response parses correctly
         assert_eq!(response.group.id, 3);
         assert_eq!(response.group.name, "Minimal Album");
-        assert!(response.group.tags.is_empty());
+        assert_eq!(response.group.tags, Vec::<String>::new());
         assert!(response.group.music_info.is_none());
         assert_eq!(response.torrent.id, 3000);
         assert_eq!(response.torrent.format, Format::MP3);

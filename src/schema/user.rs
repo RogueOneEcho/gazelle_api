@@ -214,10 +214,6 @@ impl Community {
 }
 
 #[cfg(test)]
-#[expect(
-    clippy::float_cmp,
-    reason = "exact float equality is intentional in fixture tests"
-)]
 mod tests {
     use super::*;
 
@@ -235,7 +231,7 @@ mod tests {
         // Assert - Core fields
         assert_eq!(user.username, "TestUser");
         assert!(!user.is_friend);
-        assert!(user.profile_text.is_empty());
+        assert_eq!(user.profile_text, "");
     }
 
     #[test]
